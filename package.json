@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Arc-first preflight and evidence API for AI agent transactions.",
   "engines": {
-    "node": ">=22.6"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
