@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   decodePaymentSignature,
   encodePaymentRequired,
+  getConfiguredX402PriceMicroUsdc,
   x402Enabled,
 } from "../src/services/x402.js";
 
@@ -37,5 +38,21 @@ describe("x402 boundary", () => {
       "base64",
     );
     expect(() => decodePaymentSignature(malformed)).toThrow();
+  });
+
+  it("rejects unsupported x402 versions", () => {
+    const unsupported = Buffer.from(
+      JSON.stringify({ x402Version: 1, payload: {} }),
+    ).toString("base64");
+    expect(() => decodePaymentSignature(unsupported)).toThrow();
+  });
+
+  it("rejects invalid or unbounded prices", () => {
+    process.env.X402_PRICE_MICRO_USDC = "0";
+    expect(() => getConfiguredX402PriceMicroUsdc()).toThrow();
+    process.env.X402_PRICE_MICRO_USDC = "1000000000";
+    expect(() => getConfiguredX402PriceMicroUsdc()).toThrow();
+    process.env.X402_PRICE_MICRO_USDC = "1000";
+    expect(getConfiguredX402PriceMicroUsdc()).toBe("1000");
   });
 });

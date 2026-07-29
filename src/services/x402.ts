@@ -9,7 +9,7 @@ const GATEWAY_URL = "https://gateway-api-testnet.circle.com";
 const DEFAULT_PRICE_MICRO_USDC = "1000";
 
 const paymentPayloadSchema = z.object({
-  x402Version: z.number().int(),
+  x402Version: z.literal(2),
   resource: z
     .object({
       url: z.string(),
@@ -75,6 +75,17 @@ export function x402Enabled(): boolean {
   return process.env.X402_ENABLED === "true";
 }
 
+export function getConfiguredX402PriceMicroUsdc(): string {
+  const configured =
+    process.env.X402_PRICE_MICRO_USDC?.trim() || DEFAULT_PRICE_MICRO_USDC;
+  if (!/^[1-9][0-9]{0,8}$/.test(configured)) {
+    throw new Error(
+      "X402_PRICE_MICRO_USDC must be an integer from 1 to 999999999.",
+    );
+  }
+  return configured;
+}
+
 export async function getArcPaymentRequirements(): Promise<PaymentRequirements> {
   if (supportedKindCache && supportedKindCache.expiresAt > Date.now()) {
     return buildRequirements(supportedKindCache.value);
@@ -101,7 +112,7 @@ function buildRequirements(kind: SupportedKind): PaymentRequirements {
     scheme: "exact",
     network: ARC_NETWORK,
     asset: ARC_TESTNET_USDC,
-    amount: process.env.X402_PRICE_MICRO_USDC?.trim() || DEFAULT_PRICE_MICRO_USDC,
+    amount: getConfiguredX402PriceMicroUsdc(),
     payTo: getSellerAddress(),
     maxTimeoutSeconds: 604_900,
     ...(kind.extra ? { extra: kind.extra } : {}),

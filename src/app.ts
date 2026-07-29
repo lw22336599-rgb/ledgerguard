@@ -18,6 +18,7 @@ import { buildEvidence } from "./services/evidence.js";
 import { evaluatePreflight } from "./services/preflight.js";
 import {
   encodePaymentRequired,
+  getConfiguredX402PriceMicroUsdc,
   getArcPaymentRequirements,
   settlePayment,
   x402Enabled,
@@ -50,13 +51,46 @@ app.get("/styles.css", (context) =>
 app.get("/app.js", (context) =>
   context.body(demoJs, 200, { "Content-Type": "text/javascript; charset=utf-8" }),
 );
+app.get("/llms.txt", (context) =>
+  context.text(`LedgerGuard
+Production: https://ledgerguard-gules.vercel.app
+OpenAPI: https://ledgerguard-gules.vercel.app/openapi.json
+Service catalog: https://ledgerguard-gules.vercel.app/.well-known/ledgerguard.json
+Free Arc transaction preflight: POST /v1/preflight
+Paid Arc Testnet x402 resource: GET /v1/paid/network-risk
+Safety: non-custodial; never send a seed phrase or private key.
+Mainnet: disabled until official parameters pass the documented release gate.
+`),
+);
+app.get("/.well-known/ledgerguard.json", (context) =>
+  context.json({
+    service: "LedgerGuard",
+    production: "https://ledgerguard-gules.vercel.app",
+    openapi: "https://ledgerguard-gules.vercel.app/openapi.json",
+    custody: "none",
+    signing: "client-side-only",
+    mainnet: "disabled",
+    resources: [
+      {
+        id: "arc-network-risk",
+        method: "GET",
+        path: "/v1/paid/network-risk",
+        paymentProtocol: "x402-v2",
+        network: "eip155:5042002",
+        priceMicroUsdc: getConfiguredX402PriceMicroUsdc(),
+      },
+    ],
+  }),
+);
 app.get("/v1/meta", (context) =>
   context.json({
     service: "LedgerGuard",
     version: "0.1.0",
     mode: "non-custodial-read-only",
     mainnet: "disabled",
+    x402Testnet: x402Enabled() ? "enabled" : "disabled",
     docs: "/openapi.json",
+    catalog: "/.well-known/ledgerguard.json",
   }),
 );
 

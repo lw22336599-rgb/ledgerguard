@@ -60,9 +60,28 @@ if (preflight.decision !== "ALLOW") {
   throw new Error(`/v1/preflight: expected ALLOW, got ${JSON.stringify(preflight)}`);
 }
 
-const { body: paid } = await request("/v1/paid/network-risk", undefined, 503);
-if (paid.error !== "X402_DISABLED") {
-  throw new Error(`/v1/paid/network-risk: unexpected public payment state ${JSON.stringify(paid)}`);
+const paidResponse = await fetch(`${baseUrl}/v1/paid/network-risk`, {
+  signal: AbortSignal.timeout(20_000),
+});
+const paid = await paidResponse.json();
+let paymentState;
+if (paidResponse.status === 402) {
+  const encoded = paidResponse.headers.get("payment-required");
+  if (!encoded) throw new Error("/v1/paid/network-risk: missing PAYMENT-REQUIRED header");
+  const challenge = JSON.parse(Buffer.from(encoded, "base64").toString("utf8"));
+  if (
+    challenge.x402Version !== 2 ||
+    challenge.accepts?.[0]?.network !== "eip155:5042002"
+  ) {
+    throw new Error(`/v1/paid/network-risk: invalid challenge ${JSON.stringify(challenge)}`);
+  }
+  paymentState = `x402 challenge ${paid.priceMicroUsdc} micro-USDC`;
+} else if (paidResponse.status === 503 && paid.error === "X402_DISABLED") {
+  paymentState = "x402 safely disabled";
+} else {
+  throw new Error(
+    `/v1/paid/network-risk: unexpected state ${paidResponse.status} ${JSON.stringify(paid)}`,
+  );
 }
 
-console.log(`PASS ${baseUrl} | Arc ${ready.chainId} block ${ready.blockNumber} | preflight ALLOW | mainnet and x402 closed`);
+console.log(`PASS ${baseUrl} | Arc ${ready.chainId} block ${ready.blockNumber} | preflight ALLOW | mainnet closed | ${paymentState}`);

@@ -6,6 +6,8 @@ evidence after settlement.
 
 Current status: **testnet MVP / mainnet disabled**.
 
+Public demo: **https://ledgerguard-gules.vercel.app**
+
 ## What exists
 
 - `GET /` - public, no-wallet browser demo for an Arc USDC transfer preflight.
@@ -17,6 +19,8 @@ Current status: **testnet MVP / mainnet disabled**.
 - `GET /v1/networks` - machine-readable network activation state.
 - `GET /v1/paid/network-risk` - Circle Gateway x402 testnet payment demo.
 - `GET /openapi.json` - initial API discovery document.
+- `GET /.well-known/ledgerguard.json` - agent-readable service and price catalog.
+- `GET /llms.txt` - concise discovery instructions for AI agents.
 
 The service does not hold keys, sign transactions, move funds, deploy contracts,
 or automatically enable an unknown mainnet.
@@ -41,8 +45,9 @@ npm.cmd run smoke
 ```
 
 GitHub Actions runs this check hourly against production. It verifies the web
-entry point, Arc Testnet RPC chain ID, a deterministic USDC preflight, and that
-both mainnet and the unvalidated x402 settlement path remain closed.
+entry point, Arc Testnet RPC chain ID, a deterministic USDC preflight, the
+mainnet safety gate, and either a valid x402 v2 challenge or a safely disabled
+paid endpoint.
 
 The default RPC list uses Arc's four documented public Testnet endpoints
 (Circle, Blockdaemon, dRPC, and QuickNode) in failover order. Override it with
@@ -57,6 +62,11 @@ The paid endpoint defaults to `0.001 USDC` and stays disabled until
 `SELLER_ADDRESS` is configured and `X402_ENABLED=true`. An unpaid request then
 returns a standards-shaped `402 Payment Required` response. Never place a
 private key or seed phrase in the seller service.
+
+See [`docs/INTEGRATION.md`](docs/INTEGRATION.md) for developer onboarding and
+[`docs/OFFICIAL_SUBMISSION.md`](docs/OFFICIAL_SUBMISSION.md) for the
+evidence-based ecosystem application pack. This testnet demo has no verified
+customer or revenue claim.
 
 ## Mainnet activation gate
 

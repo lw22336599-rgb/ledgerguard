@@ -27,6 +27,18 @@ describe("HTTP API", () => {
     expect((await response.json()).ok).toBe(true);
   });
 
+  it("publishes agent-readable discovery documents", async () => {
+    const catalog = await app.request("/.well-known/ledgerguard.json");
+    expect(catalog.status).toBe(200);
+    const body = await catalog.json();
+    expect(body.resources[0].paymentProtocol).toBe("x402-v2");
+    expect(body.resources[0].network).toBe("eip155:5042002");
+
+    const llms = await app.request("/llms.txt");
+    expect(llms.status).toBe(200);
+    expect(await llms.text()).toContain("never send a seed phrase");
+  });
+
   it("exposes mainnet as disabled", async () => {
     const response = await app.request("/v1/networks");
     const body = await response.json();

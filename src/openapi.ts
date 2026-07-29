@@ -6,8 +6,17 @@ export const openApiDocument = {
     description:
       "Non-custodial Arc transaction preflight and post-settlement evidence.",
   },
-  servers: [{ url: "/" }],
+  servers: [
+    { url: "https://ledgerguard-gules.vercel.app" },
+    { url: "/" },
+  ],
   paths: {
+    "/.well-known/ledgerguard.json": {
+      get: {
+        summary: "Machine-readable service and paid-resource catalog",
+        responses: { "200": { description: "LedgerGuard service catalog" } },
+      },
+    },
     "/v1/meta": {
       get: {
         summary: "Machine-readable service metadata",
