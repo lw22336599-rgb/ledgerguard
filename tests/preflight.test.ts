@@ -27,6 +27,7 @@ describe("preflight", () => {
       }),
       intent: {
         action: "transfer",
+        expectedDebitAddress: sender,
         expectedRecipient: recipient,
         expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: "1000000",
@@ -182,6 +183,7 @@ describe("preflight", () => {
       }),
       intent: {
         action: "approve",
+        expectedDebitAddress: sender,
         expectedRecipient: recipient,
         expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: maxUint256.toString(),
@@ -208,6 +210,7 @@ describe("preflight", () => {
       }),
       intent: {
         action: "approve",
+        expectedDebitAddress: sender,
         expectedRecipient: recipient,
         expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: "1000000",
@@ -220,6 +223,113 @@ describe("preflight", () => {
 
     const result = evaluatePreflight(data, { status: "success" });
     expect(result.decision).toBe("ALLOW");
+  });
+
+  it("keeps a payment in review when the payer is not declared", () => {
+    const data = preflightSchema.parse({
+      from: sender,
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "transfer",
+        args: [recipient, 1_000_000n],
+      }),
+      intent: {
+        action: "transfer",
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Payer binding is required for ALLOW",
+      },
+      policy: {},
+    });
+
+    const result = evaluatePreflight(data, { status: "success" });
+    expect(result.decision).toBe("REVIEW");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "DEBIT_ADDRESS_NOT_DECLARED",
+    );
+  });
+
+  it("allows an exact native Arc USDC transfer with no decimal remainder", () => {
+    const data = preflightSchema.parse({
+      from: sender,
+      to: recipient,
+      data: "0x",
+      valueWei: "1500000000000000000",
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: sender,
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1500000",
+        purpose: "Native Arc USDC payment",
+      },
+      policy: { maxAmountMicroUsdc: "2000000" },
+    });
+
+    const result = evaluatePreflight(data, {
+      status: "success",
+      targetHasCode: false,
+    });
+    expect(result.decision).toBe("ALLOW");
+    expect(result.decoded.kind).toBe("native_usdc_transfer");
+    expect(result.decoded.assetAddress).toBe(ARC_TESTNET_USDC);
+  });
+
+  it("keeps a native payment to a contract in review", () => {
+    const data = preflightSchema.parse({
+      from: sender,
+      to: recipient,
+      data: "0x",
+      valueWei: "1000000000000000000",
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: sender,
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Contract recipient requires deeper review",
+      },
+      policy: {},
+    });
+
+    const result = evaluatePreflight(data, {
+      status: "success",
+      targetHasCode: true,
+    });
+    expect(result.decision).toBe("REVIEW");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "NATIVE_CONTRACT_RECIPIENT",
+    );
+  });
+
+  it("blocks hidden native value attached to a token transfer", () => {
+    const data = preflightSchema.parse({
+      from: sender,
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "transfer",
+        args: [recipient, 1_000_000n],
+      }),
+      valueWei: "1000000000000000000",
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: sender,
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Reject hidden native side payment",
+      },
+      policy: {},
+    });
+
+    const result = evaluatePreflight(data, { status: "success" });
+    expect(result.decision).toBe("BLOCK");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "UNEXPECTED_NATIVE_VALUE",
+    );
   });
 
   it("blocks when required simulation was not run", () => {

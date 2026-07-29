@@ -161,6 +161,7 @@ export function buildEvidence(
   input: EvidenceInput,
   transaction: Transaction,
   receipt: TransactionReceipt,
+  recipientHasCode?: boolean,
 ): EvidenceResult {
   const transfers = extractTransfers(receipt.logs);
   const approvals = extractApprovals(receipt.logs);
@@ -261,6 +262,24 @@ export function buildEvidence(
     });
   }
 
+  if (matchingNativeTransfer) {
+    if (recipientHasCode === true) {
+      findings.push({
+        code: "NATIVE_CONTRACT_EFFECTS_UNVERIFIED",
+        severity: "warning",
+        message:
+          "The native USDC recipient is a contract, so receipt logs alone cannot prove all contract effects.",
+      });
+    } else if (recipientHasCode === undefined) {
+      findings.push({
+        code: "RECIPIENT_CODE_NOT_CHECKED",
+        severity: "warning",
+        message:
+          "LedgerGuard could not confirm that the native USDC recipient was an externally owned account.",
+      });
+    }
+  }
+
   if (input.intent.action === "transfer") {
     if (matchingTransfer && nativeValue > 0n) {
       findings.push({
@@ -350,11 +369,12 @@ export function buildEvidence(
     }
   }
 
-  if (input.intent.action === "contract_call" && transfers.length === 0) {
+  if (input.intent.action === "contract_call") {
     findings.push({
-      code: "NO_VALUE_MOVEMENT_OBSERVED",
+      code: "UNVERIFIED_CONTRACT_CALL",
       severity: "warning",
-      message: "The call finalized but no ERC-20 Transfer event was observed.",
+      message:
+        "LedgerGuard can normalize this contract call, but cannot strictly verify an unknown call's full effects.",
     });
   }
 

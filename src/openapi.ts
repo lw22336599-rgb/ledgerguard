@@ -6,6 +6,10 @@ export const openApiDocument = {
     description:
       "Non-custodial Arc transaction preflight and post-settlement evidence.",
   },
+  externalDocs: {
+    description: "Human-readable integration guide",
+    url: "https://ledgerguard-gules.vercel.app/docs",
+  },
   servers: [
     { url: "https://ledgerguard-gules.vercel.app" },
     { url: "/" },
@@ -79,9 +83,24 @@ export const openApiDocument = {
           },
         },
         responses: {
-          "200": { description: "ALLOW, REVIEW, or BLOCK decision" },
-          "400": { description: "Invalid request" },
-          "503": { description: "Requested network is disabled" },
+          "200": {
+            description: "ALLOW, REVIEW, or BLOCK decision",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/PreflightResponse" },
+              },
+            },
+          },
+          "400": {
+            description: "Invalid request",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "429": { description: "Rate limit exceeded" },
+          "503": { description: "Requested network or RPC is unavailable" },
         },
       },
     },
@@ -97,9 +116,18 @@ export const openApiDocument = {
           },
         },
         responses: {
-          "200": { description: "Normalized evidence bundle" },
+          "200": {
+            description: "Normalized evidence bundle",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EvidenceResponse" },
+              },
+            },
+          },
           "400": { description: "Invalid request" },
           "404": { description: "Transaction not found" },
+          "429": { description: "Rate limit exceeded" },
+          "503": { description: "Requested network or RPC is unavailable" },
         },
       },
     },
@@ -194,6 +222,119 @@ export const openApiDocument = {
             pattern: "^(0|[1-9][0-9]*)$",
           },
           purpose: { type: "string", minLength: 1, maxLength: 280 },
+        },
+      },
+      Finding: {
+        type: "object",
+        required: ["code", "severity", "message"],
+        properties: {
+          code: { type: "string" },
+          severity: {
+            type: "string",
+            enum: ["info", "warning", "critical"],
+          },
+          message: { type: "string" },
+        },
+      },
+      Simulation: {
+        type: "object",
+        required: ["status"],
+        properties: {
+          status: {
+            type: "string",
+            enum: ["success", "failed", "not_run"],
+          },
+          error: { type: "string" },
+          targetHasCode: {
+            type: "boolean",
+            description:
+              "Whether the outer transaction target had deployed bytecode during simulation.",
+          },
+        },
+      },
+      DecodedAction: {
+        type: "object",
+        required: ["kind", "target"],
+        properties: {
+          kind: {
+            type: "string",
+            enum: [
+              "native_usdc_transfer",
+              "erc20_transfer",
+              "erc20_approve",
+              "erc20_transfer_from",
+              "operator_approval",
+              "contract_call",
+            ],
+          },
+          target: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          debitAddress: { type: "string" },
+          recipient: { type: "string" },
+          assetAddress: { type: "string" },
+          amountMicroUsdc: { type: "string" },
+          approvalAmount: { type: "string" },
+          method: { type: "string" },
+        },
+      },
+      PreflightResponse: {
+        type: "object",
+        required: ["decision", "network", "decoded", "simulation", "findings"],
+        properties: {
+          decision: {
+            type: "string",
+            enum: ["ALLOW", "REVIEW", "BLOCK"],
+          },
+          network: { type: "string" },
+          decoded: { $ref: "#/components/schemas/DecodedAction" },
+          simulation: { $ref: "#/components/schemas/Simulation" },
+          findings: {
+            type: "array",
+            items: { $ref: "#/components/schemas/Finding" },
+          },
+        },
+      },
+      EvidenceResponse: {
+        type: "object",
+        required: [
+          "status",
+          "network",
+          "txHash",
+          "blockNumber",
+          "transfers",
+          "approvals",
+          "findings",
+          "evidenceHash",
+        ],
+        properties: {
+          status: {
+            type: "string",
+            enum: ["VERIFIED", "MISMATCH", "REVERTED", "REVIEW"],
+          },
+          network: { type: "string" },
+          txHash: { type: "string" },
+          blockNumber: { type: "string" },
+          transactionTo: {
+            oneOf: [{ type: "string" }, { type: "null" }],
+          },
+          nativeValueMicroUsdc: {
+            oneOf: [{ type: "string" }, { type: "null" }],
+          },
+          transfers: { type: "array", items: { type: "object" } },
+          approvals: { type: "array", items: { type: "object" } },
+          findings: {
+            type: "array",
+            items: { $ref: "#/components/schemas/Finding" },
+          },
+          evidenceHash: { type: "string" },
+        },
+      },
+      ErrorResponse: {
+        type: "object",
+        required: ["error"],
+        properties: {
+          error: { type: "string" },
+          message: { type: "string" },
+          issues: { type: "array", items: { type: "object" } },
         },
       },
     },

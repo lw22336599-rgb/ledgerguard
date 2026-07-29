@@ -6,7 +6,7 @@ describe("rate limiting", () => {
     delete process.env.RATE_LIMIT_PER_MINUTE;
   });
 
-  it("rejects requests after the configured per-path limit", async () => {
+  it("rejects requests after the configured per-client limit", async () => {
     process.env.RATE_LIMIT_PER_MINUTE = "1";
     const headers = { "x-real-ip": `test-${crypto.randomUUID()}` };
 
@@ -17,5 +17,16 @@ describe("rate limiting", () => {
     expect(first.headers.get("ratelimit-remaining")).toBe("0");
     expect(second.status).toBe(429);
     expect(second.headers.get("retry-after")).toBeTruthy();
+  });
+
+  it("does not allow a client to bypass the limit by changing paths", async () => {
+    process.env.RATE_LIMIT_PER_MINUTE = "1";
+    const headers = { "x-real-ip": `test-${crypto.randomUUID()}` };
+
+    const first = await app.request("/v1/networks", { headers });
+    const second = await app.request("/ready", { headers });
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(429);
   });
 });

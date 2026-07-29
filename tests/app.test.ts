@@ -13,7 +13,7 @@ describe("HTTP API", () => {
     const page = await app.request("/");
     expect(page.status).toBe(200);
     expect(page.headers.get("content-type")).toContain("text/html");
-    expect(await page.text()).toContain("Let agents pay.");
+    expect(await page.text()).toContain("让规则守住资金");
     expect(page.headers.get("content-security-policy")).toContain(
       "default-src 'self'",
     );
@@ -25,6 +25,15 @@ describe("HTTP API", () => {
     expect(meta.status).toBe(200);
     expect((await meta.json()).service).toBe("LedgerGuard");
     expect(meta.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("serves human-readable docs, catalog, and status pages", async () => {
+    for (const path of ["/docs", "/catalog"]) {
+      const response = await app.request(path);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toContain("text/html");
+    }
+    expect(await (await app.request("/docs")).text()).toContain("API 文档");
   });
 
   it("reports process health", async () => {
@@ -40,6 +49,9 @@ describe("HTTP API", () => {
     const body = await catalog.json();
     expect(body.resources[0].paymentProtocol).toBe("x402-v2");
     expect(body.resources[0].network).toBe("eip155:5042002");
+    expect(body.humanDocs).toBe(
+      "https://ledgerguard-gules.vercel.app/docs",
+    );
 
     const llms = await app.request("/llms.txt");
     expect(llms.status).toBe(200);

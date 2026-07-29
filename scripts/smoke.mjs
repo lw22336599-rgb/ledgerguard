@@ -20,11 +20,35 @@ async function request(path, options, expectedStatus = 200) {
 }
 
 const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) });
-if (home.status !== 200 || !(await home.text()).includes("Let agents pay.")) {
+if (home.status !== 200 || !(await home.text()).includes("让规则守住资金")) {
   throw new Error("/: public demo is unavailable");
 }
 if (!home.headers.get("content-security-policy")?.includes("default-src 'self'")) {
   throw new Error("/: strict Content-Security-Policy is missing");
+}
+
+for (const [path, marker] of [
+  ["/docs", "API 文档"],
+  ["/catalog", "服务目录"],
+  ["/status", "运行状态"],
+]) {
+  const response = await fetch(`${baseUrl}${path}`, {
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (response.status !== 200 || !(await response.text()).includes(marker)) {
+    throw new Error(`${path}: human-readable page is unavailable`);
+  }
+}
+
+const openapi = await fetch(`${baseUrl}/openapi.json`, {
+  signal: AbortSignal.timeout(20_000),
+});
+if (
+  openapi.status !== 200 ||
+  !openapi.headers.get("content-type")?.includes("application/json") ||
+  (await openapi.json()).openapi !== "3.1.0"
+) {
+  throw new Error("/openapi.json: machine-readable API document is invalid");
 }
 
 const { response: healthResponse, body: health } = await request("/health");
@@ -82,7 +106,8 @@ if (paidResponse.status === 402) {
   const challenge = JSON.parse(Buffer.from(encoded, "base64").toString("utf8"));
   if (
     challenge.x402Version !== 2 ||
-    challenge.accepts?.[0]?.network !== "eip155:5042002"
+    challenge.accepts?.[0]?.network !== "eip155:5042002" ||
+    challenge.resource?.url !== `${baseUrl}/v1/paid/network-risk`
   ) {
     throw new Error(`/v1/paid/network-risk: invalid challenge ${JSON.stringify(challenge)}`);
   }

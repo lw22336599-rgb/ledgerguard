@@ -11,6 +11,26 @@ funds.
   variable.
 - The public rate limiter is best-effort and is not a global abuse-control
   system.
+- `ALLOW` requires a successful read-only simulation and a declared payer for
+  supported transfer or approval intents.
+- Unknown contract calls and native USDC payments to contract recipients remain
+  `REVIEW`; LedgerGuard does not claim to understand arbitrary contract effects.
+- Evidence is a deterministic summary, not a signature, immutable archive, or
+  proof that no unlogged internal effect occurred.
+
+## Threat model and non-goals
+
+LedgerGuard checks supported transaction shapes against caller-supplied intent.
+It does not establish that the caller's intent is honest, that a recipient is
+trustworthy, or that an external RPC is correct. It does not replace wallet
+confirmation, contract audits, sanctions screening, endpoint authentication,
+enterprise approvals, or independent monitoring.
+
+The current free deployment relies on public RPC and per-instance serverless
+state. It can fail closed during provider outages, but it cannot offer a
+production SLA, globally consistent quota, tenant isolation, or durable evidence
+retention. Real-funds use remains out of scope until those controls and an
+independent security review exist.
 
 ## Reporting a vulnerability
 
