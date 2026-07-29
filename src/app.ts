@@ -263,3 +263,6 @@ app.onError((error, context) => {
   });
   return context.json({ error: "INTERNAL_ERROR" }, 500);
 });
+
+// Vercel's native Hono detector treats src/app.ts as the production entrypoint.
+export default app;
