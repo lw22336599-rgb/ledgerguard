@@ -36,6 +36,13 @@ if (decision.decision !== "ALLOW") throw new Error("Payment blocked");
 
 The complete request schema is in `openapi.json`.
 
+For payer-bound checks, set both the unsigned transaction `from` field and
+`intent.expectedDebitAddress`. LedgerGuard blocks `transferFrom` when the
+declared debit address is absent or differs from calldata. The evidence endpoint
+uses the same field to verify the transfer sender or approval owner, and rejects
+extra transfer, approval, or native-value side effects. Zero-value transfers are
+blocked; `approve(..., 0)` remains valid for revoking an allowance.
+
 ## Paid x402 testnet resource
 
 `GET /v1/paid/network-risk` returns HTTP 402 and a `PAYMENT-REQUIRED` header

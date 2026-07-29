@@ -39,6 +39,7 @@ export interface DecodedAction {
     | "operator_approval"
     | "contract_call";
   target: Address;
+  debitAddress?: Address;
   recipient?: Address;
   assetAddress?: Address;
   amountMicroUsdc?: string;
@@ -63,6 +64,7 @@ function decodeAction(input: PreflightInput): DecodedAction {
     return {
       kind: "native_usdc_transfer",
       target: to,
+      ...(input.from ? { debitAddress: getAddress(input.from) } : {}),
       recipient: to,
       amountMicroUsdc: (valueWei / 1_000_000_000_000n).toString(),
       method: "native value transfer",
@@ -77,6 +79,7 @@ function decodeAction(input: PreflightInput): DecodedAction {
         return {
           kind: "erc20_transfer",
           target: to,
+          ...(input.from ? { debitAddress: getAddress(input.from) } : {}),
           recipient: getAddress(recipient),
           assetAddress: to,
           amountMicroUsdc: amount.toString(),
@@ -88,6 +91,7 @@ function decodeAction(input: PreflightInput): DecodedAction {
         return {
           kind: "erc20_approve",
           target: to,
+          ...(input.from ? { debitAddress: getAddress(input.from) } : {}),
           recipient: getAddress(spender),
           assetAddress: to,
           approvalAmount: amount.toString(),
@@ -95,10 +99,11 @@ function decodeAction(input: PreflightInput): DecodedAction {
         };
       }
       if (decoded.functionName === "transferFrom") {
-        const [, recipient, amount] = decoded.args;
+        const [source, recipient, amount] = decoded.args;
         return {
           kind: "erc20_transfer_from",
           target: to,
+          debitAddress: getAddress(source),
           recipient: getAddress(recipient),
           assetAddress: to,
           amountMicroUsdc: amount.toString(),
@@ -178,6 +183,28 @@ export function evaluatePreflight(
   }
 
   if (
+    decoded.kind === "erc20_transfer_from" &&
+    !input.intent.expectedDebitAddress
+  ) {
+    findings.push({
+      code: "DEBIT_ADDRESS_REQUIRED",
+      severity: "critical",
+      message:
+        "transferFrom requires an explicitly declared debit address before it can be allowed.",
+    });
+  } else if (
+    input.intent.expectedDebitAddress &&
+    (!decoded.debitAddress ||
+      !sameAddress(input.intent.expectedDebitAddress, decoded.debitAddress))
+  ) {
+    findings.push({
+      code: "DEBIT_ADDRESS_MISMATCH",
+      severity: "critical",
+      message: "The decoded debit address does not match the declared intent.",
+    });
+  }
+
+  if (
     input.intent.expectedAssetAddress &&
     (!decoded.assetAddress ||
       !sameAddress(input.intent.expectedAssetAddress, decoded.assetAddress))
@@ -214,6 +241,19 @@ export function evaluatePreflight(
   }
 
   const measurableAmount = decoded.amountMicroUsdc ?? decoded.approvalAmount;
+  if (
+    (decoded.kind === "native_usdc_transfer" ||
+      decoded.kind === "erc20_transfer" ||
+      decoded.kind === "erc20_transfer_from") &&
+    decoded.amountMicroUsdc === "0"
+  ) {
+    findings.push({
+      code: "ZERO_TRANSFER_AMOUNT",
+      severity: "critical",
+      message: "A payment transfer must move an amount greater than zero.",
+    });
+  }
+
   if (
     input.policy.maxAmountMicroUsdc &&
     measurableAmount &&
