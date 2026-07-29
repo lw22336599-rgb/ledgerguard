@@ -12,6 +12,7 @@
     "start": "node --env-file-if-exists=.env --import tsx src/server.ts",
     "build": "tsc -p tsconfig.json",
     "smoke": "node scripts/smoke.mjs",
+    "smoke:local": "node scripts/local-smoke.mjs",
     "x402:buyer:init": "node scripts/x402-buyer.mjs init",
     "x402:buyer": "node --env-file-if-exists=.env.x402-buyer.local scripts/x402-buyer.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",

@@ -63,6 +63,7 @@ export interface SimulationRequest {
 export interface SimulationResult {
   status: "success" | "failed" | "not_run";
   error?: string;
+  targetHasCode?: boolean;
 }
 
 export async function withDeadline<T>(
@@ -145,15 +146,21 @@ export async function simulateReadOnly(
   }
 
   try {
-    await withDeadline(
-      client.call({
-        account: request.from,
-        to: request.to,
-        data: request.data,
-        value: request.value,
-      }),
+    const [, bytecode] = await withDeadline(
+      Promise.all([
+        client.call({
+          account: request.from,
+          to: request.to,
+          data: request.data,
+          value: request.value,
+        }),
+        client.getBytecode({ address: request.to }),
+      ]),
     );
-    return { status: "success" };
+    return {
+      status: "success",
+      targetHasCode: Boolean(bytecode && bytecode !== "0x"),
+    };
   } catch (error) {
     console.error("Read-only RPC simulation failed", {
       name: error instanceof Error ? error.name : "UnknownError",

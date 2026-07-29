@@ -59,6 +59,13 @@ export interface SettlementResult {
   network: string;
 }
 
+export class InvalidPaymentSignatureError extends Error {
+  constructor() {
+    super("The x402 payment signature is malformed.");
+    this.name = "InvalidPaymentSignatureError";
+  }
+}
+
 let supportedKindCache:
   | { value: SupportedKind; expiresAt: number }
   | undefined;
@@ -138,17 +145,22 @@ export function encodePaymentRequired(
 
 export function decodePaymentSignature(header: string): PaymentPayload {
   if (header.length > 32_768) {
-    throw new Error("Payment signature header is too large.");
+    throw new InvalidPaymentSignatureError();
   }
-  const json = Buffer.from(header, "base64").toString("utf8");
-  const parsed = paymentPayloadSchema.parse(JSON.parse(json));
-  return {
-    x402Version: parsed.x402Version,
-    payload: parsed.payload,
-    ...(parsed.resource ? { resource: parsed.resource } : {}),
-    ...(parsed.accepted ? { accepted: parsed.accepted } : {}),
-    ...(parsed.extensions ? { extensions: parsed.extensions } : {}),
-  };
+  try {
+    const json = Buffer.from(header, "base64").toString("utf8");
+    const parsed = paymentPayloadSchema.parse(JSON.parse(json));
+    return {
+      x402Version: parsed.x402Version,
+      payload: parsed.payload,
+      ...(parsed.resource ? { resource: parsed.resource } : {}),
+      ...(parsed.accepted ? { accepted: parsed.accepted } : {}),
+      ...(parsed.extensions ? { extensions: parsed.extensions } : {}),
+    };
+  } catch (error) {
+    if (error instanceof InvalidPaymentSignatureError) throw error;
+    throw new InvalidPaymentSignatureError();
+  }
 }
 
 export async function settlePayment(

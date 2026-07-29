@@ -5,6 +5,7 @@ import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
 import { getAddress, type Address, type Hex } from "viem";
 import { getNetworkRegistry, requireEnabledNetwork } from "./config/networks.js";
+import { getPublicBaseUrl } from "./config/public.js";
 import {
   createNetworkClient,
   probeRpc,
@@ -20,10 +21,19 @@ import {
   encodePaymentRequired,
   getConfiguredX402PriceMicroUsdc,
   getArcPaymentRequirements,
+  InvalidPaymentSignatureError,
   settlePayment,
   x402Enabled,
 } from "./services/x402.js";
-import { demoCss, demoHtml, demoJs } from "./ui.js";
+import {
+  catalogHtml,
+  demoCss,
+  demoHtml,
+  demoJs,
+  developerDocsHtml,
+  integrationBoundaryHtml,
+  statusHtml,
+} from "./ui.js";
 
 export const app = new Hono();
 
@@ -80,6 +90,8 @@ app.use("*", async (context, next) => {
   await next();
 });
 app.use("/v1/*", rateLimit);
+app.use("/ready", rateLimit);
+app.use("/status", rateLimit);
 app.use(
   "/v1/*",
   bodyLimit({
@@ -90,6 +102,40 @@ app.use(
 );
 
 app.get("/", (context) => context.html(demoHtml));
+app.get("/docs", (context) => context.html(developerDocsHtml));
+app.get("/docs/integration", (context) =>
+  context.html(integrationBoundaryHtml),
+);
+app.get("/catalog", (context) =>
+  context.html(catalogHtml(getConfiguredX402PriceMicroUsdc())),
+);
+app.get("/status", async (context) => {
+  let readiness:
+    | { ready: true; chainId: number; blockNumber: string }
+    | { ready: false } = { ready: false };
+  try {
+    const network = requireEnabledNetwork("arcTestnet");
+    const probe = await probeRpc(network.rpcUrls);
+    readiness =
+      probe.chainId === network.chainId
+        ? {
+            ready: true,
+            chainId: probe.chainId,
+            blockNumber: probe.blockNumber.toString(),
+          }
+        : { ready: false };
+  } catch {
+    readiness = { ready: false };
+  }
+  const registry = getNetworkRegistry();
+  return context.html(
+    statusHtml({
+      ...readiness,
+      x402: x402Enabled(),
+      mainnet: registry.arcMainnet.enabled,
+    }),
+  );
+});
 app.get("/styles.css", (context) =>
   context.body(demoCss, 200, { "Content-Type": "text/css; charset=utf-8" }),
 );
@@ -110,8 +156,9 @@ Mainnet: disabled until official parameters pass the documented release gate.
 app.get("/.well-known/ledgerguard.json", (context) =>
   context.json({
     service: "LedgerGuard",
-    production: "https://ledgerguard-gules.vercel.app",
-    openapi: "https://ledgerguard-gules.vercel.app/openapi.json",
+    production: getPublicBaseUrl(),
+    humanDocs: `${getPublicBaseUrl()}/docs`,
+    openapi: `${getPublicBaseUrl()}/openapi.json`,
     custody: "none",
     signing: "client-side-only",
     mainnet: "disabled",
@@ -134,7 +181,8 @@ app.get("/v1/meta", (context) =>
     mode: "non-custodial-read-only",
     mainnet: "disabled",
     x402Testnet: x402Enabled() ? "enabled" : "disabled",
-    docs: "/openapi.json",
+    docs: "/docs",
+    openapi: "/openapi.json",
     catalog: "/.well-known/ledgerguard.json",
   }),
 );
@@ -214,7 +262,10 @@ app.get("/v1/paid/network-risk", async (context) => {
     if (!signature) {
       context.header(
         "PAYMENT-REQUIRED",
-        encodePaymentRequired(context.req.url, requirements),
+        encodePaymentRequired(
+          `${getPublicBaseUrl()}/v1/paid/network-risk`,
+          requirements,
+        ),
       );
       return context.json(
         {
@@ -255,6 +306,15 @@ app.get("/v1/paid/network-risk", async (context) => {
       },
     });
   } catch (error) {
+    if (error instanceof InvalidPaymentSignatureError) {
+      return context.json(
+        {
+          error: "PAYMENT_FAILED",
+          reason: "The payment signature is malformed or unsupported.",
+        },
+        402,
+      );
+    }
     console.error("x402 request failed", {
       name: error instanceof Error ? error.name : "UnknownError",
       message: error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
@@ -325,7 +385,30 @@ app.post("/v1/evidence", async (context) => {
       ]),
       12_000,
     );
-    return context.json(buildEvidence(parsed.data, transaction, receipt));
+    let recipientHasCode: boolean | undefined;
+    if (transaction.to !== null) {
+      try {
+        const bytecode = await withDeadline(
+          client.getBytecode({
+            address: transaction.to,
+            blockNumber: receipt.blockNumber,
+          }),
+          8_000,
+        );
+        recipientHasCode = Boolean(bytecode && bytecode !== "0x");
+      } catch (error) {
+        console.warn("Recipient bytecode lookup failed", {
+          name: error instanceof Error ? error.name : "UnknownError",
+          message:
+            error instanceof Error
+              ? error.message.slice(0, 500)
+              : "Unknown error",
+        });
+      }
+    }
+    return context.json(
+      buildEvidence(parsed.data, transaction, receipt, recipientHasCode),
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     if (message.includes("could not be found") || message.includes("not found")) {

@@ -4,6 +4,7 @@ import {
   decodePaymentSignature,
   encodePaymentRequired,
   getConfiguredX402PriceMicroUsdc,
+  InvalidPaymentSignatureError,
   x402Enabled,
 } from "../src/services/x402.js";
 
@@ -38,6 +39,9 @@ describe("x402 boundary", () => {
       "base64",
     );
     expect(() => decodePaymentSignature(malformed)).toThrow();
+    expect(() => decodePaymentSignature(malformed)).toThrow(
+      InvalidPaymentSignatureError,
+    );
   });
 
   it("rejects unsupported x402 versions", () => {

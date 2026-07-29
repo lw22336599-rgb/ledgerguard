@@ -14,6 +14,9 @@ GET /llms.txt
 GET /openapi.json
 ```
 
+Human-readable onboarding is available at `GET /docs`; `/openapi.json` and the
+well-known catalog intentionally return raw JSON for software clients.
+
 ## Free transaction preflight
 
 Send the transaction target, calldata, declared intent, and policy to
@@ -42,6 +45,10 @@ declared debit address is absent or differs from calldata. The evidence endpoint
 uses the same field to verify the transfer sender or approval owner, and rejects
 extra transfer, approval, or native-value side effects. Zero-value transfers are
 blocked; `approve(..., 0)` remains valid for revoking an allowance.
+
+For Arc native USDC, LedgerGuard also checks whether the recipient has deployed
+bytecode. A contract recipient remains `REVIEW` because generic call simulation
+and receipt logs cannot prove every fallback or internal effect.
 
 ## Paid x402 testnet resource
 

@@ -6,6 +6,8 @@ type Bucket = {
 };
 
 const buckets = new Map<string, Bucket>();
+const MAX_BUCKETS = 10_000;
+const OVERFLOW_BUCKET = "__overflow__";
 let lastSweepAt = 0;
 
 function getClientKey(headers: Headers): string {
@@ -35,9 +37,13 @@ export const rateLimit: MiddlewareHandler = async (context, next) => {
   const now = Date.now();
   sweepExpiredBuckets(now);
 
-  const key = `${context.req.path}:${getClientKey(context.req.raw.headers)}`;
+  let key = getClientKey(context.req.raw.headers);
   const limit = configuredLimit();
-  const existing = buckets.get(key);
+  let existing = buckets.get(key);
+  if (!existing && buckets.size >= MAX_BUCKETS) {
+    key = OVERFLOW_BUCKET;
+    existing = buckets.get(key);
+  }
   const bucket =
     existing && existing.resetAt > now
       ? existing

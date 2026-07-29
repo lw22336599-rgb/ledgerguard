@@ -143,11 +143,39 @@ describe("evidence", () => {
       value: 1_500_000_000_000_000_000n,
     } as Transaction;
     const nativeReceipt = { ...receipt, logs: [] } as TransactionReceipt;
-    const result = buildEvidence(input, transaction, nativeReceipt);
+    const result = buildEvidence(input, transaction, nativeReceipt, false);
 
     expect(result.status).toBe("VERIFIED");
     expect(result.nativeValueMicroUsdc).toBe("1500000");
     expect(result.transfers).toHaveLength(0);
+  });
+
+  it("does not strictly verify native USDC sent to a contract", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: from,
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1500000",
+        purpose: "Contract payment needs contract-specific evidence",
+      },
+    });
+    const { receipt } = fixture();
+    const transaction = {
+      hash: txHash,
+      from: getAddress(from),
+      to: getAddress(to),
+      value: 1_500_000_000_000_000_000n,
+    } as Transaction;
+    const nativeReceipt = { ...receipt, logs: [] } as TransactionReceipt;
+    const result = buildEvidence(input, transaction, nativeReceipt, true);
+
+    expect(result.status).toBe("REVIEW");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "NATIVE_CONTRACT_EFFECTS_UNVERIFIED",
+    );
   });
 
   it("does not verify an approval intent without matching approval evidence", () => {
@@ -287,6 +315,23 @@ describe("evidence", () => {
     expect(result.status).toBe("MISMATCH");
     expect(result.findings.map((finding) => finding.code)).toContain(
       "UNEXPECTED_TRANSFER",
+    );
+  });
+
+  it("never marks an unknown contract call as strictly verified", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "contract_call",
+        purpose: "Unknown calls require review",
+      },
+    });
+    const { transaction, receipt } = fixture();
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("REVIEW");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "UNVERIFIED_CONTRACT_CALL",
     );
   });
 });

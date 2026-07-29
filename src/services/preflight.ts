@@ -66,6 +66,7 @@ function decodeAction(input: PreflightInput): DecodedAction {
       target: to,
       ...(input.from ? { debitAddress: getAddress(input.from) } : {}),
       recipient: to,
+      assetAddress: ARC_TESTNET_USDC,
       amountMicroUsdc: (valueWei / 1_000_000_000_000n).toString(),
       method: "native value transfer",
     };
@@ -121,6 +122,7 @@ function decodeAction(input: PreflightInput): DecodedAction {
         return {
           kind: "operator_approval",
           target: to,
+          ...(input.from ? { debitAddress: getAddress(input.from) } : {}),
           recipient: getAddress(operator),
           approvalAmount: approved ? maxUint256.toString() : "0",
           method: "setApprovalForAll(address,bool)",
@@ -193,6 +195,16 @@ export function evaluatePreflight(
         "transferFrom requires an explicitly declared debit address before it can be allowed.",
     });
   } else if (
+    (input.intent.action === "transfer" || input.intent.action === "approve") &&
+    !input.intent.expectedDebitAddress
+  ) {
+    findings.push({
+      code: "DEBIT_ADDRESS_NOT_DECLARED",
+      severity: "warning",
+      message:
+        "Declare the expected payer or approval owner before treating this result as safe to sign.",
+    });
+  } else if (
     input.intent.expectedDebitAddress &&
     (!decoded.debitAddress ||
       !sameAddress(input.intent.expectedDebitAddress, decoded.debitAddress))
@@ -241,6 +253,15 @@ export function evaluatePreflight(
   }
 
   const measurableAmount = decoded.amountMicroUsdc ?? decoded.approvalAmount;
+  if (decoded.kind !== "native_usdc_transfer" && valueWei > 0n) {
+    findings.push({
+      code: "UNEXPECTED_NATIVE_VALUE",
+      severity: "critical",
+      message:
+        "A token or contract call must not also send undeclared native USDC value.",
+    });
+  }
+
   if (
     (decoded.kind === "native_usdc_transfer" ||
       decoded.kind === "erc20_transfer" ||
@@ -252,6 +273,24 @@ export function evaluatePreflight(
       severity: "critical",
       message: "A payment transfer must move an amount greater than zero.",
     });
+  }
+
+  if (decoded.kind === "native_usdc_transfer") {
+    if (simulation.targetHasCode === true) {
+      findings.push({
+        code: "NATIVE_CONTRACT_RECIPIENT",
+        severity: "warning",
+        message:
+          "The native USDC recipient is a contract; its full fallback effects require a contract-specific policy.",
+      });
+    } else if (simulation.targetHasCode === undefined) {
+      findings.push({
+        code: "RECIPIENT_CODE_NOT_CHECKED",
+        severity: "warning",
+        message:
+          "LedgerGuard could not confirm that the native USDC recipient is an externally owned account.",
+      });
+    }
   }
 
   if (
