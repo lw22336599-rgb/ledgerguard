@@ -1,5 +1,5 @@
 import { BatchFacilitatorClient } from "@circle-fin/x402-batching/server";
-import { getAddress, type Address } from "viem";
+import { getAddress, isAddress, type Address } from "viem";
 import { z } from "zod";
 import { ARC_TESTNET_USDC } from "../config/networks.js";
 import { withDeadline } from "../lib/rpc.js";
@@ -76,6 +76,11 @@ function getSellerAddress(): Address {
     throw new Error("SELLER_ADDRESS is not configured.");
   }
   return getAddress(configured);
+}
+
+export function getConfiguredSellerAddress(): Address | null {
+  const configured = process.env.SELLER_ADDRESS?.trim();
+  return configured && isAddress(configured) ? getAddress(configured) : null;
 }
 
 export function x402Enabled(): boolean {

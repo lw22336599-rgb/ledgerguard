@@ -6,6 +6,13 @@ export const openApiDocument = {
     description:
       "Non-custodial Arc transaction preflight and post-settlement evidence.",
   },
+  tags: [
+    {
+      name: "Operations",
+      description:
+        "Responses expose X-LedgerGuard-Request-Id for sanitized operational correlation.",
+    },
+  ],
   externalDocs: {
     description: "Human-readable integration guide",
     url: "https://ledgerguard-gules.vercel.app/docs",
@@ -139,6 +146,14 @@ export const openApiDocument = {
         parameters: [
           {
             in: "header",
+            name: "X-LedgerGuard-Client",
+            required: false,
+            schema: { type: "string", maxLength: 80 },
+            description:
+              "Optional non-secret integration name used in sanitized operational events.",
+          },
+          {
+            in: "header",
             name: "PAYMENT-SIGNATURE",
             required: false,
             schema: { type: "string" },
@@ -146,7 +161,39 @@ export const openApiDocument = {
           },
         ],
         responses: {
-          "200": { description: "Payment settled and resource returned" },
+          "200": {
+            description:
+              "Payment settled; resource and Arc Testnet chain receipt returned",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["paid", "receipt", "networkRisk"],
+                  properties: {
+                    paid: { type: "boolean", const: true },
+                    receipt: {
+                      type: "object",
+                      required: [
+                        "payer",
+                        "settlementTransaction",
+                        "amountMicroUsdc",
+                        "network",
+                        "explorerUrl",
+                      ],
+                      properties: {
+                        payer: { type: "string" },
+                        settlementTransaction: { type: "string" },
+                        amountMicroUsdc: { type: "string" },
+                        network: { type: "string", const: "arcTestnet" },
+                        explorerUrl: { type: "string", format: "uri" },
+                      },
+                    },
+                    networkRisk: { type: "object" },
+                  },
+                },
+              },
+            },
+          },
           "402": { description: "Payment required or rejected" },
           "503": { description: "x402 disabled or facilitator unavailable" },
         },

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   decodePaymentSignature,
   encodePaymentRequired,
+  getConfiguredSellerAddress,
   getConfiguredX402PriceMicroUsdc,
   InvalidPaymentSignatureError,
   x402Enabled,
@@ -17,6 +18,17 @@ describe("x402 boundary", () => {
     expect(x402Enabled()).toBe(false);
     process.env.X402_ENABLED = "true";
     expect(x402Enabled()).toBe(true);
+  });
+
+  it("publishes only a valid configured seller address", () => {
+    process.env.SELLER_ADDRESS =
+      "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c";
+    expect(getConfiguredSellerAddress()?.toLowerCase()).toBe(
+      "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c",
+    );
+    process.env.SELLER_ADDRESS = "invalid";
+    expect(getConfiguredSellerAddress()).toBeNull();
+    delete process.env.SELLER_ADDRESS;
   });
 
   it("encodes a standards-shaped payment requirement", () => {

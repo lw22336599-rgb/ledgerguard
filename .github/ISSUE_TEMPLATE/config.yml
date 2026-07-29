@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security disclosure
+    url: mailto:lw22336599@gmail.com
+    about: Do not post private keys, seed phrases, credentials, or unpatched vulnerabilities publicly.

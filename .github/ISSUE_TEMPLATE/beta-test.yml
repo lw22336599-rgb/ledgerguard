@@ -1,0 +1,50 @@
+name: Arc Testnet beta result
+description: Share a LedgerGuard test result or request an integration follow-up.
+title: "[Beta] "
+labels:
+  - beta-feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing LedgerGuard. Use Arc Testnet assets only. Never include a private key, seed phrase, API token, or personal financial information.
+  - type: dropdown
+    id: tester
+    attributes:
+      label: Tester type
+      options:
+        - Individual user
+        - AI agent developer
+        - Wallet or payment developer
+        - Security researcher
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: path
+    attributes:
+      label: Test path
+      options:
+        - Browser preflight
+        - Preflight API
+        - Evidence API
+        - x402 paid testnet resource
+        - Documentation only
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened?
+      description: Include the public request ID or public testnet transaction hash if relevant. Remove all secrets.
+    validations:
+      required: true
+  - type: dropdown
+    id: followup
+    attributes:
+      label: Are you open to an integration follow-up?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true

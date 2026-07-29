@@ -155,7 +155,17 @@ async function main() {
   if (paid.status !== 200) fail(`Paid request returned HTTP ${paid.status}.`);
   if (paid.formattedAmount !== "0.001") fail("Unexpected settled payment amount.");
   if (paid.data?.paid !== true) fail("Paid resource did not confirm payment.");
-  if (!sameAddress(paid.data?.payer, client.address)) fail("Unexpected payer in response.");
+  const receipt = paid.data?.receipt;
+  if (!sameAddress(receipt?.payer ?? paid.data?.payer, client.address)) {
+    fail("Unexpected payer in response.");
+  }
+  if (receipt?.network !== "arcTestnet") fail("Unexpected receipt network.");
+  if (receipt?.amountMicroUsdc !== EXPECTED.amount) {
+    fail("Unexpected receipt amount.");
+  }
+  if (!String(receipt?.explorerUrl ?? "").startsWith("https://testnet.arcscan.app/tx/")) {
+    fail("Missing Arc Testnet receipt link.");
+  }
 
   const after = await client.getBalances();
   const evidence = {
@@ -170,7 +180,9 @@ async function main() {
     status: paid.status,
     transaction: paid.transaction,
     resourceConfirmedPaid: paid.data.paid,
-    resourceSettlementTransaction: paid.data.settlementTransaction,
+    resourceSettlementTransaction:
+      receipt?.settlementTransaction ?? paid.data.settlementTransaction,
+    explorerUrl: receipt?.explorerUrl,
     balanceBefore: before.gateway.formattedAvailable,
     balanceAfter: after.gateway.formattedAvailable,
   };

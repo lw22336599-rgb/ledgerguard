@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Arc-first preflight and evidence API for AI agent transactions.",
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
@@ -17,6 +17,7 @@
     "x402:buyer": "node --env-file-if-exists=.env.x402-buyer.local scripts/x402-buyer.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^4.0.6"

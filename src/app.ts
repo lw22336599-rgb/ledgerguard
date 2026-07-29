@@ -13,13 +13,22 @@ import {
   withDeadline,
 } from "./lib/rpc.js";
 import { rateLimit } from "./middleware/rate-limit.js";
+import {
+  type AppEnvironment,
+  requestTelemetry,
+} from "./middleware/request-telemetry.js";
 import { openApiDocument } from "./openapi.js";
 import { evidenceSchema, preflightSchema } from "./schemas.js";
 import { buildEvidence } from "./services/evidence.js";
 import { evaluatePreflight } from "./services/preflight.js";
 import {
+  notifyPaymentSettlement,
+  paymentReceipt,
+} from "./services/operations.js";
+import {
   encodePaymentRequired,
   getConfiguredX402PriceMicroUsdc,
+  getConfiguredSellerAddress,
   getArcPaymentRequirements,
   InvalidPaymentSignatureError,
   settlePayment,
@@ -33,16 +42,22 @@ import {
   developerDocsHtml,
   integrationBoundaryHtml,
   statusHtml,
+  testerHtml,
 } from "./ui.js";
 
-export const app = new Hono();
+export const app = new Hono<AppEnvironment>();
 
+app.use("*", requestTelemetry);
 app.use(
   "*",
   cors({
     origin: "*",
     allowMethods: ["GET", "POST", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Payment-Signature"],
+    allowHeaders: [
+      "Content-Type",
+      "Payment-Signature",
+      "X-LedgerGuard-Client",
+    ],
     exposeHeaders: [
       "Payment-Required",
       "Payment-Response",
@@ -50,6 +65,7 @@ app.use(
       "RateLimit-Remaining",
       "RateLimit-Reset",
       "Retry-After",
+      "X-LedgerGuard-Request-Id",
     ],
     maxAge: 86_400,
   }),
@@ -107,7 +123,20 @@ app.get("/docs/integration", (context) =>
   context.html(integrationBoundaryHtml),
 );
 app.get("/catalog", (context) =>
-  context.html(catalogHtml(getConfiguredX402PriceMicroUsdc())),
+  context.html(
+    catalogHtml(
+      getConfiguredX402PriceMicroUsdc(),
+      getConfiguredSellerAddress(),
+    ),
+  ),
+);
+app.get("/test", (context) =>
+  context.html(
+    testerHtml(
+      getConfiguredX402PriceMicroUsdc(),
+      getConfiguredSellerAddress(),
+    ),
+  ),
 );
 app.get("/status", async (context) => {
   let readiness:
@@ -147,6 +176,7 @@ app.get("/llms.txt", (context) =>
 Production: https://ledgerguard-gules.vercel.app
 OpenAPI: https://ledgerguard-gules.vercel.app/openapi.json
 Service catalog: https://ledgerguard-gules.vercel.app/.well-known/ledgerguard.json
+Public testing: https://ledgerguard-gules.vercel.app/test
 Free Arc transaction preflight: POST /v1/preflight
 Paid Arc Testnet x402 resource: GET /v1/paid/network-risk
 Safety: non-custodial; never send a seed phrase or private key.
@@ -159,6 +189,9 @@ app.get("/.well-known/ledgerguard.json", (context) =>
     production: getPublicBaseUrl(),
     humanDocs: `${getPublicBaseUrl()}/docs`,
     openapi: `${getPublicBaseUrl()}/openapi.json`,
+    testing: `${getPublicBaseUrl()}/test`,
+    support:
+      "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     custody: "none",
     signing: "client-side-only",
     mainnet: "disabled",
@@ -170,6 +203,7 @@ app.get("/.well-known/ledgerguard.json", (context) =>
         paymentProtocol: "x402-v2",
         network: "eip155:5042002",
         priceMicroUsdc: getConfiguredX402PriceMicroUsdc(),
+        payTo: getConfiguredSellerAddress(),
       },
     ],
   }),
@@ -184,6 +218,10 @@ app.get("/v1/meta", (context) =>
     docs: "/docs",
     openapi: "/openapi.json",
     catalog: "/.well-known/ledgerguard.json",
+    testing: "/test",
+    support:
+      "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
+    requestTracking: "X-LedgerGuard-Request-Id",
   }),
 );
 
@@ -292,11 +330,29 @@ app.get("/v1/paid/network-risk", async (context) => {
       "PAYMENT-RESPONSE",
       Buffer.from(JSON.stringify(settlement)).toString("base64"),
     );
+    const receipt = paymentReceipt({
+      payer: settlement.payer ?? "unknown",
+      transaction: settlement.transaction,
+      amountMicroUsdc: requirements.amount,
+    });
+    const requestId = context.get("requestId") as string;
+    console.info({
+      event: "payment.settled",
+      requestId,
+      ...receipt,
+    });
+    await notifyPaymentSettlement({
+      requestId,
+      payer: receipt.payer,
+      transaction: receipt.settlementTransaction,
+      amountMicroUsdc: receipt.amountMicroUsdc,
+    });
     const arc = requireEnabledNetwork("arcTestnet");
     return context.json({
       paid: true,
-      payer: settlement.payer,
-      settlementTransaction: settlement.transaction,
+      payer: receipt.payer,
+      settlementTransaction: receipt.settlementTransaction,
+      receipt,
       networkRisk: {
         lifecycle: arc.lifecycle,
         mainnetEnabled: getNetworkRegistry().arcMainnet.enabled,

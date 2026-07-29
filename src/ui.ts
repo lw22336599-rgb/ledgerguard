@@ -6,9 +6,10 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <meta name="description" content="${description}">
   <title>${title}</title>
   <link rel="stylesheet" href="/styles.css">
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
-const footer = `<footer>Arc 测试网软件 · 主网保持关闭，直至官方参数核验和人工发布审批完成。联系：<a href="mailto:lw22336599@gmail.com">邮箱</a> · <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
+const footer = `<footer>Arc 测试网软件 · 主网保持关闭，直至官方参数核验和人工发布审批完成。联系：<a href="mailto:lw22336599@gmail.com">邮箱</a> · <a href="/test">参与测试</a> · <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
 
 export const demoHtml = `${pageHead(
   "LedgerGuard | Arc 支付安全检查",
@@ -21,7 +22,7 @@ export const demoHtml = `${pageHead(
       <p class="eyebrow">非托管支付防火墙 · NON-CUSTODIAL</p>
       <h1>让代理付款。<br><span>让规则守住资金。</span></h1>
       <p class="lead">在钱包签名前检查 Arc USDC 收款人、金额、资产与策略。只填写公开地址，永远不要输入私钥或助记词。</p>
-      <div class="links"><a href="/docs">开发者文档</a><a href="/catalog">服务目录</a><a href="/status">运行状态</a><a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">源代码</a></div>
+      <div class="links"><a href="/test">参与测试</a><a href="/docs">开发者文档</a><a href="/catalog">服务目录</a><a href="/status">运行状态</a><a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">源代码</a></div>
     </section>
     <section class="notice" role="note"><strong>测试网提示：</strong>当前页面只使用无金融价值的 Arc 测试资产。LedgerGuard 不连接钱包、不发起交易，也不会要求签名。</section>
     <section class="panel">
@@ -103,7 +104,10 @@ export const developerDocsHtml = `${pageHead(
 </body>
 </html>`;
 
-export function catalogHtml(priceMicroUsdc: string): string {
+export function catalogHtml(
+  priceMicroUsdc: string,
+  sellerAddress?: string | null,
+): string {
   return `${pageHead(
     "LedgerGuard | 服务目录",
     "LedgerGuard 面向普通用户、开发者和 AI Agent 的服务入口。",
@@ -121,7 +125,37 @@ export function catalogHtml(priceMicroUsdc: string): string {
       <article class="doc-card"><span>FREE API</span><h2>Preflight + Evidence</h2><p>签名前检查与交易后核对，适合钱包、代理和支付应用。</p><a href="/docs">查看文档</a></article>
       <article class="doc-card"><span>X402 TESTNET</span><h2>Network Risk</h2><p>当前价格 ${priceMicroUsdc} micro-USDC（测试资产），验证自动发现、支付和交付闭环。</p><a href="/.well-known/ledgerguard.json">机器目录</a></article>
     </section>
-    <section class="notice"><strong>商业状态：</strong>测试网付费闭环已经技术验证，但测试币没有金融价值；目前不声称已有客户、经常性收入或主网 SLA。</section>
+    <section class="notice"><strong>商业状态：</strong>测试网付费闭环已经技术验证，但测试币没有金融价值；目前不声称已有客户、经常性收入或主网 SLA。${sellerAddress ? ` 当前公开测试收款地址：<code>${sellerAddress}</code>。` : ""}</section>
+    ${footer}
+  </main>
+</body>
+</html>`;
+}
+
+export function testerHtml(
+  priceMicroUsdc: string,
+  sellerAddress?: string | null,
+): string {
+  return `${pageHead(
+    "LedgerGuard | Arc 测试网体验",
+    "无需提供私钥，按步骤测试 LedgerGuard 的网页、API 和 x402 支付闭环。",
+  )}
+<body>
+  <main>
+    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">PUBLIC TEST</span></nav>
+    <section class="subhero">
+      <p class="eyebrow">公开测试入口 · TESTNET ONLY</p>
+      <h1 class="compact">一次走完测试闭环</h1>
+      <p class="lead">普通用户可直接体验免费检查；开发者可复制 API 请求；持有 Arc 测试币的钱包可验证 x402 支付、结算与资源交付。全程只使用无金融价值的测试资产。</p>
+    </section>
+    <section class="docs-grid">
+      <article class="doc-card"><span>1 · EVERYONE</span><h2>网页安全检查</h2><p>无需连接钱包。填写公开地址和金额，查看规则判断与技术详情。</p><a href="/">打开 Guard Link</a></article>
+      <article class="doc-card"><span>2 · DEVELOPERS</span><h2>调用免费 API</h2><p>调用 <code>POST /v1/preflight</code>，响应头会返回可用于排查问题的公开请求编号。</p><a href="/docs">复制请求示例</a></article>
+      <article class="doc-card"><span>3 · X402</span><h2>测试自动付款</h2><p>访问 <code>GET /v1/paid/network-risk</code> 会收到 ${priceMicroUsdc} micro-USDC 的标准 402 挑战；买方脚本完成签名和结算后自动获得资源与链上回执。</p><a href="https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/X402_BUYER_RUNBOOK.md" rel="noreferrer">付款测试手册</a></article>
+    </section>
+    <section class="notice"><strong>完成标准：</strong>记录页面结果、响应头中的 X-LedgerGuard-Request-Id，或公开的 Arc 测试网交易哈希；不要提交私钥、助记词、API Token 或个人金融信息。</section>
+    ${sellerAddress ? `<section class="notice"><strong>测试网收款地址：</strong><code>${sellerAddress}</code>。它只接收 Arc 测试网 x402 结算；服务端不保存该钱包私钥。</section>` : ""}
+    <div class="links bottom-links"><a href="https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose" rel="noreferrer">提交测试结果或问题</a><a href="/status">查看运行状态</a><a href="mailto:lw22336599@gmail.com">邮件联系</a></div>
     ${footer}
   </main>
 </body>

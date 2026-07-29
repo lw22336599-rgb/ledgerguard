@@ -1,0 +1,27 @@
+name: Bug report
+description: Report a reproducible LedgerGuard defect.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use test assets only. Never paste private keys, seed phrases, API tokens, or personal financial data.
+  - type: input
+    id: request_id
+    attributes:
+      label: Public request ID
+      description: Copy X-LedgerGuard-Request-Id from the response when available.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true

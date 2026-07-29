@@ -10,12 +10,18 @@ public transaction hash for evidence.
 
 ```text
 GET /.well-known/ledgerguard.json
+GET /test
 GET /llms.txt
 GET /openapi.json
 ```
 
 Human-readable onboarding is available at `GET /docs`; `/openapi.json` and the
 well-known catalog intentionally return raw JSON for software clients.
+
+Every API response includes `X-LedgerGuard-Request-Id`. Integrations may send a
+non-secret `X-LedgerGuard-Client` value such as `my-agent/1.0`; it is recorded
+with path, status, and latency for operational debugging. Source IP addresses
+are not included in LedgerGuard's structured request event.
 
 ## Free transaction preflight
 
@@ -59,6 +65,10 @@ wallet may authorize testnet USDC and retry with `PAYMENT-SIGNATURE`.
 
 The server sends the signed authorization directly to Circle Gateway for
 settlement. It does not store or operate the buyer's key.
+
+After a successful settlement, the response includes a `receipt` with the
+public payer, settlement identifier, amount, Arc Testnet network name, and
+explorer link. See `X402_BUYER_RUNBOOK.md` for the bounded external test flow.
 
 Use test assets only. The endpoint is a technical and demand-validation demo,
 not evidence of revenue or production readiness.
