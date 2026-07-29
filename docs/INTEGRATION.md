@@ -56,6 +56,31 @@ settlement. It does not store or operate the buyer's key.
 Use test assets only. The endpoint is a technical and demand-validation demo,
 not evidence of revenue or production readiness.
 
+### Reproduce the buyer flow
+
+The repository includes a fail-closed Arc Testnet buyer helper. It generates a
+disposable local key in the ignored `.env.x402-buyer.local` file and refuses to
+sign unless the challenge matches the expected network, USDC contract, amount,
+recipient, and Circle Gateway contract.
+
+```powershell
+npm run x402:buyer:init
+npm run x402:buyer -- inspect
+
+# Fund the printed address with testnet USDC from the official Circle faucet.
+$env:ARC_RPC_URL = "https://rpc.blockdaemon.testnet.arc.io"
+npm run x402:buyer -- deposit 0.01
+npm run x402:buyer -- status
+npm run x402:buyer -- pay
+```
+
+The deposit helper only permits `0.01` test USDC. The paid request is fixed at
+`0.001` test USDC. A sanitized receipt is written to the ignored
+`tmp/x402-payment-evidence.json`; the private key is never included.
+
+The first controlled end-to-end run completed on 2026-07-29. See
+`X402_E2E_EVIDENCE.md`.
+
 ## Mainnet behavior
 
 Arc Mainnet remains disabled. It will not silently switch when a chain launches.
