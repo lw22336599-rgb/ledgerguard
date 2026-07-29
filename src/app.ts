@@ -27,11 +27,56 @@ import { demoCss, demoHtml, demoJs } from "./ui.js";
 
 export const app = new Hono();
 
-app.use("*", cors());
+app.use(
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Payment-Signature"],
+    exposeHeaders: [
+      "Payment-Required",
+      "Payment-Response",
+      "RateLimit-Limit",
+      "RateLimit-Remaining",
+      "RateLimit-Reset",
+      "Retry-After",
+    ],
+    maxAge: 86_400,
+  }),
+);
 app.use("*", prettyJSON());
-app.use("*", secureHeaders());
-app.use("/v1/*", async (context, next) => {
-  context.header("Cache-Control", "no-store");
+app.use(
+  "*",
+  secureHeaders({
+    contentSecurityPolicy: {
+      defaultSrc: ["'self'"],
+      baseUri: ["'none'"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"],
+      imgSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'"],
+    },
+    permissionsPolicy: {
+      camera: [],
+      geolocation: [],
+      microphone: [],
+      payment: [],
+      usb: [],
+    },
+  }),
+);
+app.use("*", async (context, next) => {
+  if (
+    context.req.path.startsWith("/v1/") ||
+    context.req.path === "/health" ||
+    context.req.path === "/ready"
+  ) {
+    context.header("Cache-Control", "no-store");
+  }
   await next();
 });
 app.use("/v1/*", rateLimit);
@@ -124,11 +169,15 @@ app.get("/ready", async (context) => {
       blockNumber: blockNumber.toString(),
     });
   } catch (error) {
+    console.error("Readiness RPC probe failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+    });
     return context.json(
       {
         ok: false,
         error: "RPC_UNAVAILABLE",
-        message: error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+        message: "Arc Testnet RPC is temporarily unavailable.",
       },
       503,
     );
@@ -182,7 +231,7 @@ app.get("/v1/paid/network-risk", async (context) => {
       return context.json(
         {
           error: "PAYMENT_FAILED",
-          reason: settlement.errorReason ?? "Settlement rejected",
+          reason: "Settlement rejected by the facilitator.",
         },
         402,
       );
@@ -206,11 +255,14 @@ app.get("/v1/paid/network-risk", async (context) => {
       },
     });
   } catch (error) {
+    console.error("x402 request failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+    });
     return context.json(
       {
         error: "X402_UNAVAILABLE",
-        message:
-          error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+        message: "The testnet payment facilitator is temporarily unavailable.",
       },
       503,
     );
@@ -277,12 +329,25 @@ app.post("/v1/evidence", async (context) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     if (message.includes("could not be found") || message.includes("not found")) {
-      return context.json({ error: "TRANSACTION_NOT_FOUND", message }, 404);
+      return context.json(
+        { error: "TRANSACTION_NOT_FOUND", message: "Transaction not found." },
+        404,
+      );
     }
     if (message.includes("disabled")) {
-      return context.json({ error: "NETWORK_DISABLED", message }, 503);
+      return context.json(
+        { error: "NETWORK_DISABLED", message: "Requested network is disabled." },
+        503,
+      );
     }
-    return context.json({ error: "RPC_ERROR", message: message.slice(0, 500) }, 503);
+    console.error("Evidence RPC request failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: message.slice(0, 500),
+    });
+    return context.json(
+      { error: "RPC_ERROR", message: "Unable to retrieve onchain evidence." },
+      503,
+    );
   }
 });
 

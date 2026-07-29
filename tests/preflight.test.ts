@@ -53,6 +53,7 @@ describe("preflight", () => {
       intent: {
         action: "transfer",
         expectedRecipient: sender,
+        expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: "1000000",
         purpose: "Test mismatch",
       },
@@ -78,6 +79,8 @@ describe("preflight", () => {
       intent: {
         action: "approve",
         expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: maxUint256.toString(),
         purpose: "Test approval",
       },
       policy: {},
@@ -87,6 +90,56 @@ describe("preflight", () => {
     expect(result.decision).toBe("BLOCK");
     expect(result.findings.map((finding) => finding.code)).toContain(
       "UNLIMITED_APPROVAL",
+    );
+  });
+
+  it("allows an exact finite USDC approval after successful simulation", () => {
+    const data = preflightSchema.parse({
+      from: sender,
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "approve",
+        args: [recipient, 1_000_000n],
+      }),
+      intent: {
+        action: "approve",
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Exact approval",
+      },
+      policy: {
+        maxAmountMicroUsdc: "1000000",
+      },
+    });
+
+    const result = evaluatePreflight(data, { status: "success" });
+    expect(result.decision).toBe("ALLOW");
+  });
+
+  it("blocks when required simulation was not run", () => {
+    const data = preflightSchema.parse({
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "transfer",
+        args: [recipient, 1_000_000n],
+      }),
+      intent: {
+        action: "transfer",
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Simulation is a signing gate",
+      },
+      policy: {},
+    });
+
+    const result = evaluatePreflight(data, { status: "not_run" });
+    expect(result.decision).toBe("BLOCK");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "SIMULATION_REQUIRED",
     );
   });
 

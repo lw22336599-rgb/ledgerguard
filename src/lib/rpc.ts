@@ -155,9 +155,13 @@ export async function simulateReadOnly(
     );
     return { status: "success" };
   } catch (error) {
+    console.error("Read-only RPC simulation failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+    });
     return {
       status: "failed",
-      error: error instanceof Error ? error.message.slice(0, 500) : "RPC simulation failed",
+      error: "Read-only RPC simulation failed.",
     };
   }
 }

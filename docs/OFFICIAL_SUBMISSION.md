@@ -1,7 +1,7 @@
 # Official ecosystem submission pack
 
-This file is copy-ready source material. Replace bracketed identity/contact
-fields with truthful information before submitting any external form.
+This file is copy-ready source material. Legal-identity and funding fields must
+still be supplied by the owner before any grant or contractual submission.
 
 ## Project
 
@@ -58,7 +58,8 @@ or guaranteed revenue.
 ## Required human fields
 
 - Applicant name: `[REQUIRED]`
-- Contact email: `[REQUIRED]`
+- Public contact identifier: `lw22336599-rgb`
+- Contact email: `lw22336599@gmail.com`
 - Legal entity, if any: `[OPTIONAL — do not invent]`
 - Country/region: `Singapore`
 - Requested funding and milestone budget: `[REQUIRED FOR GRANT APPLICATION]`

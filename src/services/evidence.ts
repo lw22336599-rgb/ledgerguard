@@ -11,9 +11,16 @@ import {
   type TransactionReceipt,
 } from "viem";
 import type { EvidenceInput } from "../schemas.js";
+import { ARC_TESTNET_USDC } from "../config/networks.js";
 
 const transferEvent = parseAbiItem(
   "event Transfer(address indexed from, address indexed to, uint256 value)",
+);
+const approvalEvent = parseAbiItem(
+  "event Approval(address indexed owner, address indexed spender, uint256 value)",
+);
+const approvalForAllEvent = parseAbiItem(
+  "event ApprovalForAll(address indexed owner, address indexed operator, bool approved)",
 );
 
 export interface NormalizedTransfer {
@@ -24,6 +31,15 @@ export interface NormalizedTransfer {
   logIndex: number;
 }
 
+export interface NormalizedApproval {
+  assetAddress: Address;
+  owner: Address;
+  spender: Address;
+  amount: string;
+  logIndex: number;
+  kind: "erc20_approval" | "operator_approval";
+}
+
 export interface EvidenceResult {
   status: "VERIFIED" | "MISMATCH" | "REVERTED" | "REVIEW";
   network: string;
@@ -32,6 +48,7 @@ export interface EvidenceResult {
   transactionTo: Address | null;
   nativeValueMicroUsdc: string | null;
   transfers: NormalizedTransfer[];
+  approvals: NormalizedApproval[];
   findings: Array<{
     code: string;
     severity: "warning" | "critical";
@@ -87,12 +104,66 @@ export function extractTransfers(logs: readonly Log[]): NormalizedTransfer[] {
   return transfers;
 }
 
+export function extractApprovals(logs: readonly Log[]): NormalizedApproval[] {
+  const approvals: NormalizedApproval[] = [];
+
+  for (const log of logs) {
+    try {
+      const decoded = decodeEventLog({
+        abi: [approvalEvent],
+        data: log.data,
+        topics: log.topics,
+        strict: true,
+      });
+      if (decoded.eventName === "Approval") {
+        const { owner, spender, value } = decoded.args;
+        approvals.push({
+          assetAddress: getAddress(log.address),
+          owner: getAddress(owner),
+          spender: getAddress(spender),
+          amount: value.toString(),
+          logIndex: Number(log.logIndex ?? 0),
+          kind: "erc20_approval",
+        });
+        continue;
+      }
+    } catch {
+      // Try ApprovalForAll below.
+    }
+
+    try {
+      const decoded = decodeEventLog({
+        abi: [approvalForAllEvent],
+        data: log.data,
+        topics: log.topics,
+        strict: true,
+      });
+      if (decoded.eventName === "ApprovalForAll") {
+        const { owner, operator, approved } = decoded.args;
+        approvals.push({
+          assetAddress: getAddress(log.address),
+          owner: getAddress(owner),
+          spender: getAddress(operator),
+          amount: approved ? "unlimited" : "0",
+          logIndex: Number(log.logIndex ?? 0),
+          kind: "operator_approval",
+        });
+      }
+    } catch {
+      // Non-approval logs are intentionally ignored.
+    }
+  }
+
+  return approvals;
+}
+
 export function buildEvidence(
   input: EvidenceInput,
   transaction: Transaction,
   receipt: TransactionReceipt,
 ): EvidenceResult {
   const transfers = extractTransfers(receipt.logs);
+  const approvals = extractApprovals(receipt.logs);
   const findings: EvidenceResult["findings"] = [];
   const nativeValue =
     typeof transaction.value === "bigint" ? transaction.value : 0n;
@@ -106,6 +177,18 @@ export function buildEvidence(
       code: "TRANSACTION_REVERTED",
       severity: "critical",
       message: "The transaction reverted onchain.",
+    });
+  }
+
+  if (
+    input.network === "arcTestnet" &&
+    input.intent.expectedAssetAddress &&
+    !sameAddress(input.intent.expectedAssetAddress, ARC_TESTNET_USDC)
+  ) {
+    findings.push({
+      code: "NON_USDC_ASSET",
+      severity: "critical",
+      message: "The declared asset is not the official Arc Testnet USDC asset.",
     });
   }
 
@@ -148,6 +231,25 @@ export function buildEvidence(
     });
   }
 
+  const matchingApproval = approvals.find(
+    (approval) =>
+      sameAddress(approval.spender, input.intent.expectedRecipient!) &&
+      sameAddress(approval.assetAddress, input.intent.expectedAssetAddress!) &&
+      (approval.amount === input.intent.expectedAmountMicroUsdc ||
+        (approval.amount === "unlimited" &&
+          input.intent.expectedAmountMicroUsdc ===
+            "115792089237316195423570985008687907853269984665640564039457584007913129639935")),
+  );
+
+  if (input.intent.action === "approve" && !matchingApproval) {
+    findings.push({
+      code: "EXPECTED_APPROVAL_NOT_FOUND",
+      severity: "critical",
+      message:
+        "No approval event matched the declared spender, asset, and amount.",
+    });
+  }
+
   if (input.intent.action === "contract_call" && transfers.length === 0) {
     findings.push({
       code: "NO_VALUE_MOVEMENT_OBSERVED",
@@ -173,6 +275,7 @@ export function buildEvidence(
     transactionTo: transaction.to,
     nativeValueMicroUsdc,
     transfers,
+    approvals,
     intent: input.intent,
   };
   const evidenceHash = `0x${createHash("sha256")
@@ -187,6 +290,7 @@ export function buildEvidence(
     transactionTo: transaction.to,
     nativeValueMicroUsdc,
     transfers,
+    approvals,
     findings,
     evidenceHash,
   };

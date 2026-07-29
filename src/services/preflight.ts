@@ -148,7 +148,7 @@ export function evaluatePreflight(
   if (valueWei % 1_000_000_000_000n !== 0n) {
     findings.push({
       code: "ARC_NATIVE_DECIMAL_REMAINDER",
-      severity: "warning",
+      severity: "critical",
       message:
         "Native msg.value is not exactly representable in the 6-decimal USDC product view.",
     });
@@ -196,14 +196,15 @@ export function evaluatePreflight(
   ) {
     findings.push({
       code: "NON_USDC_ASSET",
-      severity: "warning",
+      severity: "critical",
       message: "The token call does not target the official Arc Testnet USDC contract.",
     });
   }
 
   if (
     input.intent.expectedAmountMicroUsdc &&
-    decoded.amountMicroUsdc !== input.intent.expectedAmountMicroUsdc
+    (decoded.amountMicroUsdc ?? decoded.approvalAmount) !==
+      input.intent.expectedAmountMicroUsdc
   ) {
     findings.push({
       code: "AMOUNT_MISMATCH",
@@ -266,11 +267,13 @@ export function evaluatePreflight(
       severity: "critical",
       message: simulation.error ?? "The read-only RPC simulation failed.",
     });
-  } else if (input.policy.requireSimulation && simulation.status !== "success") {
+  } else if (simulation.status !== "success") {
     findings.push({
       code: "SIMULATION_REQUIRED",
-      severity: "warning",
-      message: simulation.error ?? "A successful simulation is required before signing.",
+      severity: input.policy.requireSimulation ? "critical" : "warning",
+      message: input.policy.requireSimulation
+        ? "A successful read-only simulation is required before signing."
+        : "Simulation was not run; do not treat this result as approval to sign.",
     });
   }
 

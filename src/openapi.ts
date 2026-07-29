@@ -65,6 +65,14 @@ export const openApiDocument = {
     "/v1/evidence": {
       post: {
         summary: "Reconcile a finalized transaction with its declared intent",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/EvidenceRequest" },
+            },
+          },
+        },
         responses: {
           "200": { description: "Normalized evidence bundle" },
           "400": { description: "Invalid request" },
@@ -77,6 +85,15 @@ export const openApiDocument = {
         summary: "Purchase an Arc network-risk snapshot with x402",
         description:
           "Returns HTTP 402 with Circle Gateway Arc Testnet requirements until a valid payment signature is settled.",
+        parameters: [
+          {
+            in: "header",
+            name: "PAYMENT-SIGNATURE",
+            required: false,
+            schema: { type: "string" },
+            description: "Base64-encoded x402 v2 payment payload.",
+          },
+        ],
         responses: {
           "200": { description: "Payment settled and resource returned" },
           "402": { description: "Payment required or rejected" },
@@ -101,18 +118,7 @@ export const openApiDocument = {
           data: { type: "string", pattern: "^0x[0-9a-fA-F]*$", default: "0x" },
           valueWei: { type: "string", pattern: "^(0|[1-9][0-9]*)$", default: "0" },
           intent: {
-            type: "object",
-            required: ["action", "purpose"],
-            properties: {
-              action: {
-                type: "string",
-                enum: ["transfer", "approve", "contract_call"],
-              },
-              expectedRecipient: { type: "string" },
-              expectedAssetAddress: { type: "string" },
-              expectedAmountMicroUsdc: { type: "string" },
-              purpose: { type: "string", maxLength: 280 },
-            },
+            $ref: "#/components/schemas/Intent",
           },
           policy: {
             type: "object",
@@ -123,6 +129,44 @@ export const openApiDocument = {
               requireSimulation: { type: "boolean", default: true },
             },
           },
+        },
+      },
+      EvidenceRequest: {
+        type: "object",
+        required: ["txHash", "intent"],
+        properties: {
+          network: {
+            type: "string",
+            enum: ["arcTestnet", "arcMainnet"],
+            default: "arcTestnet",
+          },
+          txHash: { type: "string", pattern: "^0x[0-9a-fA-F]{64}$" },
+          intent: { $ref: "#/components/schemas/Intent" },
+        },
+      },
+      Intent: {
+        type: "object",
+        required: ["action", "purpose"],
+        description:
+          "Transfer and approve intents also require expectedRecipient, expectedAssetAddress, and expectedAmountMicroUsdc.",
+        properties: {
+          action: {
+            type: "string",
+            enum: ["transfer", "approve", "contract_call"],
+          },
+          expectedRecipient: {
+            type: "string",
+            pattern: "^0x[0-9a-fA-F]{40}$",
+          },
+          expectedAssetAddress: {
+            type: "string",
+            pattern: "^0x[0-9a-fA-F]{40}$",
+          },
+          expectedAmountMicroUsdc: {
+            type: "string",
+            pattern: "^(0|[1-9][0-9]*)$",
+          },
+          purpose: { type: "string", minLength: 1, maxLength: 280 },
         },
       },
     },

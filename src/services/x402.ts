@@ -157,5 +157,9 @@ export async function settlePayment(
 ): Promise<SettlementResult> {
   const payload = decodePaymentSignature(signatureHeader);
   const client = new BatchFacilitatorClient({ url: GATEWAY_URL });
-  return withDeadline(client.settle(payload, requirements), 12_000);
+  const result = await withDeadline(client.settle(payload, requirements), 12_000);
+  if (result.success && result.network !== requirements.network) {
+    throw new Error("Facilitator returned an unexpected settlement network.");
+  }
+  return result;
 }

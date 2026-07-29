@@ -14,6 +14,12 @@ describe("HTTP API", () => {
     expect(page.status).toBe(200);
     expect(page.headers.get("content-type")).toContain("text/html");
     expect(await page.text()).toContain("Let agents pay.");
+    expect(page.headers.get("content-security-policy")).toContain(
+      "default-src 'self'",
+    );
+    expect(page.headers.get("access-control-expose-headers")).toContain(
+      "Payment-Required",
+    );
 
     const meta = await app.request("/v1/meta");
     expect(meta.status).toBe(200);
@@ -25,6 +31,7 @@ describe("HTTP API", () => {
     const response = await app.request("/health");
     expect(response.status).toBe(200);
     expect((await response.json()).ok).toBe(true);
+    expect(response.headers.get("cache-control")).toBe("no-store");
   });
 
   it("publishes agent-readable discovery documents", async () => {
@@ -67,7 +74,7 @@ describe("HTTP API", () => {
     expect((await response.json()).error).toBe("NETWORK_DISABLED");
   });
 
-  it("evaluates a deterministic transfer without requiring RPC simulation", async () => {
+  it("keeps a deterministic transfer in review when RPC simulation is skipped", async () => {
     const response = await app.request("/v1/preflight", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -92,6 +99,10 @@ describe("HTTP API", () => {
       }),
     });
     expect(response.status).toBe(200);
-    expect((await response.json()).decision).toBe("ALLOW");
+    const body = await response.json();
+    expect(body.decision).toBe("REVIEW");
+    expect(body.findings.map((finding: { code: string }) => finding.code)).toContain(
+      "SIMULATION_REQUIRED",
+    );
   });
 });

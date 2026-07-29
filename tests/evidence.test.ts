@@ -112,4 +112,24 @@ describe("evidence", () => {
     expect(result.nativeValueMicroUsdc).toBe("1500000");
     expect(result.transfers).toHaveLength(0);
   });
+
+  it("does not verify an approval intent without matching approval evidence", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "approve",
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Approval evidence must exist",
+      },
+    });
+    const { transaction, receipt } = fixture();
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("MISMATCH");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "EXPECTED_APPROVAL_NOT_FOUND",
+    );
+  });
 });

@@ -15,19 +15,39 @@ const uintStringSchema = z
 
 export const networkNameSchema = z.enum(["arcTestnet", "arcMainnet"]);
 
+const intentSchema = z
+  .object({
+    action: z.enum(["transfer", "approve", "contract_call"]),
+    expectedRecipient: addressSchema.optional(),
+    expectedAssetAddress: addressSchema.optional(),
+    expectedAmountMicroUsdc: uintStringSchema.optional(),
+    purpose: z.string().trim().min(1).max(280),
+  })
+  .superRefine((intent, context) => {
+    if (intent.action === "contract_call") return;
+
+    for (const field of [
+      "expectedRecipient",
+      "expectedAssetAddress",
+      "expectedAmountMicroUsdc",
+    ] as const) {
+      if (!intent[field]) {
+        context.addIssue({
+          code: "custom",
+          path: [field],
+          message: `${field} is required for ${intent.action} intent verification`,
+        });
+      }
+    }
+  });
+
 export const preflightSchema = z.object({
   network: networkNameSchema.default("arcTestnet"),
   from: addressSchema.optional(),
   to: addressSchema,
   data: hexSchema.default("0x"),
   valueWei: uintStringSchema.default("0"),
-  intent: z.object({
-    action: z.enum(["transfer", "approve", "contract_call"]),
-    expectedRecipient: addressSchema.optional(),
-    expectedAssetAddress: addressSchema.optional(),
-    expectedAmountMicroUsdc: uintStringSchema.optional(),
-    purpose: z.string().trim().min(1).max(280),
-  }),
+  intent: intentSchema,
   policy: z.object({
     allowedTargets: z.array(addressSchema).max(100).optional(),
     maxAmountMicroUsdc: uintStringSchema.optional(),
@@ -41,13 +61,7 @@ export type PreflightInput = z.infer<typeof preflightSchema>;
 export const evidenceSchema = z.object({
   network: networkNameSchema.default("arcTestnet"),
   txHash: hexSchema.refine((value) => value.length === 66, "Expected a 32-byte transaction hash"),
-  intent: z.object({
-    action: z.enum(["transfer", "approve", "contract_call"]),
-    expectedRecipient: addressSchema.optional(),
-    expectedAssetAddress: addressSchema.optional(),
-    expectedAmountMicroUsdc: uintStringSchema.optional(),
-    purpose: z.string().trim().min(1).max(280),
-  }),
+  intent: intentSchema,
 });
 
 export type EvidenceInput = z.infer<typeof evidenceSchema>;

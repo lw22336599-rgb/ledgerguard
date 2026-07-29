@@ -8,6 +8,10 @@ Current status: **testnet MVP / mainnet disabled**.
 
 Public demo: **https://ledgerguard-gules.vercel.app**
 
+Public contact: **lw22336599@gmail.com**
+
+GitHub contact: **lw22336599-rgb**
+
 ## What exists
 
 - `GET /` - public, no-wallet browser demo for an Arc USDC transfer preflight.
@@ -24,6 +28,11 @@ Public demo: **https://ledgerguard-gules.vercel.app**
 
 The service does not hold keys, sign transactions, move funds, deploy contracts,
 or automatically enable an unknown mainnet.
+
+`ALLOW` is returned only when every decoded policy check passes and a requested
+read-only simulation succeeds. If simulation is intentionally skipped, the
+result remains `REVIEW`; if simulation is required but cannot run, it is
+`BLOCK`.
 
 ## Local development
 
