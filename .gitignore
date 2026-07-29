@@ -5,6 +5,7 @@ dist/
 .env.*
 !.env.example
 coverage/
+tmp/
 *.log
 *.pem
 *.key
