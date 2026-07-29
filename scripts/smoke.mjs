@@ -23,9 +23,15 @@ const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) })
 if (home.status !== 200 || !(await home.text()).includes("Let agents pay.")) {
   throw new Error("/: public demo is unavailable");
 }
+if (!home.headers.get("content-security-policy")?.includes("default-src 'self'")) {
+  throw new Error("/: strict Content-Security-Policy is missing");
+}
 
-const { body: health } = await request("/health");
+const { response: healthResponse, body: health } = await request("/health");
 if (!health.ok) throw new Error("/health: ok was not true");
+if (!healthResponse.headers.get("cache-control")?.includes("no-store")) {
+  throw new Error("/health: cache-control must include no-store");
+}
 
 const { body: ready } = await request("/ready");
 if (!ready.ok || ready.chainId !== 5042002) {
@@ -56,8 +62,13 @@ const { body: preflight } = await request("/v1/preflight", {
     policy: { requireSimulation: false, maxAmountMicroUsdc: amount },
   }),
 });
-if (preflight.decision !== "ALLOW") {
-  throw new Error(`/v1/preflight: expected ALLOW, got ${JSON.stringify(preflight)}`);
+if (
+  preflight.decision !== "REVIEW" ||
+  !preflight.findings?.some((finding) => finding.code === "SIMULATION_REQUIRED")
+) {
+  throw new Error(
+    `/v1/preflight: expected REVIEW with SIMULATION_REQUIRED, got ${JSON.stringify(preflight)}`,
+  );
 }
 
 const paidResponse = await fetch(`${baseUrl}/v1/paid/network-risk`, {
@@ -84,4 +95,6 @@ if (paidResponse.status === 402) {
   );
 }
 
-console.log(`PASS ${baseUrl} | Arc ${ready.chainId} block ${ready.blockNumber} | preflight ALLOW | mainnet closed | ${paymentState}`);
+console.log(
+  `PASS ${baseUrl} | Arc ${ready.chainId} block ${ready.blockNumber} | preflight REVIEW (simulation required) | mainnet closed | ${paymentState}`,
+);
