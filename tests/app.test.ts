@@ -9,6 +9,18 @@ const transferAbi = parseAbi([
 const recipient = "0x2222222222222222222222222222222222222222";
 
 describe("HTTP API", () => {
+  it("serves the public demo and machine metadata", async () => {
+    const page = await app.request("/");
+    expect(page.status).toBe(200);
+    expect(page.headers.get("content-type")).toContain("text/html");
+    expect(await page.text()).toContain("Let agents pay.");
+
+    const meta = await app.request("/v1/meta");
+    expect(meta.status).toBe(200);
+    expect((await meta.json()).service).toBe("LedgerGuard");
+    expect(meta.headers.get("cache-control")).toBe("no-store");
+  });
+
   it("reports process health", async () => {
     const response = await app.request("/health");
     expect(response.status).toBe(200);

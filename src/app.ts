@@ -22,12 +22,17 @@ import {
   settlePayment,
   x402Enabled,
 } from "./services/x402.js";
+import { demoCss, demoHtml, demoJs } from "./ui.js";
 
 export const app = new Hono();
 
 app.use("*", cors());
 app.use("*", prettyJSON());
 app.use("*", secureHeaders());
+app.use("/v1/*", async (context, next) => {
+  context.header("Cache-Control", "no-store");
+  await next();
+});
 app.use("/v1/*", rateLimit);
 app.use(
   "/v1/*",
@@ -38,7 +43,14 @@ app.use(
   }),
 );
 
-app.get("/", (context) =>
+app.get("/", (context) => context.html(demoHtml));
+app.get("/styles.css", (context) =>
+  context.body(demoCss, 200, { "Content-Type": "text/css; charset=utf-8" }),
+);
+app.get("/app.js", (context) =>
+  context.body(demoJs, 200, { "Content-Type": "text/javascript; charset=utf-8" }),
+);
+app.get("/v1/meta", (context) =>
   context.json({
     service: "LedgerGuard",
     version: "0.1.0",

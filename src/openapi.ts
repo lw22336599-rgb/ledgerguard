@@ -8,6 +8,18 @@ export const openApiDocument = {
   },
   servers: [{ url: "/" }],
   paths: {
+    "/v1/meta": {
+      get: {
+        summary: "Machine-readable service metadata",
+        responses: { "200": { description: "Service metadata" } },
+      },
+    },
+    "/v1/networks": {
+      get: {
+        summary: "Supported network registry and release state",
+        responses: { "200": { description: "Public network configuration" } },
+      },
+    },
     "/health": {
       get: {
         summary: "Process health",
@@ -26,6 +38,14 @@ export const openApiDocument = {
     "/v1/preflight": {
       post: {
         summary: "Inspect and simulate an unsigned transaction",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PreflightRequest" },
+            },
+          },
+        },
         responses: {
           "200": { description: "ALLOW, REVIEW, or BLOCK decision" },
           "400": { description: "Invalid request" },
@@ -52,6 +72,48 @@ export const openApiDocument = {
           "200": { description: "Payment settled and resource returned" },
           "402": { description: "Payment required or rejected" },
           "503": { description: "x402 disabled or facilitator unavailable" },
+        },
+      },
+    },
+  },
+  components: {
+    schemas: {
+      PreflightRequest: {
+        type: "object",
+        required: ["to", "intent", "policy"],
+        properties: {
+          network: {
+            type: "string",
+            enum: ["arcTestnet", "arcMainnet"],
+            default: "arcTestnet",
+          },
+          from: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          to: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          data: { type: "string", pattern: "^0x[0-9a-fA-F]*$", default: "0x" },
+          valueWei: { type: "string", pattern: "^(0|[1-9][0-9]*)$", default: "0" },
+          intent: {
+            type: "object",
+            required: ["action", "purpose"],
+            properties: {
+              action: {
+                type: "string",
+                enum: ["transfer", "approve", "contract_call"],
+              },
+              expectedRecipient: { type: "string" },
+              expectedAssetAddress: { type: "string" },
+              expectedAmountMicroUsdc: { type: "string" },
+              purpose: { type: "string", maxLength: 280 },
+            },
+          },
+          policy: {
+            type: "object",
+            properties: {
+              allowedTargets: { type: "array", items: { type: "string" } },
+              maxAmountMicroUsdc: { type: "string" },
+              allowUnlimitedApproval: { type: "boolean", default: false },
+              requireSimulation: { type: "boolean", default: true },
+            },
+          },
         },
       },
     },

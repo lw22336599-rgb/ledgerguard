@@ -8,6 +8,8 @@ Current status: **testnet MVP / mainnet disabled**.
 
 ## What exists
 
+- `GET /` - public, no-wallet browser demo for an Arc USDC transfer preflight.
+- `GET /v1/meta` - machine-readable service metadata.
 - `POST /v1/preflight` - decode and compare a transaction against an explicit intent and policy.
 - `POST /v1/evidence` - reconcile a finalized transaction against the original intent.
 - `GET /health` - process health.
@@ -30,6 +32,17 @@ npm.cmd test
 npm.cmd run typecheck
 npm.cmd run dev
 ```
+
+Run the reusable acceptance check against a local or deployed instance:
+
+```powershell
+$env:LEDGERGUARD_URL = "https://ledgerguard-gules.vercel.app"
+npm.cmd run smoke
+```
+
+GitHub Actions runs this check hourly against production. It verifies the web
+entry point, Arc Testnet RPC chain ID, a deterministic USDC preflight, and that
+both mainnet and the unvalidated x402 settlement path remain closed.
 
 The default RPC list uses Arc's four documented public Testnet endpoints
 (Circle, Blockdaemon, dRPC, and QuickNode) in failover order. Override it with
