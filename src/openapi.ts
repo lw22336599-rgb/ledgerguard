@@ -52,6 +52,29 @@ export const openApiDocument = {
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/PreflightRequest" },
+              example: {
+                network: "arcTestnet",
+                from: "0x1111111111111111111111111111111111111111",
+                to: "0x3600000000000000000000000000000000000000",
+                data:
+                  "0xa9059cbb000000000000000000000000222222222222222222222222222222222222222200000000000000000000000000000000000000000000000000000000000f4240",
+                valueWei: "0",
+                intent: {
+                  action: "transfer",
+                  expectedDebitAddress:
+                    "0x1111111111111111111111111111111111111111",
+                  expectedRecipient:
+                    "0x2222222222222222222222222222222222222222",
+                  expectedAssetAddress:
+                    "0x3600000000000000000000000000000000000000",
+                  expectedAmountMicroUsdc: "1000000",
+                  purpose: "Invoice 42",
+                },
+                policy: {
+                  maxAmountMicroUsdc: "2000000",
+                  requireSimulation: true,
+                },
+              },
             },
           },
         },
@@ -148,11 +171,15 @@ export const openApiDocument = {
         type: "object",
         required: ["action", "purpose"],
         description:
-          "Transfer and approve intents also require expectedRecipient, expectedAssetAddress, and expectedAmountMicroUsdc.",
+          "Transfer and approve intents also require expectedRecipient, expectedAssetAddress, and expectedAmountMicroUsdc. Declare expectedDebitAddress for payer/owner-bound evidence; transferFrom is blocked without it.",
         properties: {
           action: {
             type: "string",
             enum: ["transfer", "approve", "contract_call"],
+          },
+          expectedDebitAddress: {
+            type: "string",
+            pattern: "^0x[0-9a-fA-F]{40}$",
           },
           expectedRecipient: {
             type: "string",

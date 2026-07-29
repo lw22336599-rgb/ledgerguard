@@ -192,7 +192,10 @@ export function buildEvidence(
     });
   }
 
-  const matchingTransfer = transfers.find((transfer) => {
+  const matchingTransfers = transfers.filter((transfer) => {
+    const payerMatches =
+      !input.intent.expectedDebitAddress ||
+      sameAddress(transfer.from, input.intent.expectedDebitAddress);
     const recipientMatches =
       !input.intent.expectedRecipient ||
       sameAddress(transfer.to, input.intent.expectedRecipient);
@@ -202,13 +205,16 @@ export function buildEvidence(
     const amountMatches =
       !input.intent.expectedAmountMicroUsdc ||
       transfer.amount === input.intent.expectedAmountMicroUsdc;
-    return recipientMatches && assetMatches && amountMatches;
+    return payerMatches && recipientMatches && assetMatches && amountMatches;
   });
+  const matchingTransfer = matchingTransfers[0];
 
   const matchingNativeTransfer =
     input.intent.action === "transfer" &&
     transaction.to !== null &&
     nativeValueMicroUsdc !== null &&
+    (!input.intent.expectedDebitAddress ||
+      sameAddress(transaction.from, input.intent.expectedDebitAddress)) &&
     (!input.intent.expectedRecipient ||
       sameAddress(transaction.to, input.intent.expectedRecipient)) &&
     (!input.intent.expectedAssetAddress ||
@@ -227,12 +233,67 @@ export function buildEvidence(
     findings.push({
       code: "EXPECTED_TRANSFER_NOT_FOUND",
       severity: "critical",
-      message: "No transfer event matched the declared recipient, asset, and amount.",
+      message:
+        "No transfer matched the declared payer, recipient, asset, and amount.",
     });
   }
 
-  const matchingApproval = approvals.find(
+  if (
+    input.intent.action === "transfer" &&
+    input.intent.expectedAmountMicroUsdc === "0"
+  ) {
+    findings.push({
+      code: "ZERO_TRANSFER_AMOUNT",
+      severity: "critical",
+      message: "A zero-value transfer is not valid payment evidence.",
+    });
+  }
+
+  if (
+    input.intent.action === "transfer" &&
+    !input.intent.expectedDebitAddress
+  ) {
+    findings.push({
+      code: "DEBIT_ADDRESS_NOT_DECLARED",
+      severity: "warning",
+      message:
+        "The intent did not declare a payer, so the result cannot be strict payment evidence.",
+    });
+  }
+
+  if (input.intent.action === "transfer") {
+    if (matchingTransfer && nativeValue > 0n) {
+      findings.push({
+        code: "UNEXPECTED_NATIVE_VALUE",
+        severity: "critical",
+        message:
+          "The ERC-20 payment transaction also transferred unexpected native value.",
+      });
+    }
+    const unexpectedTransfers = transfers.filter(
+      (transfer) => transfer !== matchingTransfer,
+    );
+    if (unexpectedTransfers.length > 0) {
+      findings.push({
+        code: "UNEXPECTED_TRANSFER",
+        severity: "critical",
+        message:
+          "The transaction emitted additional or non-matching transfer events.",
+      });
+    }
+    if (approvals.length > 0) {
+      findings.push({
+        code: "UNEXPECTED_APPROVAL",
+        severity: "critical",
+        message: "The transfer transaction emitted an unexpected approval event.",
+      });
+    }
+  }
+
+  const matchingApprovals = approvals.filter(
     (approval) =>
+      (!input.intent.expectedDebitAddress ||
+        sameAddress(approval.owner, input.intent.expectedDebitAddress)) &&
       sameAddress(approval.spender, input.intent.expectedRecipient!) &&
       sameAddress(approval.assetAddress, input.intent.expectedAssetAddress!) &&
       (approval.amount === input.intent.expectedAmountMicroUsdc ||
@@ -240,6 +301,7 @@ export function buildEvidence(
           input.intent.expectedAmountMicroUsdc ===
             "115792089237316195423570985008687907853269984665640564039457584007913129639935")),
   );
+  const matchingApproval = matchingApprovals[0];
 
   if (input.intent.action === "approve" && !matchingApproval) {
     findings.push({
@@ -248,6 +310,44 @@ export function buildEvidence(
       message:
         "No approval event matched the declared spender, asset, and amount.",
     });
+  }
+
+  if (input.intent.action === "approve") {
+    if (!input.intent.expectedDebitAddress) {
+      findings.push({
+        code: "DEBIT_ADDRESS_NOT_DECLARED",
+        severity: "warning",
+        message:
+          "The intent did not declare the approval owner, so the result cannot be strict approval evidence.",
+      });
+    }
+    if (transfers.length > 0) {
+      findings.push({
+        code: "UNEXPECTED_TRANSFER",
+        severity: "critical",
+        message: "The approval transaction emitted an unexpected transfer event.",
+      });
+    }
+    if (nativeValue > 0n) {
+      findings.push({
+        code: "UNEXPECTED_NATIVE_VALUE",
+        severity: "critical",
+        message:
+          "The approval transaction also transferred unexpected native value.",
+      });
+    }
+    if (
+      approvals.some(
+        (approval) => approval !== matchingApproval,
+      )
+    ) {
+      findings.push({
+        code: "UNEXPECTED_APPROVAL",
+        severity: "critical",
+        message:
+          "The transaction emitted additional or non-matching approval events.",
+      });
+    }
   }
 
   if (input.intent.action === "contract_call" && transfers.length === 0) {

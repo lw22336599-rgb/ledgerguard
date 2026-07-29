@@ -18,6 +18,7 @@ export const networkNameSchema = z.enum(["arcTestnet", "arcMainnet"]);
 const intentSchema = z
   .object({
     action: z.enum(["transfer", "approve", "contract_call"]),
+    expectedDebitAddress: addressSchema.optional(),
     expectedRecipient: addressSchema.optional(),
     expectedAssetAddress: addressSchema.optional(),
     expectedAmountMicroUsdc: uintStringSchema.optional(),

@@ -7,10 +7,12 @@ import { evaluatePreflight } from "../src/services/preflight.js";
 const abi = parseAbi([
   "function transfer(address to, uint256 amount) returns (bool)",
   "function approve(address spender, uint256 amount) returns (bool)",
+  "function transferFrom(address from, address to, uint256 amount) returns (bool)",
 ]);
 
 const sender = "0x1111111111111111111111111111111111111111";
 const recipient = "0x2222222222222222222222222222222222222222";
+const debitSource = "0x3333333333333333333333333333333333333333";
 
 describe("preflight", () => {
   it("allows a matching simulated USDC transfer", () => {
@@ -65,6 +67,108 @@ describe("preflight", () => {
     expect(result.findings.map((finding) => finding.code)).toContain(
       "RECIPIENT_MISMATCH",
     );
+  });
+
+  it("blocks transferFrom when the decoded debit source differs from intent", () => {
+    const data = preflightSchema.parse({
+      from: sender,
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "transferFrom",
+        args: [debitSource, recipient, 1_000_000n],
+      }),
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: sender,
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Do not debit an undeclared wallet",
+      },
+      policy: {},
+    });
+
+    const result = evaluatePreflight(data, { status: "success" });
+    expect(result.decision).toBe("BLOCK");
+    expect(result.decoded.debitAddress).toBe(debitSource);
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "DEBIT_ADDRESS_MISMATCH",
+    );
+  });
+
+  it("blocks transferFrom when no expected debit source is declared", () => {
+    const data = preflightSchema.parse({
+      from: sender,
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "transferFrom",
+        args: [debitSource, recipient, 1_000_000n],
+      }),
+      intent: {
+        action: "transfer",
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Unknown debit source",
+      },
+      policy: {},
+    });
+
+    const result = evaluatePreflight(data, { status: "success" });
+    expect(result.decision).toBe("BLOCK");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "DEBIT_ADDRESS_REQUIRED",
+    );
+  });
+
+  it("blocks a zero-value transfer but continues to allow approve zero", () => {
+    const transferInput = preflightSchema.parse({
+      from: sender,
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "transfer",
+        args: [recipient, 0n],
+      }),
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: sender,
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "0",
+        purpose: "Zero payment must not pass",
+      },
+      policy: {},
+    });
+    const approvalInput = preflightSchema.parse({
+      from: sender,
+      to: ARC_TESTNET_USDC,
+      data: encodeFunctionData({
+        abi,
+        functionName: "approve",
+        args: [recipient, 0n],
+      }),
+      intent: {
+        action: "approve",
+        expectedDebitAddress: sender,
+        expectedRecipient: recipient,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "0",
+        purpose: "Revoke an approval",
+      },
+      policy: {},
+    });
+
+    const transferResult = evaluatePreflight(transferInput, { status: "success" });
+    const approvalResult = evaluatePreflight(approvalInput, { status: "success" });
+
+    expect(transferResult.decision).toBe("BLOCK");
+    expect(transferResult.findings.map((finding) => finding.code)).toContain(
+      "ZERO_TRANSFER_AMOUNT",
+    );
+    expect(approvalResult.decision).toBe("ALLOW");
   });
 
   it("blocks an unlimited approval by default", () => {

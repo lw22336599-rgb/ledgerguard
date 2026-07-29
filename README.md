@@ -34,6 +34,12 @@ read-only simulation succeeds. If simulation is intentionally skipped, the
 result remains `REVIEW`; if simulation is required but cannot run, it is
 `BLOCK`.
 
+For strict payer-bound checks, integrations should provide `from` and
+`intent.expectedDebitAddress`. `transferFrom` fails closed without a declared
+debit address. Post-settlement evidence verifies the payer/owner and rejects
+zero-value payments plus unexpected transfer, approval, or native-value side
+effects.
+
 ## Local development
 
 Requirements: Node.js 22.6 or newer.

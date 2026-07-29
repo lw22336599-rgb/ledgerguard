@@ -3,6 +3,7 @@ import {
   encodeAbiParameters,
   getAddress,
   parseAbiItem,
+  type Address,
   type Log,
   type Transaction,
   type TransactionReceipt,
@@ -15,36 +16,68 @@ import { buildEvidence } from "../src/services/evidence.js";
 const transferEvent = parseAbiItem(
   "event Transfer(address indexed from, address indexed to, uint256 value)",
 );
+const approvalEvent = parseAbiItem(
+  "event Approval(address indexed owner, address indexed spender, uint256 value)",
+);
 const from = "0x1111111111111111111111111111111111111111";
 const to = "0x2222222222222222222222222222222222222222";
+const other = "0x3333333333333333333333333333333333333333";
 const txHash = `0x${"a".repeat(64)}` as const;
 
-function fixture() {
+function transferLog(
+  source: Address = from,
+  recipient: Address = to,
+  amount = 1_000_000n,
+  logIndex = 0,
+): Log {
   const topics = encodeEventTopics({
     abi: [transferEvent],
     eventName: "Transfer",
-    args: { from, to },
+    args: { from: source, to: recipient },
   });
-  const log = {
+  return {
     address: ARC_TESTNET_USDC,
     topics,
-    data: encodeAbiParameters([{ type: "uint256" }], [1_000_000n]),
-    logIndex: 0,
+    data: encodeAbiParameters([{ type: "uint256" }], [amount]),
+    logIndex,
     blockHash: `0x${"b".repeat(64)}`,
     blockNumber: 123n,
     transactionHash: txHash,
     transactionIndex: 0,
     removed: false,
   } as unknown as Log;
+}
+
+function approvalLog(logIndex = 1): Log {
+  const topics = encodeEventTopics({
+    abi: [approvalEvent],
+    eventName: "Approval",
+    args: { owner: from, spender: other },
+  });
+  return {
+    address: ARC_TESTNET_USDC,
+    topics,
+    data: encodeAbiParameters([{ type: "uint256" }], [1_000_000n]),
+    logIndex,
+    blockHash: `0x${"b".repeat(64)}`,
+    blockNumber: 123n,
+    transactionHash: txHash,
+    transactionIndex: 0,
+    removed: false,
+  } as unknown as Log;
+}
+
+function fixture(logs: Log[] = [transferLog()]) {
   const transaction = {
     hash: txHash,
+    from: getAddress(from),
     to: getAddress(ARC_TESTNET_USDC),
   } as Transaction;
   const receipt = {
     transactionHash: txHash,
     blockNumber: 123n,
     status: "success",
-    logs: [log],
+    logs,
   } as TransactionReceipt;
   return { transaction, receipt };
 }
@@ -55,6 +88,7 @@ describe("evidence", () => {
       txHash,
       intent: {
         action: "transfer",
+        expectedDebitAddress: from,
         expectedRecipient: to,
         expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: "1000000",
@@ -75,6 +109,7 @@ describe("evidence", () => {
       txHash,
       intent: {
         action: "transfer",
+        expectedDebitAddress: from,
         expectedRecipient: to,
         expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: "2000000",
@@ -93,6 +128,7 @@ describe("evidence", () => {
       txHash,
       intent: {
         action: "transfer",
+        expectedDebitAddress: from,
         expectedRecipient: to,
         expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: "1500000",
@@ -102,6 +138,7 @@ describe("evidence", () => {
     const { receipt } = fixture();
     const transaction = {
       hash: txHash,
+      from: getAddress(from),
       to: getAddress(to),
       value: 1_500_000_000_000_000_000n,
     } as Transaction;
@@ -118,6 +155,7 @@ describe("evidence", () => {
       txHash,
       intent: {
         action: "approve",
+        expectedDebitAddress: from,
         expectedRecipient: to,
         expectedAssetAddress: ARC_TESTNET_USDC,
         expectedAmountMicroUsdc: "1000000",
@@ -130,6 +168,125 @@ describe("evidence", () => {
     expect(result.status).toBe("MISMATCH");
     expect(result.findings.map((finding) => finding.code)).toContain(
       "EXPECTED_APPROVAL_NOT_FOUND",
+    );
+  });
+
+  it("does not verify a transfer from the wrong payer", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: from,
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Bind evidence to the intended payer",
+      },
+    });
+    const { transaction, receipt } = fixture([transferLog(other)]);
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("MISMATCH");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "EXPECTED_TRANSFER_NOT_FOUND",
+    );
+  });
+
+  it("does not verify a matching transfer when extra transfers or approvals exist", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: from,
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Reject hidden side effects",
+      },
+    });
+    const { transaction, receipt } = fixture([
+      transferLog(),
+      transferLog(from, other, 25n, 1),
+      approvalLog(2),
+    ]);
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("MISMATCH");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "UNEXPECTED_TRANSFER",
+    );
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "UNEXPECTED_APPROVAL",
+    );
+  });
+
+  it("does not verify a zero-value payment event", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: from,
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "0",
+        purpose: "Zero is not a completed payment",
+      },
+    });
+    const { transaction, receipt } = fixture([transferLog(from, to, 0n)]);
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("MISMATCH");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "ZERO_TRANSFER_AMOUNT",
+    );
+  });
+
+  it("does not verify an ERC-20 payment with extra native value", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: from,
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Reject hidden native value",
+      },
+    });
+    const { transaction: baseTransaction, receipt } = fixture();
+    const transaction = {
+      ...baseTransaction,
+      value: 1_000_000_000_000n,
+    } as Transaction;
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("MISMATCH");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "UNEXPECTED_NATIVE_VALUE",
+    );
+  });
+
+  it("rejects duplicate matching events even if their log indexes collide", () => {
+    const input = evidenceSchema.parse({
+      txHash,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: from,
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Exactly one payment event is expected",
+      },
+    });
+    const { transaction, receipt } = fixture([
+      transferLog(),
+      transferLog(),
+    ]);
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("MISMATCH");
+    expect(result.findings.map((finding) => finding.code)).toContain(
+      "UNEXPECTED_TRANSFER",
     );
   });
 });
