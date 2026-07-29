@@ -1,0 +1,290 @@
+import {
+  decodeFunctionData,
+  getAddress,
+  isAddressEqual,
+  maxUint256,
+  parseAbi,
+  type Address,
+  type Hex,
+} from "viem";
+import { ARC_TESTNET_USDC } from "../config/networks.js";
+import type { PreflightInput } from "../schemas.js";
+import type { SimulationResult } from "../lib/rpc.js";
+
+const erc20Abi = parseAbi([
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+]);
+
+const approvalForAllAbi = parseAbi([
+  "function setApprovalForAll(address operator, bool approved)",
+]);
+
+export type Decision = "ALLOW" | "REVIEW" | "BLOCK";
+export type Severity = "info" | "warning" | "critical";
+
+export interface Finding {
+  code: string;
+  severity: Severity;
+  message: string;
+}
+
+export interface DecodedAction {
+  kind:
+    | "native_usdc_transfer"
+    | "erc20_transfer"
+    | "erc20_approve"
+    | "erc20_transfer_from"
+    | "operator_approval"
+    | "contract_call";
+  target: Address;
+  recipient?: Address;
+  assetAddress?: Address;
+  amountMicroUsdc?: string;
+  approvalAmount?: string;
+  method?: string;
+}
+
+export interface PreflightResult {
+  decision: Decision;
+  network: string;
+  decoded: DecodedAction;
+  simulation: SimulationResult;
+  findings: Finding[];
+}
+
+function decodeAction(input: PreflightInput): DecodedAction {
+  const to = getAddress(input.to);
+  const data = input.data as Hex;
+  const valueWei = BigInt(input.valueWei);
+
+  if (data === "0x" && valueWei > 0n) {
+    return {
+      kind: "native_usdc_transfer",
+      target: to,
+      recipient: to,
+      amountMicroUsdc: (valueWei / 1_000_000_000_000n).toString(),
+      method: "native value transfer",
+    };
+  }
+
+  if (data !== "0x") {
+    try {
+      const decoded = decodeFunctionData({ abi: erc20Abi, data });
+      if (decoded.functionName === "transfer") {
+        const [recipient, amount] = decoded.args;
+        return {
+          kind: "erc20_transfer",
+          target: to,
+          recipient: getAddress(recipient),
+          assetAddress: to,
+          amountMicroUsdc: amount.toString(),
+          method: "transfer(address,uint256)",
+        };
+      }
+      if (decoded.functionName === "approve") {
+        const [spender, amount] = decoded.args;
+        return {
+          kind: "erc20_approve",
+          target: to,
+          recipient: getAddress(spender),
+          assetAddress: to,
+          approvalAmount: amount.toString(),
+          method: "approve(address,uint256)",
+        };
+      }
+      if (decoded.functionName === "transferFrom") {
+        const [, recipient, amount] = decoded.args;
+        return {
+          kind: "erc20_transfer_from",
+          target: to,
+          recipient: getAddress(recipient),
+          assetAddress: to,
+          amountMicroUsdc: amount.toString(),
+          method: "transferFrom(address,address,uint256)",
+        };
+      }
+    } catch {
+      // Try another known ABI below.
+    }
+
+    try {
+      const decoded = decodeFunctionData({ abi: approvalForAllAbi, data });
+      if (decoded.functionName === "setApprovalForAll") {
+        const [operator, approved] = decoded.args;
+        return {
+          kind: "operator_approval",
+          target: to,
+          recipient: getAddress(operator),
+          approvalAmount: approved ? maxUint256.toString() : "0",
+          method: "setApprovalForAll(address,bool)",
+        };
+      }
+    } catch {
+      // Unknown calldata is deliberately returned for human or policy review.
+    }
+  }
+
+  return {
+    kind: "contract_call",
+    target: to,
+    method: data === "0x" ? "empty call" : data.slice(0, 10),
+  };
+}
+
+function sameAddress(left: string, right: string): boolean {
+  return isAddressEqual(getAddress(left), getAddress(right));
+}
+
+export function evaluatePreflight(
+  input: PreflightInput,
+  simulation: SimulationResult,
+): PreflightResult {
+  const decoded = decodeAction(input);
+  const findings: Finding[] = [];
+  const valueWei = BigInt(input.valueWei);
+
+  if (valueWei % 1_000_000_000_000n !== 0n) {
+    findings.push({
+      code: "ARC_NATIVE_DECIMAL_REMAINDER",
+      severity: "warning",
+      message:
+        "Native msg.value is not exactly representable in the 6-decimal USDC product view.",
+    });
+  }
+
+  if (
+    input.policy.allowedTargets &&
+    !input.policy.allowedTargets.some((target) => sameAddress(target, decoded.target))
+  ) {
+    findings.push({
+      code: "TARGET_NOT_ALLOWED",
+      severity: "critical",
+      message: "The outer transaction target is not in the allowed target list.",
+    });
+  }
+
+  if (
+    input.intent.expectedRecipient &&
+    (!decoded.recipient ||
+      !sameAddress(input.intent.expectedRecipient, decoded.recipient))
+  ) {
+    findings.push({
+      code: "RECIPIENT_MISMATCH",
+      severity: "critical",
+      message: "The decoded recipient does not match the declared intent.",
+    });
+  }
+
+  if (
+    input.intent.expectedAssetAddress &&
+    (!decoded.assetAddress ||
+      !sameAddress(input.intent.expectedAssetAddress, decoded.assetAddress))
+  ) {
+    findings.push({
+      code: "ASSET_MISMATCH",
+      severity: "critical",
+      message: "The decoded asset does not match the declared intent.",
+    });
+  }
+
+  if (
+    input.network === "arcTestnet" &&
+    decoded.assetAddress &&
+    !sameAddress(decoded.assetAddress, ARC_TESTNET_USDC)
+  ) {
+    findings.push({
+      code: "NON_USDC_ASSET",
+      severity: "warning",
+      message: "The token call does not target the official Arc Testnet USDC contract.",
+    });
+  }
+
+  if (
+    input.intent.expectedAmountMicroUsdc &&
+    decoded.amountMicroUsdc !== input.intent.expectedAmountMicroUsdc
+  ) {
+    findings.push({
+      code: "AMOUNT_MISMATCH",
+      severity: "critical",
+      message: "The decoded transfer amount does not match the declared intent.",
+    });
+  }
+
+  const measurableAmount = decoded.amountMicroUsdc ?? decoded.approvalAmount;
+  if (
+    input.policy.maxAmountMicroUsdc &&
+    measurableAmount &&
+    BigInt(measurableAmount) > BigInt(input.policy.maxAmountMicroUsdc)
+  ) {
+    findings.push({
+      code: "POLICY_AMOUNT_EXCEEDED",
+      severity: "critical",
+      message: "The decoded amount exceeds the explicit policy maximum.",
+    });
+  }
+
+  if (
+    (decoded.kind === "erc20_approve" || decoded.kind === "operator_approval") &&
+    decoded.approvalAmount === maxUint256.toString() &&
+    !input.policy.allowUnlimitedApproval
+  ) {
+    findings.push({
+      code: "UNLIMITED_APPROVAL",
+      severity: "critical",
+      message: "Unlimited approval is blocked unless the policy explicitly allows it.",
+    });
+  }
+
+  const expectedKind =
+    input.intent.action === "transfer"
+      ? new Set(["native_usdc_transfer", "erc20_transfer", "erc20_transfer_from"])
+      : input.intent.action === "approve"
+        ? new Set(["erc20_approve", "operator_approval"])
+        : new Set(["contract_call"]);
+
+  if (!expectedKind.has(decoded.kind)) {
+    findings.push({
+      code: "ACTION_MISMATCH",
+      severity: "critical",
+      message: "The decoded action type does not match the declared intent.",
+    });
+  }
+
+  if (decoded.kind === "contract_call") {
+    findings.push({
+      code: "UNKNOWN_CALL",
+      severity: "warning",
+      message: "The calldata is not one of LedgerGuard's currently decoded methods.",
+    });
+  }
+
+  if (simulation.status === "failed") {
+    findings.push({
+      code: "SIMULATION_FAILED",
+      severity: "critical",
+      message: simulation.error ?? "The read-only RPC simulation failed.",
+    });
+  } else if (input.policy.requireSimulation && simulation.status !== "success") {
+    findings.push({
+      code: "SIMULATION_REQUIRED",
+      severity: "warning",
+      message: simulation.error ?? "A successful simulation is required before signing.",
+    });
+  }
+
+  const decision: Decision = findings.some((item) => item.severity === "critical")
+    ? "BLOCK"
+    : findings.some((item) => item.severity === "warning")
+      ? "REVIEW"
+      : "ALLOW";
+
+  return {
+    decision,
+    network: input.network,
+    decoded,
+    simulation,
+    findings,
+  };
+}

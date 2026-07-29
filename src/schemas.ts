@@ -1,0 +1,53 @@
+import { isAddress, isHex } from "viem";
+import { z } from "zod";
+
+const addressSchema = z
+  .string()
+  .refine(isAddress, "Expected a valid EVM address");
+
+const hexSchema = z
+  .string()
+  .refine((value) => isHex(value), "Expected 0x-prefixed hex data");
+
+const uintStringSchema = z
+  .string()
+  .regex(/^(0|[1-9][0-9]*)$/, "Expected an unsigned integer string");
+
+export const networkNameSchema = z.enum(["arcTestnet", "arcMainnet"]);
+
+export const preflightSchema = z.object({
+  network: networkNameSchema.default("arcTestnet"),
+  from: addressSchema.optional(),
+  to: addressSchema,
+  data: hexSchema.default("0x"),
+  valueWei: uintStringSchema.default("0"),
+  intent: z.object({
+    action: z.enum(["transfer", "approve", "contract_call"]),
+    expectedRecipient: addressSchema.optional(),
+    expectedAssetAddress: addressSchema.optional(),
+    expectedAmountMicroUsdc: uintStringSchema.optional(),
+    purpose: z.string().trim().min(1).max(280),
+  }),
+  policy: z.object({
+    allowedTargets: z.array(addressSchema).max(100).optional(),
+    maxAmountMicroUsdc: uintStringSchema.optional(),
+    allowUnlimitedApproval: z.boolean().default(false),
+    requireSimulation: z.boolean().default(true),
+  }),
+});
+
+export type PreflightInput = z.infer<typeof preflightSchema>;
+
+export const evidenceSchema = z.object({
+  network: networkNameSchema.default("arcTestnet"),
+  txHash: hexSchema.refine((value) => value.length === 66, "Expected a 32-byte transaction hash"),
+  intent: z.object({
+    action: z.enum(["transfer", "approve", "contract_call"]),
+    expectedRecipient: addressSchema.optional(),
+    expectedAssetAddress: addressSchema.optional(),
+    expectedAmountMicroUsdc: uintStringSchema.optional(),
+    purpose: z.string().trim().min(1).max(280),
+  }),
+});
+
+export type EvidenceInput = z.infer<typeof evidenceSchema>;

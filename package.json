@@ -1,0 +1,33 @@
+{
+  "name": "ledgerguard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Arc-first preflight and evidence API for AI agent transactions.",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
+    "start": "node --env-file-if-exists=.env --import tsx src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@circle-fin/x402-batching": "^3.2.0",
+    "@hono/node-server": "^2.0.12",
+    "@x402/core": "^2.20.0",
+    "@x402/evm": "^2.20.0",
+    "hono": "^4.10.4",
+    "viem": "^2.38.5",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.6"
+  }
+}
