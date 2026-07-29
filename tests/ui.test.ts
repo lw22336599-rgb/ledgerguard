@@ -46,6 +46,7 @@ describe("browser demo experience", () => {
       testerHtml("1000"),
     ]) {
       expect(html).toContain('src="/_vercel/insights/script.js"');
+      expect(html).toContain('href="/favicon.svg"');
     }
   });
 

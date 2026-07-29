@@ -5,11 +5,18 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="${description}">
   <title>${title}</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
 const footer = `<footer>Arc 测试网软件 · 主网保持关闭，直至官方参数核验和人工发布审批完成。联系：<a href="mailto:lw22336599@gmail.com">邮箱</a> · <a href="/test">参与测试</a> · <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
+
+export const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LedgerGuard">
+  <rect width="64" height="64" rx="16" fill="#06140f"/>
+  <path d="M32 10 51 18v13c0 12-7.5 20.5-19 24-11.5-3.5-19-12-19-24V18l19-8Z" fill="#7df2bd"/>
+  <path d="M32 18v28c7.2-3 11-8.2 11-15.5v-7L32 18Z" fill="#06140f"/>
+</svg>`;
 
 export const demoHtml = `${pageHead(
   "LedgerGuard | Arc 支付安全检查",

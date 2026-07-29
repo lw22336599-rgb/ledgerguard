@@ -51,6 +51,13 @@ describe("HTTP API", () => {
     expect(js.status).toBe(200);
     expect(js.headers.get("content-type")).toContain("text/javascript");
 
+    for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
+      const icon = await app.request(path);
+      expect(icon.status).toBe(200);
+      expect(icon.headers.get("content-type")).toContain("image/svg+xml");
+      expect(await icon.text()).toContain("<svg");
+    }
+
     const openapi = await app.request("/openapi.json");
     expect(openapi.status).toBe(200);
     expect((await openapi.json()).openapi).toBe("3.1.0");

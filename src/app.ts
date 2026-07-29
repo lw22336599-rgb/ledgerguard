@@ -40,6 +40,7 @@ import {
   demoHtml,
   demoJs,
   developerDocsHtml,
+  faviconSvg,
   integrationBoundaryHtml,
   statusHtml,
   testerHtml,
@@ -171,6 +172,14 @@ app.get("/styles.css", (context) =>
 app.get("/app.js", (context) =>
   context.body(demoJs, 200, { "Content-Type": "text/javascript; charset=utf-8" }),
 );
+for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
+  app.get(path, (context) =>
+    context.body(faviconSvg, 200, {
+      "Content-Type": "image/svg+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=86400",
+    }),
+  );
+}
 app.get("/llms.txt", (context) =>
   context.text(`LedgerGuard
 Production: https://ledgerguard-gules.vercel.app
