@@ -8,6 +8,7 @@ import {
   BASE_MAINNET_EVIDENCE_PATH,
   BASE_MAINNET_NETWORK,
   BASE_MAINNET_USDC,
+  BASE_MAINNET_USDC_EIP712_EXTRA,
   getCommercialCandidate,
 } from "../config/commercial.js";
 import { getPublicBaseUrl } from "../config/public.js";
@@ -50,6 +51,7 @@ function createBaseMainnetPaymentMiddleware(): MiddlewareHandler<AppEnvironment>
           price: {
             asset: BASE_MAINNET_USDC,
             amount: candidate.priceMicroUsdc,
+            extra: BASE_MAINNET_USDC_EIP712_EXTRA,
           },
           maxTimeoutSeconds: 60,
         },

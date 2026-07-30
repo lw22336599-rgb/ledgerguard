@@ -23,7 +23,7 @@ const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) })
 const homeHtml = await home.text();
 if (
   home.status !== 200 ||
-  !homeHtml.includes("Control what may be paid.") ||
+  !homeHtml.includes("Send a USDC payment link.") ||
   !homeHtml.includes("https://x.com/HuiLibaa") ||
   !homeHtml.includes('<html lang="en">')
 ) {
@@ -39,7 +39,7 @@ for (const [path, marker] of [
   ["/test", "Complete the test flow end to end"],
   ["/status", "LIVE STATUS"],
   ["/developer", "Developer Console"],
-  ["/guard/create", "Create one clear payment request."],
+  ["/guard/create", "Create a USDC payment link."],
   ["/routes", "route-readiness"],
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
 ]) {

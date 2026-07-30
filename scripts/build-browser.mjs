@@ -20,13 +20,21 @@ async function bundle(entryPoint, exportName) {
   return javascript;
 }
 
-const [routesBundle, walletBundle, siteNavBundle, guardBuilderWalletBundle] =
-  await Promise.all([
-    bundle("src/browser/routes.ts", "routes"),
-    bundle("src/browser/wallet.ts", "wallet"),
-    bundle("src/browser/site-nav.ts", "site-nav"),
-    bundle("src/browser/guard-builder-wallet.ts", "guard-builder-wallet"),
-  ]);
+const [
+  routesBundle,
+  walletBundle,
+  siteNavBundle,
+  guardBuilderWalletBundle,
+  guardBuilderBundle,
+  mainnetCanaryBundle,
+] = await Promise.all([
+  bundle("src/browser/routes.ts", "routes"),
+  bundle("src/browser/wallet.ts", "wallet"),
+  bundle("src/browser/site-nav.ts", "site-nav"),
+  bundle("src/browser/guard-builder-wallet.ts", "guard-builder-wallet"),
+  bundle("src/browser/guard-builder.ts", "guard-builder"),
+  bundle("src/browser/mainnet-canary.ts", "mainnet-canary"),
+]);
 
 await mkdir("src/generated", { recursive: true });
 
@@ -52,6 +60,16 @@ await Promise.all([
   writeFile(
     "src/generated/guard-builder-wallet-bundle.ts",
     `${header}export const guardBuilderWalletBundle = ${JSON.stringify(guardBuilderWalletBundle)};\n`,
+    "utf8",
+  ),
+  writeFile(
+    "src/generated/guard-builder-bundle.ts",
+    `${header}export const guardBuilderBundle = ${JSON.stringify(guardBuilderBundle)};\n`,
+    "utf8",
+  ),
+  writeFile(
+    "src/generated/mainnet-canary-bundle.ts",
+    `${header}export const mainnetCanaryBundle = ${JSON.stringify(mainnetCanaryBundle)};\n`,
     "utf8",
   ),
 ]);

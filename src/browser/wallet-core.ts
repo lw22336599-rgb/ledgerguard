@@ -1,4 +1,5 @@
 import type { EIP1193Provider } from "viem";
+import { showWalletPicker } from "./wallet-picker.js";
 
 export type ProviderDetail = {
   info: { name: string; uuid: string; icon?: string };
@@ -73,26 +74,39 @@ export class WalletCore {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }
 
-  private pickProvider(preferredUuid?: string | null): EIP1193Provider {
+  private async waitForProviders(timeoutMs = 500): Promise<ProviderDetail[]> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const discovered = [...this.providers.values()];
+      if (discovered.length > 0) return discovered;
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
+    }
+    return [...this.providers.values()];
+  }
+
+  private async pickProvider(
+    preferredUuid?: string | null,
+  ): Promise<EIP1193Provider> {
     if (preferredUuid) {
       const preferred = this.providers.get(preferredUuid)?.provider;
       if (preferred) return preferred;
     }
-    const discovered = [...this.providers.values()];
+
+    const discovered = await this.waitForProviders();
     if (discovered.length === 1) {
       this.activeUuid = discovered[0]!.info.uuid;
       return discovered[0]!.provider;
     }
     if (discovered.length > 1) {
-      const names = discovered.map((entry, index) => `${index + 1}. ${entry.info.name}`);
-      const choice = window.prompt(
-        `Select a wallet:\n${names.join("\n")}\n\nEnter the number:`,
-      );
-      const index = choice ? Number.parseInt(choice, 10) - 1 : -1;
-      if (index >= 0 && discovered[index]) {
-        this.activeUuid = discovered[index]!.info.uuid;
-        return discovered[index]!.provider;
+      const selectedUuid = await showWalletPicker(discovered);
+      if (selectedUuid) {
+        const selected = this.providers.get(selectedUuid)?.provider;
+        if (selected) {
+          this.activeUuid = selectedUuid;
+          return selected;
+        }
       }
+      throw new Error("Wallet selection was cancelled.");
     }
     if (window.ethereum) {
       this.activeUuid = null;
@@ -102,7 +116,7 @@ export class WalletCore {
   }
 
   async connect(preferredUuid?: string | null): Promise<WalletState> {
-    const provider = this.pickProvider(preferredUuid);
+    const provider = await this.pickProvider(preferredUuid);
     const accounts = (await provider.request({
       method: "eth_requestAccounts",
     })) as string[];

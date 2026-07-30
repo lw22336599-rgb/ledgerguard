@@ -42,6 +42,8 @@ import { routesBundle } from "./generated/routes-bundle.js";
 import { walletBundle } from "./generated/wallet-bundle.js";
 import { siteNavBundle } from "./generated/site-nav-bundle.js";
 import { guardBuilderWalletBundle } from "./generated/guard-builder-wallet-bundle.js";
+import { guardBuilderBundle } from "./generated/guard-builder-bundle.js";
+import { mainnetCanaryBundle } from "./generated/mainnet-canary-bundle.js";
 import { retrieveCctpEvidence } from "./services/cctp-evidence.js";
 import {
   retrieveEvidence,
@@ -94,7 +96,6 @@ import {
   developerDocsHtml,
   faviconSvg,
   guardBuilderHtml,
-  guardBuilderJs,
   guardLinkHtml,
   guardLinkJs,
   integrationBoundaryHtml,
@@ -103,6 +104,7 @@ import {
   statusHtml,
   testnetHelpHtml,
   testnetHelpJs,
+  mainnetCanaryHtml,
   testerHtml,
   unifiedBrandCss,
 } from "./ui.js";
@@ -120,6 +122,8 @@ app.use(
       "Authorization",
       "Content-Type",
       "Payment-Signature",
+      "PAYMENT-SIGNATURE",
+      "X-PAYMENT",
       "X-LedgerGuard-Client",
       "X-LedgerGuard-Integration",
       "Mcp-Session-Id",
@@ -213,6 +217,21 @@ app.get("/receipts", (context) =>
 );
 app.get("/developers", (context) => context.html(developerDocsHtml));
 app.get("/guard/create", (context) => context.html(guardBuilderHtml));
+app.get("/canary", (context) => {
+  const candidate = getCommercialCandidate();
+  if (!candidate.ready) {
+    return context.json(
+      {
+        error: "BASE_MAINNET_NOT_READY",
+        message:
+          "The Base Mainnet canary page is unavailable until every activation gate passes.",
+        activationGates: candidate.activationGates,
+      },
+      503,
+    );
+  }
+  return context.html(mainnetCanaryHtml);
+});
 app.get("/testnet-help", (context) => context.html(testnetHelpHtml));
 app.get("/testnet-help.js", (context) =>
   context.body(testnetHelpJs, 200, {
@@ -380,8 +399,9 @@ app.get("/guard.js", (context) =>
   }),
 );
 app.get("/guard-builder.js", (context) =>
-  context.body(guardBuilderJs, 200, {
+  context.body(guardBuilderBundle, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
   }),
 );
 app.get("/wallet.js", (context) =>
@@ -404,6 +424,12 @@ app.get("/guard-builder-wallet.js", (context) =>
 );
 app.get("/routes.js", (context) =>
   context.body(routesBundle, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  }),
+);
+app.get("/mainnet-canary.js", (context) =>
+  context.body(mainnetCanaryBundle, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
     "Cache-Control": "public, max-age=300",
   }),

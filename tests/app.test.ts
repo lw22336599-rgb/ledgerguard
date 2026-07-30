@@ -13,7 +13,7 @@ describe("HTTP API", () => {
     const page = await app.request("/");
     expect(page.status).toBe(200);
     expect(page.headers.get("content-type")).toContain("text/html");
-    expect(await page.text()).toContain("Control what may be paid.");
+    expect(await page.text()).toContain("Send a USDC payment link.");
     expect(page.headers.get("content-security-policy")).toContain(
       "default-src 'self'",
     );

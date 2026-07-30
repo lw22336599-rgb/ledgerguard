@@ -1,5 +1,13 @@
 import type { ChainDefinition } from "./wallet-core.js";
 
+export const BASE_MAINNET: ChainDefinition = {
+  chainId: "0x2105",
+  chainName: "Base",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: ["https://mainnet.base.org"],
+  blockExplorerUrls: ["https://basescan.org"],
+};
+
 export const BASE_SEPOLIA: ChainDefinition = {
   chainId: "0x14a34",
   chainName: "Base Sepolia",

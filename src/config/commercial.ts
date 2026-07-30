@@ -4,6 +4,10 @@ import { getAddress, isAddress } from "viem";
 export const BASE_MAINNET_NETWORK = "eip155:8453";
 export const BASE_MAINNET_USDC =
   "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+export const BASE_MAINNET_USDC_EIP712_EXTRA = {
+  name: "USD Coin",
+  version: "2",
+} as const;
 export const CDP_X402_FACILITATOR =
   "https://api.cdp.coinbase.com/platform/v2/x402";
 export const BASE_MAINNET_EVIDENCE_PATH = "/v1/paid/base/evidence";

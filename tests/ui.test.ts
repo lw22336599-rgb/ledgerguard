@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { guardBuilderBundle } from "../src/generated/guard-builder-bundle.js";
 import {
   catalogHtml,
   demoHtml,
@@ -6,7 +7,6 @@ import {
   developerConsoleHtml,
   developerDocsHtml,
   guardBuilderHtml,
-  guardBuilderJs,
   guardLinkHtml,
   guardLinkJs,
   portalHtml,
@@ -129,6 +129,8 @@ describe("browser demo experience", () => {
     expect(html).toContain("Example Agent");
     expect(html).toContain("Connect test wallet");
     expect(html).toContain('src="/guard.js"');
+    expect(html).toContain("Create your Guard Link");
+    expect(html).toContain('id="guard-cta"');
   });
 
   it("creates and completes Guard Links without server-side signing", () => {
@@ -147,13 +149,23 @@ describe("browser demo experience", () => {
       findings: [{ code: "SIMULATION_REQUIRED", message: "Review first" }],
       requestId: "request-123",
     })).toContain("/wallet.js");
+    expect(guardBuilderHtml).toContain("/guard-builder.js");
+    expect(guardBuilderHtml).toContain("guard-qr-canvas");
+    expect(guardBuilderHtml).toContain("Advanced options");
+    expect(guardBuilderHtml).toContain("Your receiving address");
     expect(guardBuilderHtml).toContain("Identity boundary");
-    expect(guardBuilderJs).toContain('fetch("/v1/guard-links"');
+    expect(guardBuilderBundle).toContain('fetch("/v1/guard-links"');
+    expect(guardBuilderBundle).toContain("guard-qr-canvas");
     expect(guardLinkJs).toContain('"eth_sendTransaction"');
     expect(guardLinkJs).toContain('fetch("/v1/evidence"');
+    expect(guardLinkJs).toContain("guard-cta-highlight");
     expect(guardLinkJs).not.toMatch(/privateKey|seed phrase/i);
-    expect(() => new Function(guardBuilderJs)).not.toThrow();
     expect(() => new Function(guardLinkJs)).not.toThrow();
+  });
+
+  it("leads with a plain-language payment link promise on the portal", () => {
+    expect(portalHtml).toContain("Send a USDC payment link.");
+    expect(portalHtml).toContain("Create a Guard Link");
   });
 
   it("publishes the official X account on the public portal", () => {
