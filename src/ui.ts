@@ -10,9 +10,9 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
-const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Arc Public Testnet only. Mainnet stays disabled until release gates pass. <a href="/protect">Protect</a> &middot; <a href="/meter">Meter</a> &middot; <a href="/receipts">Receipts</a> &middot; <a href="/developers">Developers</a> &middot; <a href="https://x.com/HuiLibaa" rel="me noreferrer">Official X @HuiLibaa</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
+const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Arc Public Testnet only. Mainnet stays disabled until release gates pass. <a href="/guard/create">Get paid</a> &middot; <a href="/protect">Protect</a> &middot; <a href="/meter">Meter</a> &middot; <a href="/receipts">Receipts</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="https://x.com/HuiLibaa" rel="me noreferrer">Official X @HuiLibaa</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
 
-const portalNavLinks = `<a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a>`;
+const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/docs">Developers</a><a href="/testnet-help">Testnet funding</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a>`;
 
 export function portalNavHtml(badge = "ARC PUBLIC TESTNET"): string {
   return `<nav class="portal-nav">
@@ -24,6 +24,13 @@ export function portalNavHtml(badge = "ARC PUBLIC TESTNET"): string {
       <span id="nav-wallet-display" class="nav-wallet-display"></span>
       <span class="badge">${badge}</span>
     </nav>`;
+}
+
+export function portalPageScripts(...extraScripts: string[]): string {
+  const extras = extraScripts
+    .map((source) => `\n  <script src="${source}" defer></script>`)
+    .join("");
+  return `\n  <script src="/wallet.js" defer></script>\n  <script src="/site-nav.js" defer></script>${extras}`;
 }
 
 function escapeHtml(value: string): string {
@@ -83,16 +90,16 @@ export function guardLinkHtml(input: {
         ? "A defined policy risk was detected. Do not sign or send this payment."
         : "The payer or another required condition is incomplete. Connect a test wallet or inspect the evidence before proceeding.";
   return `${pageHead(
-    "LedgerGuard | Payment Intent Receipt",
-    "A prefilled, human-readable Arc Testnet payment intent and deterministic safety decision.",
+    "LedgerGuard | Payment Request",
+    "Review a prefilled Arc Testnet USDC payment request before approving it in your wallet.",
   )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">PREFILLED GUARD LINK</span></nav>
+    ${portalNavHtml("PAYMENT REQUEST")}
     <section class="subhero">
       <p class="eyebrow">NO CUSTODY &middot; EXPLICIT WALLET APPROVAL</p>
-      <h1 class="compact">Payment intent receipt</h1>
-      <p class="lead">See who requested the payment, who receives it, how much can move, and why—before a wallet signs.</p>
+      <h1 class="compact">Payment request</h1>
+      <p class="lead">Review who receives the payment, how much USDC can move, and why—before your wallet asks you to sign.</p>
     </section>
     <section class="panel">
       <div>
@@ -137,9 +144,7 @@ export function guardLinkHtml(input: {
     <section class="notice"><strong>Testnet only:</strong> Arc Testnet assets have no financial value. No mainnet transaction can be initiated from this page. A self-declared sender name is context, not verified identity.</section>
     <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/protect">Open advanced checker</a><a href="/docs">Developer docs</a><a href="/test">Join testing</a></div>
     ${footer}
-  </main>
-  <script src="/wallet.js" defer></script>
-  <script src="/guard.js" defer></script>
+  </main>${portalPageScripts("/guard.js")}
 </body>
 </html>`;
 }
@@ -196,10 +201,7 @@ export const guardBuilderHtml = `${pageHead(
     </section>
     <section class="notice"><strong>Identity boundary:</strong> the sender name is self-declared. It is not proof that a company or domain authorized the request. LedgerGuard still binds and checks the exact payment fields.</section>
     ${footer}
-  </main>
-  <script src="/wallet.js" defer></script>
-  <script src="/guard-builder.js" defer></script>
-  <script src="/guard-builder-wallet.js" defer></script>
+  </main>${portalPageScripts("/guard-builder.js", "/guard-builder-wallet.js")}
 </body>
 </html>`;
 
@@ -355,13 +357,11 @@ export const portalHtml = `${pageHead(
       <p class="eyebrow">ONE ACCEPTANCE PATH</p>
       <h2>Protect &rarr; Meter &rarr; Receipts</h2>
       <div class="flow-row"><span>Declare intent</span><span>ALLOW / REVIEW / BLOCK</span><span>402 settlement</span><span>Protected delivery</span><span>Dual receipt</span></div>
-      <div class="links"><a href="/developers">Developer quickstart</a><a href="/catalog">Service catalog</a><a href="/test">Join public testing</a><a href="/status">Live status</a></div>
+      <div class="links"><a href="/docs">Developer quickstart</a><a href="/catalog">Service catalog</a><a href="/test">Join public testing</a><a href="/status">Live status</a></div>
     </section>
     <section class="notice"><strong>Current status:</strong> the protected API/MCP payment path, durable receipts, and capped browser-wallet crosschain route are implemented on test networks. An externally signed end-to-end crosschain record, repeat partner use, and a paid pilot remain acceptance gates.</section>
     ${footer}
-  </main>
-  <script src="/wallet.js" defer></script>
-  <script src="/site-nav.js" defer></script>
+  </main>${portalPageScripts()}
 </body>
 </html>`;
 
@@ -371,7 +371,7 @@ export const demoHtml = `${pageHead(
 )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard <small>/ Protect</small></a><div class="nav-actions"><a href="/meter">Meter</a><span class="badge">ARC TESTNET</span></div></nav>
+    ${portalNavHtml("PROTECT")}
     <section class="hero">
       <p class="eyebrow">NON-CUSTODIAL PAYMENT FIREWALL</p>
       <h1>Let agents pay.<br><span>Let rules protect funds.</span></h1>
@@ -405,8 +405,7 @@ export const demoHtml = `${pageHead(
       <article><span>03</span><h3>Reconcile onchain</h3><p>After settlement, match actual asset flows against the original intent.</p></article>
     </section>
     ${footer}
-  </main>
-  <script src="/app.js" defer></script>
+  </main>${portalPageScripts("/app.js")}
 </body>
 </html>`;
 
@@ -416,7 +415,7 @@ export const developerDocsHtml = `${pageHead(
 )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">DEVELOPER DOCS</span></nav>
+    ${portalNavHtml("DEVELOPER DOCS")}
     <section class="subhero">
       <p class="eyebrow">HUMAN-READABLE DEVELOPER ENTRY</p>
       <h1 class="compact">API documentation</h1>
@@ -454,7 +453,7 @@ export const developerDocsHtml = `${pageHead(
     <section class="notice"><strong>Decision boundary:</strong> ALLOW is returned only when every implemented rule passes and read-only simulation succeeds. Unknown calls, an undeclared payer, or missing simulation are never treated as safe to sign.</section>
     <div class="links bottom-links"><a href="/developer">Developer console</a><a href="/openapi.json">Raw OpenAPI</a><a href="/.well-known/ledgerguard.json">Raw agent catalog</a><a href="/v1/networks">Raw network registry</a><a href="/docs/integration">Integration boundary</a></div>
     ${footer}
-  </main>
+  </main>${portalPageScripts()}
 </body>
 </html>`;
 
@@ -632,7 +631,7 @@ export function statusHtml(input: {
   )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge ${input.ready ? "" : "danger"}">${input.ready ? "OPERATIONAL" : "DEGRADED"}</span></nav>
+    ${portalNavHtml(input.ready ? "OPERATIONAL" : "DEGRADED")}
     <section class="subhero">
       <p class="eyebrow">LIVE STATUS</p>
       <h1 class="compact">${input.ready ? "All monitored services are operational" : "Some services are degraded"}</h1>
@@ -646,7 +645,7 @@ export function statusHtml(input: {
     </section>
     <div class="links bottom-links"><a href="/ready">Raw readiness data</a><a href="/health">Raw process health</a><a href="/v1/shadow/arc-mainnet">5042 Shadow data</a><a href="/v1/networks">Network registry</a></div>
     ${footer}
-  </main>
+  </main>${portalPageScripts()}
 </body>
 </html>`;
 }
@@ -670,7 +669,7 @@ export const integrationBoundaryHtml = `${pageHead(
 </body>
 </html>`;
 
-export const demoCss = `:root{color-scheme:dark;--bg:#060817;--panel:#0d1228;--line:#273052;--text:#f4f6ff;--muted:#9ba6c8;--mint:#8aa4ff;--orange:#b990ff;--red:#ff758d;--brand:#6f8cff;--brand-2:#9c6cff;--success:#55d6a7}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 82% 4%,#5536c638 0,transparent 30rem),radial-gradient(circle at 12% 20%,#245bca2f 0,transparent 34rem),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{width:min(1180px,calc(100% - 48px));margin:auto}nav{min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:21px;letter-spacing:-.03em;text-decoration:none;color:var(--text)}.badge,.step,.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:800}.badge{color:#b8c6ff;border:1px solid #52649f;background:#111936cc;padding:7px 10px;border-radius:99px}.badge.danger{color:var(--red);border-color:#8b4545}.hero{padding:76px 0 48px;max-width:900px}.subhero{padding:64px 0 38px;max-width:900px}.eyebrow,.step{color:#aebcff}h1{font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.065em;margin:20px 0 26px}h1.compact{font-size:clamp(44px,6vw,70px)}h1 span{background:linear-gradient(90deg,#88a2ff,#bc8cff);-webkit-background-clip:text;background-clip:text;color:transparent}.lead{font-size:20px;color:var(--muted);max-width:760px}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{color:var(--text);text-underline-offset:5px}.notice{background:#111a38;border:1px solid #344273;border-radius:12px;padding:16px 18px;margin:0 0 28px;color:#cbd3ef;box-shadow:inset 3px 0 #718aff}.panel{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:22px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;box-shadow:0 25px 80px #0005}.developer-panel{margin-bottom:28px}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;background:#070b1a;border:1px solid #334065;border-radius:10px;color:var(--text);padding:13px;font:inherit}input:focus{outline:2px solid var(--brand);outline-offset:1px;box-shadow:0 0 0 4px #6f8cff20}button{border:0;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;padding:14px;cursor:pointer}button.secondary{background:#151e3e;color:var(--text);border:1px solid #3b4a79}button:disabled{opacity:.6}.result{grid-column:1/-1;border-left:4px solid var(--success);background:#070b19;border-radius:8px;padding:18px;min-height:96px}.result.allow{border-color:var(--success)}.result.review{border-color:var(--orange)}.result.block,.result.error{border-color:var(--red)}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;background:#070b19;border:1px solid #2c365a;border-radius:8px;padding:16px;color:#c8d0ef}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{color:var(--orange);font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card,.code-card{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:16px;padding:24px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.status-dot.ok{background:var(--success)}.status-dot.bad{background:var(--red)}footer{border-top:1px solid var(--line);padding:26px 0 42px;color:var(--muted);font-size:13px}@media(max-width:760px){main{width:min(100% - 28px,1180px)}.hero,.subhero{padding:48px 0 32px}.panel{grid-template-columns:1fr;padding:22px;gap:24px}.grid,.docs-grid{grid-template-columns:1fr;padding-bottom:42px}h1,h1.compact{font-size:46px}.lead{font-size:18px}}`;
+export const demoCss = `:root{color-scheme:dark;--bg:#060817;--panel:#0d1228;--line:#273052;--text:#f4f6ff;--muted:#9ba6c8;--mint:#8aa4ff;--orange:#b990ff;--red:#ff758d;--brand:#6f8cff;--brand-2:#9c6cff;--success:#55d6a7}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 82% 4%,#5536c638 0,transparent 30rem),radial-gradient(circle at 12% 20%,#245bca2f 0,transparent 34rem),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{width:min(1180px,calc(100% - 48px));margin:auto}nav{min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:21px;letter-spacing:-.03em;text-decoration:none;color:var(--text)}.badge,.step,.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:800}.badge{color:#b8c6ff;border:1px solid #52649f;background:#111936cc;padding:7px 10px;border-radius:99px}.badge.danger{color:var(--red);border-color:#8b4545}.hero{padding:76px 0 48px;max-width:900px}.subhero{padding:64px 0 38px;max-width:900px}.eyebrow,.step{color:#aebcff}h1{font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.065em;margin:20px 0 26px}h1.compact{font-size:clamp(44px,6vw,70px)}h1 span{background:linear-gradient(90deg,#88a2ff,#bc8cff);-webkit-background-clip:text;background-clip:text;color:transparent}.lead{font-size:20px;color:var(--muted);max-width:760px}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{color:var(--text);text-underline-offset:5px}.notice{background:#111a38;border:1px solid #344273;border-radius:12px;padding:16px 18px;margin:0 0 28px;color:#cbd3ef;box-shadow:inset 3px 0 #718aff}.panel{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:22px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;box-shadow:0 25px 80px #0005}.developer-panel{margin-bottom:28px}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;background:#070b1a;border:1px solid #334065;border-radius:10px;color:var(--text);padding:13px;font:inherit}input:focus{outline:2px solid var(--brand);outline-offset:1px;box-shadow:0 0 0 4px #6f8cff20}button{border:0;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;padding:14px;cursor:pointer}button.secondary{background:#151e3e;color:var(--text);border:1px solid #3b4a79}button:disabled{opacity:.6}.result{grid-column:1/-1;border-left:4px solid var(--success);background:#070b19;border-radius:8px;padding:18px;min-height:96px}.result.allow{border-color:var(--success)}.result.review{border-color:var(--orange)}.result.block,.result.error{border-color:var(--red)}.result.neutral{border-color:#667de0}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;background:#070b19;border:1px solid #2c365a;border-radius:8px;padding:16px;color:#c8d0ef}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{color:var(--orange);font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card,.code-card{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:16px;padding:24px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.status-dot.ok{background:var(--success)}.status-dot.bad{background:var(--red)}footer{border-top:1px solid var(--line);padding:26px 0 42px;color:var(--muted);font-size:13px}@media(max-width:760px){main{width:min(100% - 28px,1180px)}.hero,.subhero{padding:48px 0 32px}.panel{grid-template-columns:1fr;padding:22px;gap:24px}.grid,.docs-grid{grid-template-columns:1fr;padding-bottom:42px}h1,h1.compact{font-size:46px}.lead{font-size:18px}}`;
 
 export const unifiedBrandCss = `
 :root{
@@ -747,6 +746,7 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .result.allow{border-color:var(--success)}
 .result.review{border-color:#ba91ff}
 .result.block,.result.error{border-color:var(--red)}
+.result.neutral{border-color:#667de0}
 .grid,.docs-grid{gap:20px}
 .doc-card,.code-card{border-radius:14px}
 .grid span,.doc-card span{color:#a991ff}

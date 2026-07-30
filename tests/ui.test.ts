@@ -10,6 +10,7 @@ import {
   guardLinkHtml,
   guardLinkJs,
   portalHtml,
+  statusHtml,
   testerHtml,
 } from "../src/ui.js";
 
@@ -29,7 +30,8 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/routes"');
     expect(portalHtml).toContain('href="/meter"');
     expect(portalHtml).toContain('href="/receipts"');
-    expect(portalHtml).toContain('href="/developers"');
+    expect(portalHtml).toContain('href="/docs"');
+    expect(portalHtml).toContain('href="/testnet-help"');
     expect(portalHtml).toContain('id="nav-connect"');
     expect(portalHtml).toContain('id="nav-menu-toggle"');
     expect(portalHtml).toContain('id="nav-mobile-panel"');
@@ -121,7 +123,7 @@ describe("browser demo experience", () => {
       findings: [{ code: "SIMULATION_REQUIRED", message: "Review first" }],
       requestId: "request-123",
     });
-    expect(html).toContain("Payment intent receipt");
+    expect(html).toContain("Payment request");
     expect(html).toContain("Invoice &amp; delivery");
     expect(html).not.toContain("Invoice & delivery");
     expect(html).toContain("REVIEW");
@@ -129,12 +131,14 @@ describe("browser demo experience", () => {
     expect(html).toContain("Example Agent");
     expect(html).toContain("Connect test wallet");
     expect(html).toContain('src="/guard.js"');
+    expect(html).toContain("/site-nav.js");
     expect(html).toContain("Create your Guard Link");
     expect(html).toContain('id="guard-cta"');
   });
 
   it("creates and completes Guard Links without server-side signing", () => {
     expect(portalHtml).toContain('href="/guard/create"');
+    expect(guardBuilderHtml).toContain("/site-nav.js");
     expect(guardBuilderHtml).toContain("/guard-builder-wallet.js");
     expect(guardBuilderHtml).toContain("wallet-status-card");
     expect(guardLinkHtml({
@@ -161,6 +165,30 @@ describe("browser demo experience", () => {
     expect(guardLinkJs).toContain("guard-cta-highlight");
     expect(guardLinkJs).not.toMatch(/privateKey|seed phrase/i);
     expect(() => new Function(guardLinkJs)).not.toThrow();
+  });
+
+  it("uses the shared portal navigation on key human pages", () => {
+    expect(demoHtml).toContain('id="nav-connect"');
+    expect(demoHtml).toContain("/site-nav.js");
+    expect(developerDocsHtml).toContain('id="nav-menu-toggle"');
+    expect(developerDocsHtml).toContain("/site-nav.js");
+    expect(
+      statusHtml({
+        ready: true,
+        chainId: 5042002,
+        blockNumber: "1",
+        x402: true,
+        mainnet: false,
+        shadow: {
+          ok: false,
+          enabled: false,
+          chainId: 5042,
+          headBlock: null,
+          healthyRpcs: 0,
+          healthyObservers: 0,
+        },
+      }),
+    ).toContain("/site-nav.js");
   });
 
   it("leads with a plain-language payment link promise on the portal", () => {

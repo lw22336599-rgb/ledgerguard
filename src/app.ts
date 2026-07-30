@@ -215,7 +215,7 @@ app.get("/meter", (context) =>
 app.get("/receipts", (context) =>
   context.redirect("https://arc-meter-xi.vercel.app/#flow", 302),
 );
-app.get("/developers", (context) => context.html(developerDocsHtml));
+app.get("/developers", (context) => context.redirect("/docs", 301));
 app.get("/guard/create", (context) => context.html(guardBuilderHtml));
 app.get("/canary", (context) => {
   const candidate = getCommercialCandidate();

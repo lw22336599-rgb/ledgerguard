@@ -37,7 +37,6 @@ describe("HTTP API", () => {
     for (const path of [
       "/",
       "/protect",
-      "/developers",
       "/docs",
       "/catalog",
       "/test",
@@ -52,6 +51,9 @@ describe("HTTP API", () => {
       expect(html).toContain('<html lang="en">');
       expect(html).not.toMatch(/\p{Script=Han}/u);
     }
+    const developers = await app.request("/developers", { redirect: "manual" });
+    expect(developers.status).toBe(301);
+    expect(developers.headers.get("location")).toBe("/docs");
     expect(await (await app.request("/docs")).text()).toContain(
       "API documentation",
     );
