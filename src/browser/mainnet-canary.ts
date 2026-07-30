@@ -2,13 +2,13 @@ import { x402Client } from "@x402/core/client";
 import { x402HTTPClient } from "@x402/core/client";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { toClientEvmSigner } from "@x402/evm";
-import { createPublicClient, createWalletClient, custom, http } from "viem";
+import { createPublicClient, http, type EIP1193Provider } from "viem";
 import { base } from "viem/chains";
 import { BASE_MAINNET } from "./wallet-chains.js";
 
 const CANARY_TX =
   "0x2b536c8c0c6789482c0792290c1f310cb5a75532247ac394270707015c02098b";
-const SELLER_ADDRESS = "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c";
+const SELLER_ADDRESS = "0xA0Fef5776E934ad8798298cc53de1749B62Ca0b9";
 const CANARY_EVIDENCE_BODY = {
   network: "arcTestnet",
   txHash: CANARY_TX,
@@ -60,6 +60,56 @@ function chainLabel(chainId: string | undefined) {
   return `chain ${numeric}`;
 }
 
+function formatError(error: unknown): string {
+  if (error instanceof Error) {
+    const cause =
+      error.cause instanceof Error
+        ? error.cause.message
+        : typeof error.cause === "string"
+          ? error.cause
+          : "";
+    return cause ? `${error.message} (${cause})` : error.message;
+  }
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object" && "message" in error) {
+    return String((error as { message: unknown }).message);
+  }
+  return "Canary payment failed.";
+}
+
+function serializeTypedDataMessage(
+  message: Record<string, unknown>,
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(message).map(([key, value]) => [
+      key,
+      typeof value === "bigint" ? value.toString() : value,
+    ]),
+  );
+}
+
+async function signWithWallet(
+  provider: EIP1193Provider,
+  account: `0x${string}`,
+  typedData: {
+    domain: Record<string, unknown>;
+    types: Record<string, unknown>;
+    primaryType: string;
+    message: Record<string, unknown>;
+  },
+): Promise<`0x${string}`> {
+  const payload = {
+    domain: typedData.domain,
+    types: typedData.types,
+    primaryType: typedData.primaryType,
+    message: serializeTypedDataMessage(typedData.message),
+  };
+  return (await provider.request({
+    method: "eth_signTypedData_v4",
+    params: [account, JSON.stringify(payload)],
+  })) as `0x${string}`;
+}
+
 async function requireBaseMainnet() {
   await wallet().ensureChain(BASE_MAINNET);
   const chainId = wallet().getState().chainId;
@@ -83,11 +133,6 @@ async function buildPaymentClient() {
     );
   }
 
-  const walletClient = createWalletClient({
-    account,
-    chain: base,
-    transport: custom(provider),
-  });
   const publicClient = createPublicClient({
     chain: base,
     transport: http("https://mainnet.base.org"),
@@ -96,10 +141,9 @@ async function buildPaymentClient() {
     {
       address: account,
       signTypedData: (message) =>
-        walletClient.signTypedData({
-          account,
+        signWithWallet(provider, account, {
           domain: message.domain as Record<string, unknown>,
-          types: message.types as Record<string, { name: string; type: string }[]>,
+          types: message.types as Record<string, unknown>,
           primaryType: message.primaryType,
           message: message.message as Record<string, unknown>,
         }),
@@ -142,6 +186,20 @@ function formatFailure(status: number, body: Record<string, unknown>) {
   );
 }
 
+function markPayReady() {
+  const connected = wallet().getState().account;
+  const chainId = wallet().getState().chainId;
+  if (!connected) return;
+  if (sameAddress(connected, SELLER_ADDRESS)) {
+    setStatus(
+      `Connected on ${chainLabel(chainId)}, but this wallet is the recipient. Switch MetaMask to a different Base account before signing.`,
+    );
+    if (payButton) payButton.disabled = true;
+    return;
+  }
+  if (payButton) payButton.disabled = false;
+}
+
 connectButton?.addEventListener("click", async () => {
   connectButton.disabled = true;
   try {
@@ -149,22 +207,14 @@ connectButton?.addEventListener("click", async () => {
     await requireBaseMainnet();
     const connected = wallet().getState().account;
     const chainId = wallet().getState().chainId;
-    if (sameAddress(connected, SELLER_ADDRESS)) {
+    markPayReady();
+    if (!sameAddress(connected, SELLER_ADDRESS)) {
       setStatus(
-        `Connected on ${chainLabel(chainId)}, but this wallet is the recipient. Switch MetaMask to a different Base account before signing.`,
+        `Connected on ${chainLabel(chainId)}: ${wallet().shortAddress(connected)}`,
       );
-      if (payButton) payButton.disabled = true;
-      return;
     }
-    setStatus(
-      `Connected on ${chainLabel(chainId)}: ${wallet().shortAddress(connected)}`,
-    );
-    if (payButton) payButton.disabled = false;
   } catch (error) {
-    showResult(
-      "error",
-      error instanceof Error ? error.message : "Wallet connection failed.",
-    );
+    showResult("error", formatError(error));
   } finally {
     connectButton.disabled = false;
   }
@@ -177,12 +227,15 @@ switchButton?.addEventListener("click", async () => {
       await wallet().connect();
     }
     await requireBaseMainnet();
-    setStatus(`Network ready: ${chainLabel(wallet().getState().chainId)}`);
-  } catch (error) {
-    showResult(
-      "error",
-      error instanceof Error ? error.message : "Network switch failed.",
+    markPayReady();
+    const connected = wallet().getState().account;
+    setStatus(
+      connected
+        ? `Ready on ${chainLabel(wallet().getState().chainId)}: ${wallet().shortAddress(connected)}`
+        : `Network ready: ${chainLabel(wallet().getState().chainId)}`,
     );
+  } catch (error) {
+    showResult("error", formatError(error));
   } finally {
     switchButton.disabled = false;
   }
@@ -200,6 +253,7 @@ payButton?.addEventListener("click", async () => {
       await wallet().connect();
     }
     await requireBaseMainnet();
+    markPayReady();
     const { client, httpClient } = await buildPaymentClient();
     const bodyText = JSON.stringify(CANARY_EVIDENCE_BODY);
     const challenge = await fetch("/v1/paid/base/evidence", {
@@ -239,10 +293,7 @@ payButton?.addEventListener("click", async () => {
     );
     setStatus("Real-funds canary complete.");
   } catch (error) {
-    showResult(
-      "error",
-      error instanceof Error ? error.message : "Canary payment failed.",
-    );
+    showResult("error", formatError(error));
     setStatus("Canary did not complete.");
   } finally {
     payButton.disabled = false;

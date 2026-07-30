@@ -8,6 +8,24 @@ const detail = document.querySelector<HTMLElement>("#w-detail");
 const dot = document.querySelector<HTMLElement>("#w-dot");
 const section = document.querySelector<HTMLElement>("#wallet-section");
 const recipientInput = document.querySelector<HTMLInputElement>("#guard-recipient");
+const verifiedNotice = document.querySelector<HTMLElement>("#guard-verified-notice");
+
+function applyCreatePrefill(): void {
+  const params = new URLSearchParams(location.search);
+  const recipient = params.get("recipient")?.trim();
+  if (
+    recipient &&
+    /^0x[0-9a-fA-F]{40}$/.test(recipient) &&
+    recipientInput
+  ) {
+    recipientInput.value = recipient;
+  }
+  if (params.get("from") === "verified-payment" && verifiedNotice) {
+    verifiedNotice.hidden = false;
+  }
+}
+
+applyCreatePrefill();
 
 function render(): void {
   const state = wallet().getState();

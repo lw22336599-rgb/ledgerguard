@@ -96,7 +96,6 @@ import {
   faviconSvg,
   guardBuilderHtml,
   guardLinkHtml,
-  guardLinkJs,
   integrationBoundaryHtml,
   meterHtml,
   portalHtml,
@@ -109,6 +108,7 @@ import {
   mainnetCanaryHtml,
   testerHtml,
 } from "./ui.js";
+import { guardLinkBundle } from "./generated/guard-link-bundle.js";
 import { developerShadowJs } from "./ui-shadow.js";
 
 export const app = new Hono<AppEnvironment>();
@@ -391,7 +391,7 @@ app.get("/developer.js", (context) =>
   }),
 );
 app.get("/guard.js", (context) =>
-  context.body(guardLinkJs, 200, {
+  context.body(guardLinkBundle, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
   }),
 );

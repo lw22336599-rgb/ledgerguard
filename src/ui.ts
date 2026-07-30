@@ -10,14 +10,14 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
-const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Arc Public Testnet only. Mainnet stays disabled until release gates pass. <a href="/guard/create">Get paid</a> &middot; <a href="/protect">Protect</a> &middot; <a href="/meter">Meter</a> &middot; <a href="/receipts">Receipts</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="https://x.com/HuiLibaa" rel="me noreferrer">Official X @HuiLibaa</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
+const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Guard Links on Arc Testnet &middot; Base Mainnet canary at <a href="/canary">/canary</a> &middot; <a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="https://x.com/HuiLibaa" rel="me noreferrer">Official X @HuiLibaa</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
 
-const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/docs">Developers</a><a href="/testnet-help">Testnet funding</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a>`;
+const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/docs">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a>`;
 
 export const meterAppOrigin = "https://arc-meter-xi.vercel.app";
 
 export function portalNavHtml(
-  badge = "ARC PUBLIC TESTNET",
+  badge = "BASE + ARC",
   options?: { danger?: boolean },
 ): string {
   const badgeClass = options?.danger ? "badge danger" : "badge";
@@ -144,8 +144,8 @@ export function guardLinkHtml(input: {
     <section id="guard-cta" class="guard-cta">
       <p class="step">POWERED BY LEDGERGUARD</p>
       <h2>Get paid with USDC too</h2>
-      <p class="muted">Create your own payment link in under a minute. No account required.</p>
-      <a class="button-link" href="/guard/create">Create your Guard Link</a>
+      <p id="guard-cta-summary" class="muted">Create your own payment link in under a minute. No account required.</p>
+      <a id="guard-cta-link" class="button-link" href="/guard/create">Create your Guard Link</a>
     </section>
     <section class="notice"><strong>Testnet only:</strong> Arc Testnet assets have no financial value. No mainnet transaction can be initiated from this page. A self-declared sender name is context, not verified identity.</section>
     <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/protect">Open advanced checker</a><a href="/docs">Developer docs</a><a href="/test">Join testing</a></div>
@@ -163,11 +163,20 @@ export const guardBuilderHtml = `${pageHead(
   <main>
     ${portalNavHtml("GUARD LINK BUILDER")}
     <section class="subhero">
-      <p class="eyebrow">GET PAID WITH A LINK &middot; TESTNET</p>
+      <p class="eyebrow">USDC PAYMENT LINKS · BASE + ARC</p>
       <h1 class="compact">Create a USDC payment link.</h1>
-      <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer sees exactly who receives what before signing.</p>
+      <p class="lead">Connect your wallet, pick a network, enter the amount, and share the link or QR code. The payer sees exactly who receives what before signing.</p>
     </section>
+    <section id="guard-verified-notice" class="notice" hidden><strong>Welcome back.</strong> Your receiving address is prefilled from your verified payment. Connect the same wallet or edit the address before creating a link.</section>
     <section class="panel builder-panel">
+      <div class="chain-selector-row">
+        <label for="guard-chain">Network</label>
+        <select id="guard-chain" class="chain-select">
+          <option value="arc-testnet" selected>Arc Testnet</option>
+          <option value="base-mainnet" disabled>Base Mainnet (coming soon)</option>
+        </select>
+        <p id="guard-chain-notice" class="chain-selector-notice">Guard Links currently settle on Arc Testnet. Base Mainnet support is in progress — use <a href="/canary">/canary</a> for the live mainnet payment check.</p>
+      </div>
       <div id="wallet-section" class="wallet-status-card">
         <div class="wallet-status-row">
           <div id="w-dot" class="wallet-status-dot"></div>
@@ -337,11 +346,11 @@ export const portalHtml = `${pageHead(
   <main>
     ${portalNavHtml()}
     <section class="hero portal-hero">
-      <p class="eyebrow">GET PAID WITH A LINK &middot; NON-CUSTODIAL</p>
+      <p class="eyebrow">USDC PAYMENT LINKS · BASE + ARC</p>
       <h1>Send a USDC payment link.<br><span>Get paid without asking for an address first.</span></h1>
-      <p class="lead">Create a Guard Link, share it in chat or as a QR code, and let the payer review who receives how much before signing. Built for Arc today, with separate developer APIs and fail-closed mainnet controls.</p>
+      <p class="lead">Create a Guard Link, share it in chat or as a QR code, and let the payer review who receives how much before signing. Now live on Base Mainnet. Arc Testnet ready.</p>
       <div class="portal-actions"><a class="primary-action" href="/guard/create">Create a Guard Link</a><a class="secondary-action" href="/routes">Move USDC into Arc</a></div>
-      <p class="portal-truth">Non-custodial. No private keys. Browser signing is live on the capped test route. Base Mainnet real-funds execution remains disabled.</p>
+      <p class="portal-truth">Non-custodial. No private keys. Browser signing is live on the capped test route.</p>
     </section>
     <section class="product-map" aria-label="LedgerGuard products">
       <article class="product-module protect-module">
@@ -831,6 +840,12 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .wallet-panel>.result{grid-column:1/-1}
 .button-link{display:inline-flex;align-items:center;justify-content:center;padding:13px 16px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;text-decoration:none;font-weight:800}
 .builder-panel{align-items:start}
+.chain-selector-row{display:grid;gap:8px;margin-bottom:18px;padding:14px 16px;border:1px solid #2b355b;border-radius:12px;background:#0b1123}
+.chain-selector-row label{font-size:13px;font-weight:700;color:#c6d0ff}
+.chain-select{width:100%;max-width:360px;padding:10px 12px;border:1px solid #334065;border-radius:10px;background:#060817;color:var(--text);font:inherit}
+.chain-select:disabled{color:#8e99ba}
+.chain-selector-notice{margin:0;font-size:13px;line-height:1.55;color:var(--muted)}
+.chain-selector-notice a{color:#c6d0ff}
 .builder-panel .result input{margin:14px 0}
 .builder-panel form{grid-template-columns:1fr 1fr}
 .builder-panel form label:nth-of-type(1),.builder-panel form label:nth-of-type(2),.builder-panel form details,.builder-panel form button{grid-column:1/-1}
@@ -844,6 +859,9 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .guard-cta h2{margin:10px 0 8px;font-size:clamp(28px,4vw,40px)}
 .guard-cta .button-link{margin-top:12px}
 .guard-cta-highlight{border-color:#667de0;box-shadow:0 0 0 1px #667de0,0 18px 50px #6f8cff22}
+.guard-cta-verified{border-color:var(--success);box-shadow:0 0 0 1px #55d6a7,0 18px 50px #55d6a733;background:linear-gradient(145deg,#102318e8,#0a1218e8)}
+.guard-cta-verified .step{color:#7dffb8}
+.guard-cta-verified h2{color:#d7ffe8}
 .wallet-picker-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:#02040ccc;backdrop-filter:blur(4px)}
 .wallet-picker-dialog{width:min(420px,calc(100vw - 32px));padding:24px;border:1px solid #334065;border-radius:18px;background:#0d1228;box-shadow:0 24px 80px #0008}
 .wallet-picker-dialog h2{margin:0 0 8px;font-size:24px}
@@ -906,8 +924,6 @@ footer{border-color:#ffffff19;line-height:1.9}
 `;
 
 export const siteCss = `${siteBaseCss}${unifiedBrandCss}`;
-
-export const guardLinkJs = `const root=document.querySelector("#guard-wallet");const connect=document.querySelector("#connect-wallet");const send=document.querySelector("#send-payment");const verify=document.querySelector("#verify-evidence");const status=document.querySelector("#wallet-status");const output=document.querySelector("#wallet-result");const cta=document.querySelector("#guard-cta");const wallet=window.LedgerGuardWallet;const arcChain={chainId:"0x4cef52",chainName:"Arc Testnet",nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},rpcUrls:["https://rpc.testnet.arc.network"],blockExplorerUrls:["https://testnet.arcscan.app"]};const usdc="0x3600000000000000000000000000000000000000";let account="";let txHash="";const show=(kind,html)=>{output.hidden=false;output.className="result "+kind;output.replaceChildren();const p=document.createElement("p");p.textContent=html;output.append(p)};const units=(value)=>{const parts=value.split(".");return (BigInt(parts[0]||"0")*1000000n+BigInt(((parts[1]||"")+"000000").slice(0,6))).toString()};const data=()=>{const recipient=root.dataset.recipient.slice(2).toLowerCase().padStart(64,"0");const amount=BigInt(units(root.dataset.amount)).toString(16).padStart(64,"0");return "0xa9059cbb"+recipient+amount};const connected=()=>{const state=wallet?.getState?.()||{account:""};account=state.account||"";const declared=(root.dataset.payer||"").toLowerCase();const matches=declared&&account.toLowerCase()===declared;send.disabled=!(root.dataset.decision==="ALLOW"&&matches);status.textContent=matches?(send.disabled?"The connected wallet matches, but this intent is not allowed to proceed.":"Wallet matched. Review the exact testnet transaction before signing."):"The connected wallet does not match the declared payer."};connect.addEventListener("click",async()=>{if(!wallet){show("review","Wallet module did not load. Refresh and try again.");return}connect.disabled=true;try{await wallet.connect();await wallet.ensureChain(arcChain);const state=wallet.getState();account=state.account;const declared=root.dataset.payer||"";if(!declared||declared.toLowerCase()!==account.toLowerCase()){const url=new URL(location.href);url.searchParams.set("payer",account);location.replace(url.toString());return}connected()}catch(error){show("error",error instanceof Error?error.message:"Wallet connection failed.")}finally{connect.disabled=false}});send.addEventListener("click",async()=>{const provider=wallet?.getProvider();if(!provider||!account||root.dataset.decision!=="ALLOW")return;if(!confirm("Continue to your wallet to review a "+root.dataset.amount+" test USDC transfer?"))return;send.disabled=true;try{await wallet.ensureChain(arcChain);txHash=await provider.request({method:"eth_sendTransaction",params:[{from:account,to:usdc,data:data(),value:"0x0"}]});show("review","Transaction submitted. Wait for confirmation, then verify the onchain result.");const link=document.createElement("a");link.href="https://testnet.arcscan.app/tx/"+txHash;link.rel="noreferrer";link.target="_blank";link.textContent="Open transaction in ArcScan";output.append(link);verify.hidden=false}catch(error){show("error",error instanceof Error?error.message:"The wallet rejected or failed the transaction.");send.disabled=false}});verify.addEventListener("click",async()=>{if(!txHash)return;verify.disabled=true;show("neutral","Checking the confirmed transaction against the original intent…");try{const response=await fetch("/v1/evidence",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({network:"arcTestnet",txHash,intent:{action:"transfer",expectedDebitAddress:account,expectedRecipient:root.dataset.recipient,expectedAssetAddress:usdc,expectedAmountMicroUsdc:units(root.dataset.amount),purpose:root.dataset.purpose}})});const body=await response.json();if(response.status===404){show("review","The transaction is not confirmed yet. Wait a moment and verify again.");return}if(!response.ok)throw new Error(body.message||body.error||"Evidence check failed");const kind=body.status==="VERIFIED"?"allow":body.status==="MISMATCH"?"block":"review";show(kind,body.status+": "+(body.status==="VERIFIED"?"The confirmed asset flow matches the declared payment.":"Review the evidence before treating this payment as complete."));if(body.status==="VERIFIED"&&cta){cta.classList.add("guard-cta-highlight");cta.scrollIntoView({behavior:"smooth",block:"nearest"})}const pre=document.createElement("pre");pre.textContent=JSON.stringify(body,null,2);output.append(pre)}catch(error){show("error",error instanceof Error?error.message:"Evidence check failed.")}finally{verify.disabled=false}});if(!wallet){connect.disabled=true;status.textContent="Wallet support did not load. Intent review remains available."}else if(root.dataset.payer){status.textContent="Reconnect the declared test wallet to enable the payment button.";void wallet.restore().then(()=>connected()).catch(()=>{})}if(root.dataset.decision==="BLOCK"){connect.disabled=true;status.textContent="This payment is blocked. Wallet handoff is disabled."}`;
 
 export const demoJs = `const form=document.querySelector("#preflight");const result=document.querySelector("#result");const title=document.querySelector("#result-title");const summary=document.querySelector("#result-summary");const findings=document.querySelector("#result-findings");const details=document.querySelector("#result-details");const json=document.querySelector("#result-json");const usdc="0x3600000000000000000000000000000000000000";const messages={ALLOW:"The implemented checks passed. Continue only after reviewing the transaction in your wallet.",REVIEW:"Information is incomplete or an unknown condition remains. Review before proceeding.",BLOCK:"A defined risk was detected. Do not sign or send this transaction."};const clear=()=>{findings.replaceChildren();details.hidden=true;json.textContent=""};const show=(kind,heading,message)=>{result.className="result "+kind;title.textContent=heading;summary.textContent=message};const stale=(message)=>{clear();show("review","Result expired",message)};form.addEventListener("input",()=>stale("The input changed. Run the check again."));form.addEventListener("invalid",()=>stale("Correct the invalid input before running the check."),true);const units=(v)=>{if(!/^\\d+(\\.\\d{0,6})?$/.test(v))throw new Error("The amount must be a positive number with no more than 6 decimal places.");const [w,f=""]=v.split(".");const value=BigInt(w)*1000000n+BigInt((f+"000000").slice(0,6));if(value<=0n)throw new Error("The amount must be greater than zero.");return value.toString()};const address=(v,label)=>{if(!/^0x[0-9a-fA-F]{40}$/.test(v))throw new Error(label+" is not a valid EVM address.");return v};const pad=(v)=>v.slice(2).toLowerCase().padStart(64,"0");form.addEventListener("submit",async(e)=>{e.preventDefault();const button=form.querySelector("button");button.disabled=true;clear();show("neutral","Checking","Parsing the transaction and evaluating Arc Testnet policy…");try{const recipient=address(document.querySelector("#recipient").value.trim(),"Recipient address");const payerValue=document.querySelector("#payer").value.trim();const payer=payerValue?address(payerValue,"Payer public address"):"";const amount=units(document.querySelector("#amount").value.trim());const limit=units(document.querySelector("#limit").value.trim());const data="0xa9059cbb"+pad(recipient)+BigInt(amount).toString(16).padStart(64,"0");const intent={action:"transfer",expectedRecipient:recipient,expectedAssetAddress:usdc,expectedAmountMicroUsdc:amount,purpose:"LedgerGuard browser demo"};if(payer)intent.expectedDebitAddress=payer;const payload={network:"arcTestnet",to:usdc,data,valueWei:"0",intent,policy:{requireSimulation:Boolean(payer),maxAmountMicroUsdc:limit}};if(payer)payload.from=payer;const response=await fetch("/v1/preflight",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||body.error||"Request failed");show(body.decision.toLowerCase(),body.decision,messages[body.decision]||"Check completed.");for(const item of body.findings||[]){const li=document.createElement("li");li.textContent=item.code+": "+item.message;findings.append(li)}if(!body.findings?.length){const li=document.createElement("li");li.textContent="No known issue was found in the recipient, asset, amount, payer, or simulation.";findings.append(li)}json.textContent=JSON.stringify(body,null,2);details.hidden=false}catch(error){show("error","Check failed",error instanceof Error?error.message:"Unknown error");}finally{button.disabled=false}});`;
 

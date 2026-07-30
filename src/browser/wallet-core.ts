@@ -74,7 +74,7 @@ export class WalletCore {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }
 
-  private async waitForProviders(timeoutMs = 500): Promise<ProviderDetail[]> {
+  private async waitForProviders(timeoutMs = 2500): Promise<ProviderDetail[]> {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       const discovered = [...this.providers.values()];
@@ -112,7 +112,9 @@ export class WalletCore {
       this.activeUuid = null;
       return window.ethereum;
     }
-    throw new Error("No EIP-6963 or injected EVM wallet was found.");
+    throw new Error(
+      "No wallet found. Install MetaMask (or another EVM wallet), refresh this page, then click Connect again.",
+    );
   }
 
   async connect(preferredUuid?: string | null): Promise<WalletState> {

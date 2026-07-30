@@ -43,6 +43,18 @@ form?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!form || !actions || !created) return;
 
+  const chain =
+    document.querySelector<HTMLSelectElement>("#guard-chain")?.value ??
+    "arc-testnet";
+  if (chain !== "arc-testnet") {
+    show(
+      "review",
+      "Base Mainnet coming soon",
+      "Guard Links on Base Mainnet are not live yet. Switch to Arc Testnet, or try the mainnet canary at /canary.",
+    );
+    return;
+  }
+
   actions.hidden = true;
   created.hidden = true;
   if (qrWrap) qrWrap.hidden = true;

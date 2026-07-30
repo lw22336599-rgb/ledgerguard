@@ -35,7 +35,7 @@ export const EXPECTED = Object.freeze({
   network: "eip155:8453",
   asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   amount: "1000",
-  payTo: "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c",
+  payTo: "0xA0Fef5776E934ad8798298cc53de1749B62Ca0b9",
 });
 
 function fail(message) {

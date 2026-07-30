@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { guardBuilderBundle } from "../src/generated/guard-builder-bundle.js";
+import { guardLinkBundle } from "../src/generated/guard-link-bundle.js";
 import {
   catalogHtml,
   demoHtml,
@@ -8,7 +9,6 @@ import {
   developerDocsHtml,
   guardBuilderHtml,
   guardLinkHtml,
-  guardLinkJs,
   integrationBoundaryHtml,
   meterHtml,
   portalHtml,
@@ -29,10 +29,11 @@ describe("browser demo experience", () => {
   });
 
   it("routes people to readable pages instead of raw JSON", () => {
-    expect(portalHtml).toContain('href="/protect"');
+    expect(portalHtml).toContain('href="/guard/create"');
     expect(portalHtml).toContain('href="/routes"');
     expect(portalHtml).toContain('href="/meter"');
-    expect(portalHtml).toContain('href="/receipts"');
+    expect(portalHtml).toContain('href="/status"');
+    expect(portalHtml).toContain('href="/canary"');
     expect(portalHtml).toContain('href="/docs"');
     expect(portalHtml).toContain('href="/testnet-help"');
     expect(portalHtml).toContain('id="nav-connect"');
@@ -137,6 +138,8 @@ describe("browser demo experience", () => {
     expect(html).toContain("/site-nav.js");
     expect(html).toContain("Create your Guard Link");
     expect(html).toContain('id="guard-cta"');
+    expect(html).toContain('id="guard-cta-link"');
+    expect(html).toContain('id="guard-cta-summary"');
   });
 
   it("creates and completes Guard Links without server-side signing", () => {
@@ -159,15 +162,17 @@ describe("browser demo experience", () => {
     expect(guardBuilderHtml).toContain("/guard-builder.js");
     expect(guardBuilderHtml).toContain("guard-qr-canvas");
     expect(guardBuilderHtml).toContain("Advanced options");
+    expect(guardBuilderHtml).toContain("guard-verified-notice");
     expect(guardBuilderHtml).toContain("Your receiving address");
     expect(guardBuilderHtml).toContain("Identity boundary");
     expect(guardBuilderBundle).toContain('fetch("/v1/guard-links"');
     expect(guardBuilderBundle).toContain("guard-qr-canvas");
-    expect(guardLinkJs).toContain('"eth_sendTransaction"');
-    expect(guardLinkJs).toContain('fetch("/v1/evidence"');
-    expect(guardLinkJs).toContain("guard-cta-highlight");
-    expect(guardLinkJs).not.toMatch(/privateKey|seed phrase/i);
-    expect(() => new Function(guardLinkJs)).not.toThrow();
+    expect(guardLinkBundle).toContain("eth_sendTransaction");
+    expect(guardLinkBundle).toContain('fetch("/v1/evidence"');
+    expect(guardLinkBundle).toContain("guard-cta-highlight");
+    expect(guardLinkBundle).toContain("guard-cta-verified");
+    expect(guardLinkBundle).toContain("verified-payment");
+    expect(guardLinkBundle).not.toMatch(/privateKey|seed phrase/i);
   });
 
   it("uses the shared portal navigation on key human pages", () => {

@@ -26,6 +26,7 @@ const [
   siteNavBundle,
   guardBuilderWalletBundle,
   guardBuilderBundle,
+  guardLinkBundle,
   mainnetCanaryBundle,
 ] = await Promise.all([
   bundle("src/browser/routes.ts", "routes"),
@@ -33,6 +34,7 @@ const [
   bundle("src/browser/site-nav.ts", "site-nav"),
   bundle("src/browser/guard-builder-wallet.ts", "guard-builder-wallet"),
   bundle("src/browser/guard-builder.ts", "guard-builder"),
+  bundle("src/browser/guard-link.ts", "guard-link"),
   bundle("src/browser/mainnet-canary.ts", "mainnet-canary"),
 ]);
 
@@ -65,6 +67,11 @@ await Promise.all([
   writeFile(
     "src/generated/guard-builder-bundle.ts",
     `${header}export const guardBuilderBundle = ${JSON.stringify(guardBuilderBundle)};\n`,
+    "utf8",
+  ),
+  writeFile(
+    "src/generated/guard-link-bundle.ts",
+    `${header}export const guardLinkBundle = ${JSON.stringify(guardLinkBundle)};\n`,
     "utf8",
   ),
   writeFile(
