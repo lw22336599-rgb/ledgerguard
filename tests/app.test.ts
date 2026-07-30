@@ -106,6 +106,20 @@ describe("HTTP API", () => {
     expect(bundle.headers.get("content-type")).toContain("javascript");
     expect(await bundle.text()).toContain("LedgerGuard Routes");
 
+    for (const path of ["/wallet.js", "/site-nav.js", "/guard-builder-wallet.js"]) {
+      const script = await app.request(path);
+      expect(script.status).toBe(200);
+      expect(script.headers.get("content-type")).toContain("javascript");
+      expect((await script.text()).length).toBeGreaterThan(100);
+    }
+
+    const routesPage = await app.request("/routes");
+    const routesHtml = await routesPage.text();
+    expect(routesPage.status).toBe(200);
+    expect(routesHtml).toContain('id="route-readiness"');
+    expect(routesHtml).toContain("/wallet.js");
+    expect(routesHtml).toContain('id="nav-menu-toggle"');
+
     const evidence = await app.request("/v1/cctp/evidence", {
       method: "POST",
       headers: { "content-type": "application/json" },

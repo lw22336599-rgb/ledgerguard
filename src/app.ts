@@ -39,6 +39,9 @@ import {
   ROUTE_MAX_AMOUNT_USDC,
 } from "./config/routes.js";
 import { routesBundle } from "./generated/routes-bundle.js";
+import { walletBundle } from "./generated/wallet-bundle.js";
+import { siteNavBundle } from "./generated/site-nav-bundle.js";
+import { guardBuilderWalletBundle } from "./generated/guard-builder-wallet-bundle.js";
 import { retrieveCctpEvidence } from "./services/cctp-evidence.js";
 import {
   retrieveEvidence,
@@ -370,6 +373,24 @@ app.get("/guard.js", (context) =>
 app.get("/guard-builder.js", (context) =>
   context.body(guardBuilderJs, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
+  }),
+);
+app.get("/wallet.js", (context) =>
+  context.body(walletBundle, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  }),
+);
+app.get("/site-nav.js", (context) =>
+  context.body(siteNavBundle, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  }),
+);
+app.get("/guard-builder-wallet.js", (context) =>
+  context.body(guardBuilderWalletBundle, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
   }),
 );
 app.get("/routes.js", (context) =>

@@ -40,6 +40,7 @@ for (const [path, marker] of [
   ["/status", "LIVE STATUS"],
   ["/developer", "Developer Console"],
   ["/guard/create", "Create one clear payment request."],
+  ["/routes", "route-readiness"],
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
 ]) {
   const response = await fetch(`${baseUrl}${path}`, {

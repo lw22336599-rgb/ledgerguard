@@ -1,17 +1,12 @@
 import { AppKit } from "@circle-fin/app-kit";
 import { createViemAdapterFromProvider } from "@circle-fin/adapter-viem-v2";
-import type { EIP1193Provider } from "viem";
+import {
+  BASE_SEPOLIA,
+  BASE_SEPOLIA_USDC,
+} from "./wallet-chains.js";
+import { getSharedWallet } from "./wallet-shared.js";
 
-type ProviderDetail = {
-  info: { name: string; uuid: string };
-  provider: EIP1193Provider;
-};
-
-declare global {
-  interface Window {
-    ethereum?: EIP1193Provider;
-  }
-}
+const wallet = () => getSharedWallet();
 
 const root = document.querySelector<HTMLElement>("#route-app");
 if (!root) throw new Error("Route application root is missing.");
@@ -24,6 +19,7 @@ const recipientInput =
   document.querySelector<HTMLInputElement>("#route-recipient")!;
 const walletLabel = document.querySelector<HTMLElement>("#route-wallet")!;
 const status = document.querySelector<HTMLElement>("#route-status")!;
+const readiness = document.querySelector<HTMLElement>("#route-readiness")!;
 const quoteOutput = document.querySelector<HTMLElement>("#route-quote-output")!;
 const progressOutput =
   document.querySelector<HTMLElement>("#route-progress-output")!;
@@ -31,9 +27,6 @@ const progressOutput =
 const maxAmount = Number(root.dataset.maxAmount ?? "0.001");
 const customFee = root.dataset.customFee ?? "0";
 const feeRecipient = root.dataset.feeRecipient ?? "";
-const providers = new Map<string, ProviderDetail>();
-let provider: EIP1193Provider | undefined;
-let account = "";
 let adapter: Awaited<ReturnType<typeof createViemAdapterFromProvider>> | undefined;
 let quotedAmount = "";
 
@@ -87,30 +80,86 @@ const bridgeParams = () => {
   };
 };
 
-window.addEventListener("eip6963:announceProvider", (event) => {
-  const detail = (event as CustomEvent<ProviderDetail>).detail;
-  providers.set(detail.info.uuid, detail);
+async function updateReadiness(): Promise<void> {
+  if (!readiness) return;
+  const state = wallet().getState();
+  if (!state.connected) {
+    readiness.className = "route-readiness neutral";
+    readiness.innerHTML =
+      "<strong>Before you connect</strong><p>Install MetaMask or another EVM wallet, add Base Sepolia, and fund it with test USDC from the <a href=\"https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet\" rel=\"noreferrer\" target=\"_blank\">Base Sepolia faucet</a>.</p>";
+    quoteButton.disabled = true;
+    executeButton.disabled = true;
+    return;
+  }
+
+  const chainNumeric = state.chainId
+    ? Number.parseInt(state.chainId, 16)
+    : null;
+  const onBaseSepolia = chainNumeric === Number.parseInt(BASE_SEPOLIA.chainId, 16);
+  let balanceText = "unknown";
+  try {
+    if (onBaseSepolia) {
+      const balance = await wallet().readErc20Balance(BASE_SEPOLIA_USDC);
+      balanceText = `${wallet().formatUsdc(balance)} test USDC`;
+    }
+  } catch {
+    balanceText = "could not read";
+  }
+
+  if (!onBaseSepolia) {
+    readiness.className = "route-readiness review";
+    readiness.innerHTML =
+      `<strong>Switch network</strong><p>Wallet ${wallet().shortAddress(state.account)} is connected on chain ${chainNumeric ?? "unknown"}. Switch to Base Sepolia before requesting a quote.</p>`;
+    quoteButton.disabled = true;
+    executeButton.disabled = true;
+    return;
+  }
+
+  readiness.className = "route-readiness allow";
+  readiness.innerHTML =
+    `<strong>Ready to quote</strong><p>Wallet ${wallet().shortAddress(state.account)} is on Base Sepolia. Balance: ${balanceText}. Destination Arc Testnet mint address will default to your wallet if left blank.</p>`;
+  quoteButton.disabled = false;
+}
+
+wallet().subscribe(async (state) => {
+  if (state.connected && state.provider) {
+    adapter = await createViemAdapterFromProvider({ provider: state.provider });
+    walletLabel.textContent = wallet().shortAddress(state.account);
+    recipientInput.value ||= state.account;
+    status.textContent =
+      "Connected. Quoting is read-only; execution always requires explicit browser-wallet signatures.";
+  } else {
+    adapter = undefined;
+    walletLabel.textContent = "not connected";
+    status.textContent =
+      "The quote is read-only. Execution requires explicit browser-wallet signatures.";
+    quoteButton.disabled = true;
+    executeButton.disabled = true;
+  }
+  await updateReadiness();
 });
-window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+void wallet().restore().then(async (state) => {
+  if (state?.connected && state.provider) {
+    adapter = await createViemAdapterFromProvider({ provider: state.provider });
+    walletLabel.textContent = wallet().shortAddress(state.account);
+    recipientInput.value ||= state.account;
+  }
+  await updateReadiness();
+});
 
 connectButton.addEventListener("click", async () => {
   connectButton.disabled = true;
   try {
-    provider = providers.values().next().value?.provider ?? window.ethereum;
-    if (!provider) throw new Error("No EIP-6963 or injected EVM wallet was found.");
-    const accounts = (await provider.request({
-      method: "eth_requestAccounts",
-    })) as string[];
-    account = accounts[0] ?? "";
-    if (!/^0x[0-9a-fA-F]{40}$/.test(account)) {
-      throw new Error("The wallet did not return a valid account.");
+    if (wallet().getState().connected) {
+      wallet().disconnect();
+      quotedAmount = "";
+      quoteOutput.hidden = true;
+      progressOutput.hidden = true;
+      return;
     }
-    adapter = await createViemAdapterFromProvider({ provider });
-    recipientInput.value ||= account;
-    walletLabel.textContent = `${account.slice(0, 8)}…${account.slice(-6)}`;
-    status.textContent =
-      "Connected. Quoting is read-only; execution always requires explicit wallet signatures.";
-    quoteButton.disabled = false;
+    await wallet().connect();
+    await wallet().ensureChain(BASE_SEPOLIA);
   } catch (error) {
     show(
       progressOutput,
@@ -119,6 +168,7 @@ connectButton.addEventListener("click", async () => {
     );
   } finally {
     connectButton.disabled = false;
+    await updateReadiness();
   }
 });
 
@@ -127,6 +177,7 @@ quoteButton.addEventListener("click", async () => {
   executeButton.disabled = true;
   quotedAmount = "";
   try {
+    await wallet().ensureChain(BASE_SEPOLIA);
     const params = bridgeParams();
     show(quoteOutput, "neutral", "Reading the route and estimating costs…");
     const kit = new AppKit({
@@ -163,13 +214,15 @@ quoteButton.addEventListener("click", async () => {
     );
   } finally {
     quoteButton.disabled = false;
+    await updateReadiness();
   }
 });
 
 executeButton.addEventListener("click", async () => {
-  if (!adapter || !provider) return;
+  if (!adapter) return;
   let params;
   try {
+    await wallet().ensureChain(BASE_SEPOLIA);
     params = bridgeParams();
     if (params.amount !== quotedAmount) {
       throw new Error("The amount changed after the quote. Request a new quote.");
@@ -259,4 +312,11 @@ executeButton.addEventListener("click", async () => {
   } finally {
     executeButton.disabled = false;
   }
+});
+
+amountInput.addEventListener("input", () => {
+  executeButton.disabled = true;
+});
+recipientInput.addEventListener("input", () => {
+  executeButton.disabled = true;
 });

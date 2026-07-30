@@ -12,6 +12,20 @@ const pageHead = (title: string, description: string) => `<!doctype html>
 
 const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Arc Public Testnet only. Mainnet stays disabled until release gates pass. <a href="/protect">Protect</a> &middot; <a href="/meter">Meter</a> &middot; <a href="/receipts">Receipts</a> &middot; <a href="/developers">Developers</a> &middot; <a href="https://x.com/HuiLibaa" rel="me noreferrer">Official X @HuiLibaa</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
 
+const portalNavLinks = `<a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a>`;
+
+export function portalNavHtml(badge = "ARC PUBLIC TESTNET"): string {
+  return `<nav class="portal-nav">
+      <a class="brand" href="/">LedgerGuard</a>
+      <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
+      <div class="portal-nav-links">${portalNavLinks}</div>
+      <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
+      <button id="nav-connect" class="nav-wallet-btn" type="button">Connect Wallet</button>
+      <span id="nav-wallet-display" class="nav-wallet-display"></span>
+      <span class="badge">${badge}</span>
+    </nav>`;
+}
+
 function escapeHtml(value: string): string {
   return value.replace(
     /[&<>"']/g,
@@ -118,6 +132,7 @@ export function guardLinkHtml(input: {
     <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/protect">Open advanced checker</a><a href="/docs">Developer docs</a><a href="/test">Join testing</a></div>
     ${footer}
   </main>
+  <script src="/wallet.js" defer></script>
   <script src="/guard.js" defer></script>
 </body>
 </html>`;
@@ -129,20 +144,20 @@ export const guardBuilderHtml = `${pageHead(
 )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">GUARD LINK BUILDER</span></nav>
+    ${portalNavHtml("GUARD LINK BUILDER")}
     <section class="subhero">
       <p class="eyebrow">NO SERVER-SIDE WALLET &middot; TESTNET ONLY</p>
       <h1 class="compact">Create one clear payment request.</h1>
       <p class="lead">Prefill the recipient, amount, purpose, limit, and expiry. The recipient can review the request without understanding calldata or policy fields.</p>
     </section>
     <section class="panel builder-panel">
-      <div id="wallet-section" style="border:1px solid #2a2a5a;border-radius:12px;padding:16px;margin-bottom:20px;background:#0d0d25">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div id="w-dot" style="width:10px;height:10px;border-radius:50%;background:#555"></div>
-          <span id="w-status" style="flex:1;color:#aaa">No wallet connected</span>
-          <button id="w-btn" style="background:linear-gradient(135deg,#7b2ff7,#5b1fd7);border:none;border-radius:8px;padding:8px 16px;color:#fff;font-size:13px;cursor:pointer">Connect Wallet</button>
+      <div id="wallet-section" class="wallet-status-card">
+        <div class="wallet-status-row">
+          <div id="w-dot" class="wallet-status-dot"></div>
+          <span id="w-status" class="wallet-status-label">No wallet connected</span>
+          <button id="w-btn" type="button" class="nav-wallet-btn">Connect Wallet</button>
         </div>
-        <div id="w-detail" style="display:none;font-family:monospace;font-size:13px;color:#aabbdd;word-break:break-all"></div>
+        <div id="w-detail" class="wallet-status-detail" hidden></div>
       </div>
       <form id="guard-builder">
         <label>Requested by (optional, self-declared)<input id="guard-issuer" name="issuer" maxlength="80" placeholder="Example Agent or merchant"></label>
@@ -167,39 +182,9 @@ export const guardBuilderHtml = `${pageHead(
     <section class="notice"><strong>Identity boundary:</strong> the sender name is self-declared. It is not proof that a company or domain authorized the request. LedgerGuard still binds and checks the exact payment fields.</section>
     ${footer}
   </main>
+  <script src="/wallet.js" defer></script>
   <script src="/guard-builder.js" defer></script>
-<script>
-(function(){
-var b=document.getElementById('w-btn'),s=document.getElementById('w-status'),d=document.getElementById('w-detail'),dot=document.getElementById('w-dot'),sec=document.getElementById('wallet-section'),addrI=document.getElementById('guard-recipient'),ac='',ch='';
-function ui(account,chainId){
-ac=account;ch=chainId;
-if(account){
-s.textContent='Connected: '+account.slice(0,6)+'...'+account.slice(-4);
-b.textContent='Disconnect';b.className='w-connected';dot.style.background='#4ade80';
-sec.style.borderColor='#4ade80';d.style.display='block';
-d.textContent='Wallet: '+account+(chainId?' | Chain: eip155:'+parseInt(chainId):'');
-if(addrI&&(!addrI.value||addrI.value==='0x2222222222222222222222222222222222222222'))addrI.value=account;
-}else{
-s.textContent='No wallet connected';b.textContent='Connect Wallet';b.className='';
-dot.style.background='#555';sec.style.borderColor='#2a2a5a';d.style.display='none';
-}}
-b.addEventListener('click',function(){
-if(ac){ui('','');return}
-if(!window.ethereum){s.textContent='No wallet found. Install MetaMask.';return}
-b.disabled=true;
-window.ethereum.request({method:'eth_requestAccounts'}).then(function(acc){
-if(acc&&acc[0])window.ethereum.request({method:'eth_chainId'}).then(function(c){ui(acc[0],c)});
-}).catch(function(){s.textContent='Connection cancelled'}).finally(function(){b.disabled=false});
-});
-if(window.ethereum){
-window.ethereum.request({method:'eth_accounts'}).then(function(acc){
-if(acc&&acc[0])window.ethereum.request({method:'eth_chainId'}).then(function(c){ui(acc[0],c)});
-}).catch(function(){});
-window.ethereum.on('accountsChanged',function(acc){if(acc&&acc[0])ui(acc[0],ch);else ui('','')});
-window.ethereum.on('chainChanged',function(c){ch=c;if(ac)ui(ac,c)});
-}
-})();
-</script>
+  <script src="/guard-builder-wallet.js" defer></script>
 </body>
 </html>`;
 
@@ -222,11 +207,7 @@ export function routesHtml(input: {
   )}
 <body>
   <main>
-    <nav class="portal-nav">
-      <a class="brand" href="/">LedgerGuard</a>
-      <div class="portal-nav-links"><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a></div>
-      <span class="badge">CAPPED TEST ROUTE</span>
-    </nav>
+    ${portalNavHtml("CAPPED TEST ROUTE")}
     <section class="subhero route-hero">
       <p class="eyebrow">BASE SEPOLIA &rarr; ARC TESTNET &middot; CCTP STANDARD</p>
       <h1 class="compact">Quote first. Sign second. Verify the mint.</h1>
@@ -254,6 +235,7 @@ export function routesHtml(input: {
         <p class="step">2 &middot; CONNECT + QUOTE</p>
         <h2>Wallet: <span id="route-wallet">not connected</span></h2>
         <p id="route-status" class="muted">The quote is read-only. Execution requires explicit browser-wallet signatures.</p>
+        <section id="route-readiness" class="route-readiness neutral" aria-live="polite"></section>
         <div class="wallet-buttons">
           <button id="route-connect" type="button" class="secondary">Connect wallet</button>
           <button id="route-quote" type="button" disabled>Get protected quote</button>
@@ -271,7 +253,9 @@ export function routesHtml(input: {
     <section class="notice"><strong>Safety boundary:</strong> this page cannot initiate Arc Mainnet or Base Mainnet transfers. It never receives a seed phrase or private key. Changing the amount after a quote invalidates execution.</section>
     ${footer}
   </main>
+  <script src="/wallet.js" defer></script>
   <script src="/routes.js" defer></script>
+  <script src="/site-nav.js" defer></script>
 </body>
 </html>`;
 }
@@ -282,13 +266,7 @@ export const portalHtml = `${pageHead(
 )}
 <body>
   <main>
-    <nav class="portal-nav">
-      <a class="brand" href="/">LedgerGuard</a>
-      <div class="portal-nav-links"><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a></div>
-      <button id="nav-connect" class="nav-wallet-btn" onclick="connectWallet()">Connect Wallet</button>
-      <span id="nav-wallet-display" style="display:none;font-size:12px;color:#8aa4ff;font-family:monospace;white-space:nowrap"></span>
-      <span class="badge">ARC PUBLIC TESTNET</span>
-    </nav>
+    ${portalNavHtml()}
     <section class="hero portal-hero">
       <p class="eyebrow">ONE BUSINESS &middot; TWO ISOLATED SERVICES</p>
       <h1>Control what may be paid.<br><span>Prove what was delivered.</span></h1>
@@ -320,30 +298,9 @@ export const portalHtml = `${pageHead(
     </section>
     <section class="notice"><strong>Current status:</strong> the protected API/MCP payment path, durable receipts, and capped browser-wallet crosschain route are implemented on test networks. An externally signed end-to-end crosschain record, repeat partner use, and a paid pilot remain acceptance gates.</section>
     ${footer}
-<script>
-(function(){var p=[],a=null,c=null;
-window.addEventListener("eip6963:announceProvider",function(e){p.push(e.detail)});
-window.dispatchEvent(new Event("eip6963:requestProvider"));
-var b=document.getElementById('nav-connect'),d=document.getElementById('nav-wallet-display');
-function doConnect(pr){
-pr.request({method:'eth_requestAccounts'}).then(function(ac){
-if(ac&&ac[0]){a=ac[0];b.textContent=ac[0].slice(0,6)+'...'+ac[0].slice(-4);b.classList.add('connected');
-pr.request({method:'eth_chainId'}).then(function(id){c=id;if(d){d.textContent='eip155:'+parseInt(id);d.style.display='inline'}})}
-}).catch(function(){alert('Connection cancelled')})
-}
-if(b)b.onclick=function(){
-if(a){a=null;c=null;b.textContent='Connect Wallet';b.classList.remove('connected');if(d)d.style.display='none';return}
-if(p.length>1){var s=p.map(function(x,i){return i+':'+x.info.name}).join(', ');var n=prompt('Select wallet ('+s+'):');if(n!==null){var idx=parseInt(n);if(!isNaN(idx)&&p[idx])doConnect(p[idx].provider)}}
-else if(p.length===1)doConnect(p[0].provider);
-else if(window.ethereum)doConnect(window.ethereum);
-else alert('No wallet found');
-};
-if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(function(ac){
-if(ac&&ac[0]){a=ac[0];b.textContent=ac[0].slice(0,6)+'...'+ac[0].slice(-4);b.classList.add('connected')}
-}).catch(function(){});
-})();
-</script>
   </main>
+  <script src="/wallet.js" defer></script>
+  <script src="/site-nav.js" defer></script>
 </body>
 </html>`;
 
@@ -621,7 +578,7 @@ export const integrationBoundaryHtml = `${pageHead(
 </body>
 </html>`;
 
-export const demoCss = `:root{color-scheme:dark;--bg:#07100d;--panel:#101b17;--line:#263a32;--text:#effbf5;--muted:#9bb2a8;--mint:#82f4bd;--orange:#ffb86b;--red:#ff7474}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 5%,#17382b 0,transparent 34%),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{width:min(1120px,calc(100% - 40px));margin:auto}nav{height:86px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:20px;letter-spacing:-.03em;text-decoration:none}.badge,.step,.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:800}.badge{color:var(--mint);border:1px solid #4d896d;padding:7px 10px;border-radius:99px}.badge.danger{color:var(--red);border-color:#8b4545}.hero{padding:76px 0 48px;max-width:900px}.subhero{padding:64px 0 38px;max-width:900px}.eyebrow,.step{color:var(--mint)}h1{font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.065em;margin:20px 0 26px}h1.compact{font-size:clamp(44px,6vw,70px)}h1 span{color:var(--mint)}.lead{font-size:20px;color:var(--muted);max-width:760px}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{color:var(--text);text-underline-offset:5px}.notice{background:#10241c;border:1px solid #315846;border-radius:12px;padding:16px 18px;margin:0 0 28px;color:#c8e8d9}.panel{background:linear-gradient(145deg,#13241d,#0d1713);border:1px solid var(--line);border-radius:22px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;box-shadow:0 25px 80px #0005}.developer-panel{margin-bottom:28px}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;background:#07100d;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:13px;font:inherit}input:focus{outline:2px solid var(--mint);outline-offset:1px}button{border:0;border-radius:10px;background:var(--mint);color:#07100d;font-weight:800;padding:14px;cursor:pointer}button.secondary{background:#244137;color:var(--text);border:1px solid #3d6958}button:disabled{opacity:.6}.result{grid-column:1/-1;border-left:4px solid var(--mint);background:#07100d;border-radius:8px;padding:18px;min-height:96px}.result.allow{border-color:var(--mint)}.result.review{border-color:var(--orange)}.result.block,.result.error{border-color:var(--red)}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;background:#050b09;border:1px solid var(--line);border-radius:8px;padding:16px;color:#c8e8d9}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{color:var(--orange);font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card,.code-card{background:linear-gradient(145deg,#13241d,#0d1713);border:1px solid var(--line);border-radius:16px;padding:24px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.status-dot.ok{background:var(--mint)}.status-dot.bad{background:var(--red)}footer{border-top:1px solid var(--line);padding:26px 0 42px;color:var(--muted);font-size:13px}@media(max-width:760px){main{width:min(100% - 24px,1120px)}.hero,.subhero{padding:48px 0 32px}.panel{grid-template-columns:1fr;padding:22px;gap:24px}.grid,.docs-grid{grid-template-columns:1fr;padding-bottom:42px}h1,h1.compact{font-size:46px}.lead{font-size:18px}}`;
+export const demoCss = `:root{color-scheme:dark;--bg:#060817;--panel:#0d1228;--line:#273052;--text:#f4f6ff;--muted:#9ba6c8;--mint:#8aa4ff;--orange:#b990ff;--red:#ff758d;--brand:#6f8cff;--brand-2:#9c6cff;--success:#55d6a7}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 82% 4%,#5536c638 0,transparent 30rem),radial-gradient(circle at 12% 20%,#245bca2f 0,transparent 34rem),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{width:min(1180px,calc(100% - 48px));margin:auto}nav{min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:21px;letter-spacing:-.03em;text-decoration:none;color:var(--text)}.badge,.step,.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:800}.badge{color:#b8c6ff;border:1px solid #52649f;background:#111936cc;padding:7px 10px;border-radius:99px}.badge.danger{color:var(--red);border-color:#8b4545}.hero{padding:76px 0 48px;max-width:900px}.subhero{padding:64px 0 38px;max-width:900px}.eyebrow,.step{color:#aebcff}h1{font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.065em;margin:20px 0 26px}h1.compact{font-size:clamp(44px,6vw,70px)}h1 span{background:linear-gradient(90deg,#88a2ff,#bc8cff);-webkit-background-clip:text;background-clip:text;color:transparent}.lead{font-size:20px;color:var(--muted);max-width:760px}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{color:var(--text);text-underline-offset:5px}.notice{background:#111a38;border:1px solid #344273;border-radius:12px;padding:16px 18px;margin:0 0 28px;color:#cbd3ef;box-shadow:inset 3px 0 #718aff}.panel{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:22px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;box-shadow:0 25px 80px #0005}.developer-panel{margin-bottom:28px}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;background:#070b1a;border:1px solid #334065;border-radius:10px;color:var(--text);padding:13px;font:inherit}input:focus{outline:2px solid var(--brand);outline-offset:1px;box-shadow:0 0 0 4px #6f8cff20}button{border:0;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;padding:14px;cursor:pointer}button.secondary{background:#151e3e;color:var(--text);border:1px solid #3b4a79}button:disabled{opacity:.6}.result{grid-column:1/-1;border-left:4px solid var(--success);background:#070b19;border-radius:8px;padding:18px;min-height:96px}.result.allow{border-color:var(--success)}.result.review{border-color:var(--orange)}.result.block,.result.error{border-color:var(--red)}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;background:#070b19;border:1px solid #2c365a;border-radius:8px;padding:16px;color:#c8d0ef}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{color:var(--orange);font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card,.code-card{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:16px;padding:24px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.status-dot.ok{background:var(--success)}.status-dot.bad{background:var(--red)}footer{border-top:1px solid var(--line);padding:26px 0 42px;color:var(--muted);font-size:13px}@media(max-width:760px){main{width:min(100% - 28px,1180px)}.hero,.subhero{padding:48px 0 32px}.panel{grid-template-columns:1fr;padding:22px;gap:24px}.grid,.docs-grid{grid-template-columns:1fr;padding-bottom:42px}h1,h1.compact{font-size:46px}.lead{font-size:18px}}`;
 
 export const unifiedBrandCss = `
 :root{
@@ -714,12 +671,31 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .builder-panel form{grid-template-columns:1fr 1fr}
 .builder-panel form label:nth-of-type(1),.builder-panel form label:nth-of-type(2),.builder-panel form label:nth-of-type(5),.builder-panel form button{grid-column:1/-1}
 .links a{color:#c6d0ff}
-#nav-connect{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;background:linear-gradient(135deg,#7b2ff7,#5b1fd7);border:none;color:#fff;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;margin:0 6px}
-#nav-connect:hover{box-shadow:0 4px 15px rgba(123,47,247,.4)}
-#nav-connect.connected{background:transparent;border:1px solid #4ade80;color:#4ade80;font-size:10px}
+.nav-wallet-btn,#nav-connect,#w-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));border:none;color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.nav-wallet-btn:hover,#nav-connect:hover,#w-btn:hover{box-shadow:0 4px 15px #6f8cff55}
+.nav-wallet-btn.connected,#nav-connect.connected,#w-btn.w-connected{background:transparent;border:1px solid var(--success);color:var(--success)}
+.nav-wallet-display{display:none;font-size:12px;color:#8aa4ff;font-family:ui-monospace,monospace;white-space:nowrap}
+.portal-nav{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px;border-bottom:1px solid #ffffff19;padding:18px 0;margin-bottom:12px}
+.nav-menu-toggle{display:none;background:#151e3e;border:1px solid #3b4a79;color:#dbe3ff;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
+.nav-mobile-panel{display:none;flex-direction:column;gap:12px;width:100%;padding:14px 0 4px}
+.nav-mobile-panel a{color:var(--muted);text-decoration:none;font-size:15px}
+.nav-mobile-panel.open{display:flex}
+.wallet-status-card{border:1px solid #2b355b;border-radius:14px;padding:16px;margin-bottom:20px;background:#0b1123}
+.wallet-status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wallet-status-dot{width:10px;height:10px;border-radius:50%;background:#555;flex:none}
+.wallet-status-label{flex:1;color:var(--muted);min-width:160px}
+.wallet-status-detail{margin-top:10px;font-family:ui-monospace,monospace;font-size:13px;color:#aabbdd;word-break:break-all}
+.wallet-connected{border-color:var(--success)}
+.route-readiness{border:1px solid #303a5d;border-radius:12px;padding:14px 16px;margin:16px 0;background:#0b1123}
+.route-readiness p{margin:8px 0 0;color:var(--muted);line-height:1.55}
+.route-readiness a{color:#c6d0ff}
+.route-readiness.neutral{border-color:#344273}
+.route-readiness.allow{border-color:var(--success)}
+.route-readiness.review{border-color:#ba91ff}
 footer{border-color:#ffffff19;line-height:1.9}
 @media(max-width:900px){
   .portal-nav-links{display:none}
+  .nav-menu-toggle{display:inline-flex}
   .route-grid{grid-template-columns:1fr}.route-evidence{grid-column:auto}.stage-row{grid-template-columns:1fr 1fr}
   .flow-row{grid-template-columns:1fr}
   .flow-row span{min-height:60px;border-right:0;border-bottom:1px solid var(--line)}
@@ -742,7 +718,7 @@ footer{border-color:#ffffff19;line-height:1.9}
 
 export const guardBuilderJs = `const form=document.querySelector("#guard-builder");const result=document.querySelector("#guard-builder-result");const created=document.querySelector("#guard-created-url");const actions=document.querySelector("#guard-builder-actions");const open=document.querySelector("#guard-open");const copy=document.querySelector("#guard-copy");const share=document.querySelector("#guard-share");let currentUrl="";const show=(kind,title,message)=>{result.className="result "+kind;result.querySelector("strong").textContent=title;result.querySelector("p").textContent=message};form.addEventListener("submit",async(event)=>{event.preventDefault();actions.hidden=true;created.hidden=true;show("neutral","Creating link","Validating the declared payment intent…");const expiryHours=Number(document.querySelector("#guard-expiry-hours").value);const payload={issuer:document.querySelector("#guard-issuer").value.trim()||undefined,recipient:document.querySelector("#guard-recipient").value.trim(),amount:document.querySelector("#guard-amount").value.trim(),limit:document.querySelector("#guard-limit").value.trim(),purpose:document.querySelector("#guard-purpose").value.trim(),expires:new Date(Date.now()+expiryHours*3600000).toISOString()};try{const response=await fetch("/v1/guard-links",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||body.error||"Could not create link");currentUrl=body.url;created.value=currentUrl;created.hidden=false;open.href=currentUrl;actions.hidden=false;show("allow","Guard Link created","The intent is time-bound and ready to review. Intent reference: "+body.intentId)}catch(error){show("error","Could not create link",error instanceof Error?error.message:"Unknown error")}});copy.addEventListener("click",async()=>{if(!currentUrl)return;try{await navigator.clipboard.writeText(currentUrl);show("allow","Link copied","The Guard Link is ready to share.")}catch{created.focus();created.select();show("review","Copy manually","Select and copy the displayed URL.")}});share.addEventListener("click",async()=>{if(!currentUrl)return;if(navigator.share){try{await navigator.share({title:"LedgerGuard payment request",url:currentUrl});return}catch{}}try{await navigator.clipboard.writeText(currentUrl);show("allow","Link copied","Native sharing was unavailable, so the link was copied.")}catch{show("review","Share manually","Copy the displayed URL.")}});`;
 
-export const guardLinkJs = `const root=document.querySelector("#guard-wallet");const connect=document.querySelector("#connect-wallet");const send=document.querySelector("#send-payment");const verify=document.querySelector("#verify-evidence");const status=document.querySelector("#wallet-status");const output=document.querySelector("#wallet-result");const chainId="0x4cef52";const usdc="0x3600000000000000000000000000000000000000";let account="";let txHash="";const show=(kind,html)=>{output.hidden=false;output.className="result "+kind;output.replaceChildren();const p=document.createElement("p");p.textContent=html;output.append(p)};const units=(value)=>{const parts=value.split(".");return (BigInt(parts[0]||"0")*1000000n+BigInt(((parts[1]||"")+"000000").slice(0,6))).toString()};const data=()=>{const recipient=root.dataset.recipient.slice(2).toLowerCase().padStart(64,"0");const amount=BigInt(units(root.dataset.amount)).toString(16).padStart(64,"0");return "0xa9059cbb"+recipient+amount};const ensureNetwork=async()=>{const current=await window.ethereum.request({method:"eth_chainId"});if(current.toLowerCase()===chainId)return;try{await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId}]})}catch(error){if(error&&error.code===4902){await window.ethereum.request({method:"wallet_addEthereumChain",params:[{chainId,chainName:"Arc Testnet",nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},rpcUrls:["https://rpc.testnet.arc.network"],blockExplorerUrls:["https://testnet.arcscan.app"]}]})}else{throw error}}};const connected=()=>{const declared=(root.dataset.payer||"").toLowerCase();const matches=declared&&account.toLowerCase()===declared;send.disabled=!(root.dataset.decision==="ALLOW"&&matches);status.textContent=matches?(send.disabled?"The connected wallet matches, but this intent is not allowed to proceed.":"Wallet matched. Review the exact testnet transaction before signing."):"The connected wallet does not match the declared payer.";};connect.addEventListener("click",async()=>{if(!window.ethereum){show("review","No compatible EVM wallet was detected. You can still review the intent and evidence.");return}connect.disabled=true;try{const accounts=await window.ethereum.request({method:"eth_requestAccounts"});account=accounts&&accounts[0]||"";if(!account)throw new Error("No account was selected.");await ensureNetwork();const declared=root.dataset.payer||"";if(!declared||declared.toLowerCase()!==account.toLowerCase()){const url=new URL(location.href);url.searchParams.set("payer",account);location.replace(url.toString());return}connected()}catch(error){show("error",error instanceof Error?error.message:"Wallet connection failed.")}finally{connect.disabled=false}});send.addEventListener("click",async()=>{if(!window.ethereum||!account||root.dataset.decision!=="ALLOW")return;if(!confirm("Continue to your wallet to review a "+root.dataset.amount+" test USDC transfer?"))return;send.disabled=true;try{await ensureNetwork();txHash=await window.ethereum.request({method:"eth_sendTransaction",params:[{from:account,to:usdc,data:data(),value:"0x0"}]});show("review","Transaction submitted. Wait for confirmation, then verify the onchain result.");const link=document.createElement("a");link.href="https://testnet.arcscan.app/tx/"+txHash;link.rel="noreferrer";link.target="_blank";link.textContent="Open transaction in ArcScan";output.append(link);verify.hidden=false}catch(error){show("error",error instanceof Error?error.message:"The wallet rejected or failed the transaction.");send.disabled=false}});verify.addEventListener("click",async()=>{if(!txHash)return;verify.disabled=true;show("neutral","Checking the confirmed transaction against the original intent…");try{const response=await fetch("/v1/evidence",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({network:"arcTestnet",txHash,intent:{action:"transfer",expectedDebitAddress:account,expectedRecipient:root.dataset.recipient,expectedAssetAddress:usdc,expectedAmountMicroUsdc:units(root.dataset.amount),purpose:root.dataset.purpose}})});const body=await response.json();if(response.status===404){show("review","The transaction is not confirmed yet. Wait a moment and verify again.");return}if(!response.ok)throw new Error(body.message||body.error||"Evidence check failed");const kind=body.status==="VERIFIED"?"allow":body.status==="MISMATCH"?"block":"review";show(kind,body.status+": "+(body.status==="VERIFIED"?"The confirmed asset flow matches the declared payment.":"Review the evidence before treating this payment as complete."));const pre=document.createElement("pre");pre.textContent=JSON.stringify(body,null,2);output.append(pre)}catch(error){show("error",error instanceof Error?error.message:"Evidence check failed.")}finally{verify.disabled=false}});if(!window.ethereum){connect.disabled=true;status.textContent="No compatible EVM wallet was detected. Intent review remains available."}else if(root.dataset.payer){status.textContent="Reconnect the declared test wallet to enable the payment button."}if(root.dataset.decision==="BLOCK"){connect.disabled=true;status.textContent="This payment is blocked. Wallet handoff is disabled."}`;
+export const guardLinkJs = `const root=document.querySelector("#guard-wallet");const connect=document.querySelector("#connect-wallet");const send=document.querySelector("#send-payment");const verify=document.querySelector("#verify-evidence");const status=document.querySelector("#wallet-status");const output=document.querySelector("#wallet-result");const wallet=window.LedgerGuardWallet;const arcChain={chainId:"0x4cef52",chainName:"Arc Testnet",nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},rpcUrls:["https://rpc.testnet.arc.network"],blockExplorerUrls:["https://testnet.arcscan.app"]};const usdc="0x3600000000000000000000000000000000000000";let account="";let txHash="";const show=(kind,html)=>{output.hidden=false;output.className="result "+kind;output.replaceChildren();const p=document.createElement("p");p.textContent=html;output.append(p)};const units=(value)=>{const parts=value.split(".");return (BigInt(parts[0]||"0")*1000000n+BigInt(((parts[1]||"")+"000000").slice(0,6))).toString()};const data=()=>{const recipient=root.dataset.recipient.slice(2).toLowerCase().padStart(64,"0");const amount=BigInt(units(root.dataset.amount)).toString(16).padStart(64,"0");return "0xa9059cbb"+recipient+amount};const connected=()=>{const state=wallet?.getState?.()||{account:""};account=state.account||"";const declared=(root.dataset.payer||"").toLowerCase();const matches=declared&&account.toLowerCase()===declared;send.disabled=!(root.dataset.decision==="ALLOW"&&matches);status.textContent=matches?(send.disabled?"The connected wallet matches, but this intent is not allowed to proceed.":"Wallet matched. Review the exact testnet transaction before signing."):"The connected wallet does not match the declared payer."};connect.addEventListener("click",async()=>{if(!wallet){show("review","Wallet module did not load. Refresh and try again.");return}connect.disabled=true;try{await wallet.connect();await wallet.ensureChain(arcChain);const state=wallet.getState();account=state.account;const declared=root.dataset.payer||"";if(!declared||declared.toLowerCase()!==account.toLowerCase()){const url=new URL(location.href);url.searchParams.set("payer",account);location.replace(url.toString());return}connected()}catch(error){show("error",error instanceof Error?error.message:"Wallet connection failed.")}finally{connect.disabled=false}});send.addEventListener("click",async()=>{const provider=wallet?.getProvider();if(!provider||!account||root.dataset.decision!=="ALLOW")return;if(!confirm("Continue to your wallet to review a "+root.dataset.amount+" test USDC transfer?"))return;send.disabled=true;try{await wallet.ensureChain(arcChain);txHash=await provider.request({method:"eth_sendTransaction",params:[{from:account,to:usdc,data:data(),value:"0x0"}]});show("review","Transaction submitted. Wait for confirmation, then verify the onchain result.");const link=document.createElement("a");link.href="https://testnet.arcscan.app/tx/"+txHash;link.rel="noreferrer";link.target="_blank";link.textContent="Open transaction in ArcScan";output.append(link);verify.hidden=false}catch(error){show("error",error instanceof Error?error.message:"The wallet rejected or failed the transaction.");send.disabled=false}});verify.addEventListener("click",async()=>{if(!txHash)return;verify.disabled=true;show("neutral","Checking the confirmed transaction against the original intent…");try{const response=await fetch("/v1/evidence",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({network:"arcTestnet",txHash,intent:{action:"transfer",expectedDebitAddress:account,expectedRecipient:root.dataset.recipient,expectedAssetAddress:usdc,expectedAmountMicroUsdc:units(root.dataset.amount),purpose:root.dataset.purpose}})});const body=await response.json();if(response.status===404){show("review","The transaction is not confirmed yet. Wait a moment and verify again.");return}if(!response.ok)throw new Error(body.message||body.error||"Evidence check failed");const kind=body.status==="VERIFIED"?"allow":body.status==="MISMATCH"?"block":"review";show(kind,body.status+": "+(body.status==="VERIFIED"?"The confirmed asset flow matches the declared payment.":"Review the evidence before treating this payment as complete."));const pre=document.createElement("pre");pre.textContent=JSON.stringify(body,null,2);output.append(pre)}catch(error){show("error",error instanceof Error?error.message:"Evidence check failed.")}finally{verify.disabled=false}});if(!wallet){connect.disabled=true;status.textContent="Wallet support did not load. Intent review remains available."}else if(root.dataset.payer){status.textContent="Reconnect the declared test wallet to enable the payment button.";void wallet.restore().then(()=>connected()).catch(()=>{})}if(root.dataset.decision==="BLOCK"){connect.disabled=true;status.textContent="This payment is blocked. Wallet handoff is disabled."}`;
 
 export const demoJs = `const form=document.querySelector("#preflight");const result=document.querySelector("#result");const title=document.querySelector("#result-title");const summary=document.querySelector("#result-summary");const findings=document.querySelector("#result-findings");const details=document.querySelector("#result-details");const json=document.querySelector("#result-json");const usdc="0x3600000000000000000000000000000000000000";const messages={ALLOW:"The implemented checks passed. Continue only after reviewing the transaction in your wallet.",REVIEW:"Information is incomplete or an unknown condition remains. Review before proceeding.",BLOCK:"A defined risk was detected. Do not sign or send this transaction."};const clear=()=>{findings.replaceChildren();details.hidden=true;json.textContent=""};const show=(kind,heading,message)=>{result.className="result "+kind;title.textContent=heading;summary.textContent=message};const stale=(message)=>{clear();show("review","Result expired",message)};form.addEventListener("input",()=>stale("The input changed. Run the check again."));form.addEventListener("invalid",()=>stale("Correct the invalid input before running the check."),true);const units=(v)=>{if(!/^\\d+(\\.\\d{0,6})?$/.test(v))throw new Error("The amount must be a positive number with no more than 6 decimal places.");const [w,f=""]=v.split(".");const value=BigInt(w)*1000000n+BigInt((f+"000000").slice(0,6));if(value<=0n)throw new Error("The amount must be greater than zero.");return value.toString()};const address=(v,label)=>{if(!/^0x[0-9a-fA-F]{40}$/.test(v))throw new Error(label+" is not a valid EVM address.");return v};const pad=(v)=>v.slice(2).toLowerCase().padStart(64,"0");form.addEventListener("submit",async(e)=>{e.preventDefault();const button=form.querySelector("button");button.disabled=true;clear();show("neutral","Checking","Parsing the transaction and evaluating Arc Testnet policy…");try{const recipient=address(document.querySelector("#recipient").value.trim(),"Recipient address");const payerValue=document.querySelector("#payer").value.trim();const payer=payerValue?address(payerValue,"Payer public address"):"";const amount=units(document.querySelector("#amount").value.trim());const limit=units(document.querySelector("#limit").value.trim());const data="0xa9059cbb"+pad(recipient)+BigInt(amount).toString(16).padStart(64,"0");const intent={action:"transfer",expectedRecipient:recipient,expectedAssetAddress:usdc,expectedAmountMicroUsdc:amount,purpose:"LedgerGuard browser demo"};if(payer)intent.expectedDebitAddress=payer;const payload={network:"arcTestnet",to:usdc,data,valueWei:"0",intent,policy:{requireSimulation:Boolean(payer),maxAmountMicroUsdc:limit}};if(payer)payload.from=payer;const response=await fetch("/v1/preflight",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||body.error||"Request failed");show(body.decision.toLowerCase(),body.decision,messages[body.decision]||"Check completed.");for(const item of body.findings||[]){const li=document.createElement("li");li.textContent=item.code+": "+item.message;findings.append(li)}if(!body.findings?.length){const li=document.createElement("li");li.textContent="No known issue was found in the recipient, asset, amount, payer, or simulation.";findings.append(li)}json.textContent=JSON.stringify(body,null,2);details.hidden=false}catch(error){show("error","Check failed",error instanceof Error?error.message:"Unknown error");}finally{button.disabled=false}});`;
 

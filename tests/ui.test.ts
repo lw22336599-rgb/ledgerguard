@@ -30,7 +30,12 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/meter"');
     expect(portalHtml).toContain('href="/receipts"');
     expect(portalHtml).toContain('href="/developers"');
-    expect(portalHtml).toContain('href="/guard/create"');
+    expect(portalHtml).toContain('id="nav-connect"');
+    expect(portalHtml).toContain('id="nav-menu-toggle"');
+    expect(portalHtml).toContain('id="nav-mobile-panel"');
+    expect(portalHtml).toContain("/wallet.js");
+    expect(portalHtml).toContain("/site-nav.js");
+    expect(portalHtml).not.toContain("connectWallet()");
     expect(portalHtml).toContain("https://x.com/HuiLibaa");
     expect(demoHtml).toContain('href="/docs"');
     expect(demoHtml).toContain('href="/catalog"');
@@ -127,7 +132,21 @@ describe("browser demo experience", () => {
   });
 
   it("creates and completes Guard Links without server-side signing", () => {
-    expect(guardBuilderHtml).toContain('id="guard-builder"');
+    expect(portalHtml).toContain('href="/guard/create"');
+    expect(guardBuilderHtml).toContain("/guard-builder-wallet.js");
+    expect(guardBuilderHtml).toContain("wallet-status-card");
+    expect(guardLinkHtml({
+      issuer: "Example Agent",
+      intentId: "a1b2c3d4e5f6",
+      payer: "Not declared",
+      recipient: "0x2222222222222222222222222222222222222222",
+      amount: "1.25",
+      limit: "2",
+      purpose: "Invoice & delivery",
+      decision: "REVIEW",
+      findings: [{ code: "SIMULATION_REQUIRED", message: "Review first" }],
+      requestId: "request-123",
+    })).toContain("/wallet.js");
     expect(guardBuilderHtml).toContain("Identity boundary");
     expect(guardBuilderJs).toContain('fetch("/v1/guard-links"');
     expect(guardLinkJs).toContain('"eth_sendTransaction"');
