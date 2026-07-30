@@ -9,6 +9,7 @@ import {
   guardBuilderHtml,
   guardLinkHtml,
   guardLinkJs,
+  integrationBoundaryHtml,
   portalHtml,
   statusHtml,
   testerHtml,
@@ -172,6 +173,19 @@ describe("browser demo experience", () => {
     expect(demoHtml).toContain("/site-nav.js");
     expect(developerDocsHtml).toContain('id="nav-menu-toggle"');
     expect(developerDocsHtml).toContain("/site-nav.js");
+    for (const html of [
+      catalogHtml("1000"),
+      testerHtml("1000"),
+      developerConsoleHtml({
+        storageReady: true,
+        registrationEnabled: true,
+      }),
+      integrationBoundaryHtml,
+    ]) {
+      expect(html).toContain('class="portal-nav"');
+      expect(html).toContain('id="nav-connect"');
+      expect(html).toContain("/site-nav.js");
+    }
     expect(
       statusHtml({
         ready: true,

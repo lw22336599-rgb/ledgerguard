@@ -88,7 +88,6 @@ import {
 } from "./services/tenant-store.js";
 import {
   catalogHtml,
-  demoCss,
   demoHtml,
   demoJs,
   developerConsoleHtml,
@@ -101,12 +100,12 @@ import {
   integrationBoundaryHtml,
   portalHtml,
   routesHtml,
+  siteCss,
   statusHtml,
   testnetHelpHtml,
   testnetHelpJs,
   mainnetCanaryHtml,
   testerHtml,
-  unifiedBrandCss,
 } from "./ui.js";
 import { developerShadowJs } from "./ui-shadow.js";
 
@@ -381,7 +380,7 @@ app.get("/status", async (context) => {
   );
 });
 app.get("/styles.css", (context) =>
-  context.body(`${demoCss}\n${unifiedBrandCss}`, 200, {
+  context.body(siteCss, 200, {
     "Content-Type": "text/css; charset=utf-8",
   }),
 );

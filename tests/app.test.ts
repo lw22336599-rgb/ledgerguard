@@ -203,6 +203,10 @@ describe("HTTP API", () => {
     const css = await app.request("/styles.css");
     expect(css.status).toBe(200);
     expect(css.headers.get("content-type")).toContain("text/css");
+    const cssText = await css.text();
+    expect(cssText).toContain(".result.neutral{border-color:#667de0}");
+    expect(cssText).toContain(".portal-nav{");
+    expect(cssText.match(/\.panel\{[^}]*border-radius:18px/)).toBeTruthy();
 
     const js = await app.request("/app.js");
     expect(js.status).toBe(200);

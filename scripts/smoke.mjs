@@ -51,6 +51,8 @@ for (const [path, marker] of [
     response.status !== 200 ||
     !html.includes(marker) ||
     !html.includes('<html lang="en">') ||
+    !html.includes('class="portal-nav"') ||
+    !html.includes("/site-nav.js") ||
     /\p{Script=Han}/u.test(html)
   ) {
     throw new Error(`${path}: human-readable page is unavailable`);
@@ -92,7 +94,7 @@ const guard = await fetch(
 const guardHtml = await guard.text();
 if (
   guard.status !== 200 ||
-  !guardHtml.includes("Payment intent receipt") ||
+  !guardHtml.includes("Payment request") ||
   !guardHtml.includes("Release smoke") ||
   !guardHtml.includes("REVIEW")
 ) {

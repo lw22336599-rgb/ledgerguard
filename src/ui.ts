@@ -467,7 +467,7 @@ export function catalogHtml(
   )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">SERVICE CATALOG</span></nav>
+    ${portalNavHtml("SERVICE CATALOG")}
     <section class="subhero">
       <p class="eyebrow">SERVICE CATALOG</p>
       <h1 class="compact">Three entry points. One safety core.</h1>
@@ -480,7 +480,7 @@ export function catalogHtml(
     </section>
     <section class="notice"><strong>Commercial status:</strong> The testnet payment flow has been technically validated, but test assets have no financial value. LedgerGuard does not currently claim paying customers, recurring revenue, or a mainnet SLA.${sellerAddress ? ` Public test recipient: <code>${sellerAddress}</code>.` : ""}</section>
     ${footer}
-  </main>
+  </main>${portalPageScripts()}
 </body>
 </html>`;
 }
@@ -496,7 +496,7 @@ export const mainnetCanaryHtml = `${pageHead(
       <p class="eyebrow">REAL USDC · FAIL-CLOSED CANARY · 0.001 USDC</p>
       <h1 class="compact">Sign the production canary once.</h1>
       <p class="lead">Connect a Base Mainnet wallet with a small USDC balance and ETH for gas. LedgerGuard requests a standard x402 payment of 0.001 USDC, then delivers a strict Arc Testnet evidence receipt.</p>
-      <p class="lead"><strong>Important:</strong> do not use the settlement recipient wallet (<code>0xF1437d…466c</code>) as the payer. Switch MetaMask to a different Base account, or the payment will fail after signing.</p>
+      <p class="lead"><strong>Important:</strong> do not use the settlement recipient wallet (<code>0xA0Fef5…Ca0b9</code>) as the payer. Use a different Base Mainnet account that holds USDC and ETH for gas.</p>
     </section>
     <section class="panel builder-panel">
       <div class="wallet-buttons">
@@ -526,7 +526,7 @@ export function testerHtml(
   )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">PUBLIC TEST</span></nav>
+    ${portalNavHtml("PUBLIC TEST")}
     <section class="subhero">
       <p class="eyebrow">PUBLIC TEST ENTRY · TESTNET ONLY</p>
       <h1 class="compact">Complete the test flow end to end</h1>
@@ -541,7 +541,7 @@ export function testerHtml(
     ${sellerAddress ? `<section class="notice"><strong>Testnet recipient:</strong> <code>${sellerAddress}</code>. It receives only Arc Testnet x402 settlements; the service never stores the wallet private key.</section>` : ""}
     <div class="links bottom-links"><a href="https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose" rel="noreferrer">Submit a test result or issue</a><a href="/status">View live status</a><a href="mailto:lw22336599@gmail.com">Email us</a></div>
     ${footer}
-  </main>
+  </main>${portalPageScripts()}
 </body>
 </html>`;
 }
@@ -557,7 +557,7 @@ export function developerConsoleHtml(input: {
   )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge ${available ? "" : "danger"}">${available ? "TESTNET SELF-SERVICE" : "SETUP PENDING"}</span></nav>
+    ${portalNavHtml(available ? "TESTNET SELF-SERVICE" : "SETUP PENDING")}
     <section class="subhero">
       <p class="eyebrow">DEVELOPER SELF-SERVICE</p>
       <h1 class="compact">One key. Metered safety checks.</h1>
@@ -596,8 +596,7 @@ export function developerConsoleHtml(input: {
     <section class="notice"><strong>Commercial boundary:</strong> This console proves tenant identity, key revocation, quota enforcement, and durable metering. It does not represent a paid subscription or mainnet service.</section>
     <div class="links bottom-links"><a href="/docs">API documentation</a><a href="/test">Public test flow</a><a href="/status">Live status</a></div>
     ${footer}
-  </main>
-  <script src="/developer.js" defer></script>
+  </main>${portalPageScripts("/developer.js")}
 </body>
 </html>`;
 }
@@ -656,7 +655,7 @@ export const integrationBoundaryHtml = `${pageHead(
 )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">SAFETY BOUNDARY</span></nav>
+    ${portalNavHtml("SAFETY BOUNDARY")}
     <section class="subhero"><p class="eyebrow">INTEGRATION SAFETY BOUNDARY</p><h1 class="compact">What the system does — and never does</h1></section>
     <section class="docs-grid">
       <article class="doc-card"><span>DOES</span><h2>Inspect and reconcile</h2><p>Parse supported calls, run read-only simulation, match declared intent, and return a reviewable evidence summary.</p></article>
@@ -665,11 +664,11 @@ export const integrationBoundaryHtml = `${pageHead(
     </section>
     <section class="notice"><strong>Important:</strong> LedgerGuard is an additional safety layer. It does not replace wallet confirmation, contract audits, organizational approval, or the user's final judgment.</section>
     ${footer}
-  </main>
+  </main>${portalPageScripts()}
 </body>
 </html>`;
 
-export const demoCss = `:root{color-scheme:dark;--bg:#060817;--panel:#0d1228;--line:#273052;--text:#f4f6ff;--muted:#9ba6c8;--mint:#8aa4ff;--orange:#b990ff;--red:#ff758d;--brand:#6f8cff;--brand-2:#9c6cff;--success:#55d6a7}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 82% 4%,#5536c638 0,transparent 30rem),radial-gradient(circle at 12% 20%,#245bca2f 0,transparent 34rem),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{width:min(1180px,calc(100% - 48px));margin:auto}nav{min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:21px;letter-spacing:-.03em;text-decoration:none;color:var(--text)}.badge,.step,.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:800}.badge{color:#b8c6ff;border:1px solid #52649f;background:#111936cc;padding:7px 10px;border-radius:99px}.badge.danger{color:var(--red);border-color:#8b4545}.hero{padding:76px 0 48px;max-width:900px}.subhero{padding:64px 0 38px;max-width:900px}.eyebrow,.step{color:#aebcff}h1{font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.065em;margin:20px 0 26px}h1.compact{font-size:clamp(44px,6vw,70px)}h1 span{background:linear-gradient(90deg,#88a2ff,#bc8cff);-webkit-background-clip:text;background-clip:text;color:transparent}.lead{font-size:20px;color:var(--muted);max-width:760px}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{color:var(--text);text-underline-offset:5px}.notice{background:#111a38;border:1px solid #344273;border-radius:12px;padding:16px 18px;margin:0 0 28px;color:#cbd3ef;box-shadow:inset 3px 0 #718aff}.panel{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:22px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;box-shadow:0 25px 80px #0005}.developer-panel{margin-bottom:28px}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;background:#070b1a;border:1px solid #334065;border-radius:10px;color:var(--text);padding:13px;font:inherit}input:focus{outline:2px solid var(--brand);outline-offset:1px;box-shadow:0 0 0 4px #6f8cff20}button{border:0;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;padding:14px;cursor:pointer}button.secondary{background:#151e3e;color:var(--text);border:1px solid #3b4a79}button:disabled{opacity:.6}.result{grid-column:1/-1;border-left:4px solid var(--success);background:#070b19;border-radius:8px;padding:18px;min-height:96px}.result.allow{border-color:var(--success)}.result.review{border-color:var(--orange)}.result.block,.result.error{border-color:var(--red)}.result.neutral{border-color:#667de0}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;background:#070b19;border:1px solid #2c365a;border-radius:8px;padding:16px;color:#c8d0ef}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{color:var(--orange);font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card,.code-card{background:linear-gradient(145deg,#111831e8,#090d1ee8);border:1px solid var(--line);border-radius:16px;padding:24px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.status-dot.ok{background:var(--success)}.status-dot.bad{background:var(--red)}footer{border-top:1px solid var(--line);padding:26px 0 42px;color:var(--muted);font-size:13px}@media(max-width:760px){main{width:min(100% - 28px,1180px)}.hero,.subhero{padding:48px 0 32px}.panel{grid-template-columns:1fr;padding:22px;gap:24px}.grid,.docs-grid{grid-template-columns:1fr;padding-bottom:42px}h1,h1.compact{font-size:46px}.lead{font-size:18px}}`;
+const siteBaseCss = `:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{margin:auto}nav{display:flex;align-items:center;justify-content:space-between}.subhero{padding:64px 0 38px;max-width:900px}h1{margin:20px 0 26px;letter-spacing:-.065em}h1.compact{font-size:clamp(44px,6vw,70px)}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}h3{margin:14px 0 4px}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;padding:13px;font:inherit;color:var(--text)}button{cursor:pointer;font-weight:800;padding:14px;border:0}button:disabled{opacity:.6}.developer-panel{margin-bottom:28px}.panel{display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:32px}.result{grid-column:1/-1;border-left:4px solid var(--success);border-radius:8px;padding:18px;min-height:96px}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;padding:16px;color:#c8d0ef}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{text-underline-offset:5px}footer{padding:26px 0 42px;color:var(--muted);font-size:13px}.badge.danger{color:var(--red);border-color:#8b4545}`;
 
 export const unifiedBrandCss = `
 :root{
@@ -832,6 +831,8 @@ footer{border-color:#ffffff19;line-height:1.9}
   .badge{font-size:9px}
 }
 `;
+
+export const siteCss = `${siteBaseCss}${unifiedBrandCss}`;
 
 export const guardLinkJs = `const root=document.querySelector("#guard-wallet");const connect=document.querySelector("#connect-wallet");const send=document.querySelector("#send-payment");const verify=document.querySelector("#verify-evidence");const status=document.querySelector("#wallet-status");const output=document.querySelector("#wallet-result");const cta=document.querySelector("#guard-cta");const wallet=window.LedgerGuardWallet;const arcChain={chainId:"0x4cef52",chainName:"Arc Testnet",nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},rpcUrls:["https://rpc.testnet.arc.network"],blockExplorerUrls:["https://testnet.arcscan.app"]};const usdc="0x3600000000000000000000000000000000000000";let account="";let txHash="";const show=(kind,html)=>{output.hidden=false;output.className="result "+kind;output.replaceChildren();const p=document.createElement("p");p.textContent=html;output.append(p)};const units=(value)=>{const parts=value.split(".");return (BigInt(parts[0]||"0")*1000000n+BigInt(((parts[1]||"")+"000000").slice(0,6))).toString()};const data=()=>{const recipient=root.dataset.recipient.slice(2).toLowerCase().padStart(64,"0");const amount=BigInt(units(root.dataset.amount)).toString(16).padStart(64,"0");return "0xa9059cbb"+recipient+amount};const connected=()=>{const state=wallet?.getState?.()||{account:""};account=state.account||"";const declared=(root.dataset.payer||"").toLowerCase();const matches=declared&&account.toLowerCase()===declared;send.disabled=!(root.dataset.decision==="ALLOW"&&matches);status.textContent=matches?(send.disabled?"The connected wallet matches, but this intent is not allowed to proceed.":"Wallet matched. Review the exact testnet transaction before signing."):"The connected wallet does not match the declared payer."};connect.addEventListener("click",async()=>{if(!wallet){show("review","Wallet module did not load. Refresh and try again.");return}connect.disabled=true;try{await wallet.connect();await wallet.ensureChain(arcChain);const state=wallet.getState();account=state.account;const declared=root.dataset.payer||"";if(!declared||declared.toLowerCase()!==account.toLowerCase()){const url=new URL(location.href);url.searchParams.set("payer",account);location.replace(url.toString());return}connected()}catch(error){show("error",error instanceof Error?error.message:"Wallet connection failed.")}finally{connect.disabled=false}});send.addEventListener("click",async()=>{const provider=wallet?.getProvider();if(!provider||!account||root.dataset.decision!=="ALLOW")return;if(!confirm("Continue to your wallet to review a "+root.dataset.amount+" test USDC transfer?"))return;send.disabled=true;try{await wallet.ensureChain(arcChain);txHash=await provider.request({method:"eth_sendTransaction",params:[{from:account,to:usdc,data:data(),value:"0x0"}]});show("review","Transaction submitted. Wait for confirmation, then verify the onchain result.");const link=document.createElement("a");link.href="https://testnet.arcscan.app/tx/"+txHash;link.rel="noreferrer";link.target="_blank";link.textContent="Open transaction in ArcScan";output.append(link);verify.hidden=false}catch(error){show("error",error instanceof Error?error.message:"The wallet rejected or failed the transaction.");send.disabled=false}});verify.addEventListener("click",async()=>{if(!txHash)return;verify.disabled=true;show("neutral","Checking the confirmed transaction against the original intent…");try{const response=await fetch("/v1/evidence",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({network:"arcTestnet",txHash,intent:{action:"transfer",expectedDebitAddress:account,expectedRecipient:root.dataset.recipient,expectedAssetAddress:usdc,expectedAmountMicroUsdc:units(root.dataset.amount),purpose:root.dataset.purpose}})});const body=await response.json();if(response.status===404){show("review","The transaction is not confirmed yet. Wait a moment and verify again.");return}if(!response.ok)throw new Error(body.message||body.error||"Evidence check failed");const kind=body.status==="VERIFIED"?"allow":body.status==="MISMATCH"?"block":"review";show(kind,body.status+": "+(body.status==="VERIFIED"?"The confirmed asset flow matches the declared payment.":"Review the evidence before treating this payment as complete."));if(body.status==="VERIFIED"&&cta){cta.classList.add("guard-cta-highlight");cta.scrollIntoView({behavior:"smooth",block:"nearest"})}const pre=document.createElement("pre");pre.textContent=JSON.stringify(body,null,2);output.append(pre)}catch(error){show("error",error instanceof Error?error.message:"Evidence check failed.")}finally{verify.disabled=false}});if(!wallet){connect.disabled=true;status.textContent="Wallet support did not load. Intent review remains available."}else if(root.dataset.payer){status.textContent="Reconnect the declared test wallet to enable the payment button.";void wallet.restore().then(()=>connected()).catch(()=>{})}if(root.dataset.decision==="BLOCK"){connect.disabled=true;status.textContent="This payment is blocked. Wallet handoff is disabled."}`;
 
