@@ -147,6 +147,26 @@ describe("HTTP API", () => {
     );
     expect(mainnet.enabled).toBe(false);
     expect(mainnet.chainId).toBeNull();
+    expect(body.shadows[0]).toMatchObject({
+      name: "arcMainnet5042",
+      mode: "read-only-shadow",
+      chainId: 5_042,
+      realFundsEnabled: false,
+      signingEnabled: false,
+      x402MainnetEnabled: false,
+    });
+  });
+
+  it("fails closed when the 5042 shadow is not configured", async () => {
+    const response = await app.request("/v1/shadow/arc-mainnet");
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({
+      ok: false,
+      mode: "read-only-shadow",
+      realFundsEnabled: false,
+      signingEnabled: false,
+      x402MainnetEnabled: false,
+    });
   });
 
   it("rejects Arc Mainnet requests", async () => {

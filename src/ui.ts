@@ -175,10 +175,23 @@ export function statusHtml(input: {
   blockNumber?: string;
   x402: boolean;
   mainnet: boolean;
+  shadow: {
+    ok: boolean;
+    enabled: boolean;
+    chainId: number;
+    headBlock: string | null;
+    healthyRpcs: number;
+    healthyObservers: number;
+  };
 }): string {
   const rpcLabel = input.ready
     ? `正常 · Arc Testnet ${input.chainId} · Block ${input.blockNumber}`
     : "异常 · 当前 RPC 探测未通过";
+  const shadowLabel = input.shadow.ok
+    ? `READ ONLY · Chain ${input.shadow.chainId} · Block ${input.shadow.headBlock} · ${input.shadow.healthyRpcs} RPC + ${input.shadow.healthyObservers} observer`
+    : input.shadow.enabled
+      ? "DEGRADED · Shadow consensus check failed closed"
+      : "DISABLED · Shadow monitoring is not configured";
   return `${pageHead(
     "LedgerGuard | 运行状态",
     "LedgerGuard Arc 测试网实时运行状态。",
@@ -194,9 +207,10 @@ export function statusHtml(input: {
     <section class="status-list">
       <article><span class="status-dot ${input.ready ? "ok" : "bad"}"></span><div><strong>Arc Testnet RPC</strong><p>${rpcLabel}</p></div></article>
       <article><span class="status-dot ${input.x402 ? "ok" : "warn"}"></span><div><strong>x402 测试网端点</strong><p>${input.x402 ? "已启用" : "安全关闭"}</p></div></article>
+      <article><span class="status-dot ${input.shadow.ok ? "ok" : input.shadow.enabled ? "bad" : "warn"}"></span><div><strong>Arc 5042 Shadow</strong><p>${shadowLabel}</p><p>只读观测；不签名、不转账、不启用主网 x402。</p></div></article>
       <article><span class="status-dot ${input.mainnet ? "bad" : "ok"}"></span><div><strong>Arc Mainnet</strong><p>${input.mainnet ? "已启用，需要立即复核" : "保持关闭（预期状态）"}</p></div></article>
     </section>
-    <div class="links bottom-links"><a href="/ready">原始就绪数据</a><a href="/health">进程健康数据</a><a href="/v1/networks">网络注册表</a></div>
+    <div class="links bottom-links"><a href="/ready">原始就绪数据</a><a href="/health">进程健康数据</a><a href="/v1/shadow/arc-mainnet">5042 Shadow 数据</a><a href="/v1/networks">网络注册表</a></div>
     ${footer}
   </main>
 </body>

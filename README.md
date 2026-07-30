@@ -75,8 +75,8 @@ npm.cmd run smoke
 
 GitHub Actions runs this check hourly against production. It verifies the web
 entry point, Arc Testnet RPC chain ID, a deterministic USDC preflight, the
-mainnet safety gate, and either a valid x402 v2 challenge or a safely disabled
-paid endpoint.
+mainnet safety gate, the read-only 5042 Shadow quorum, and either a valid x402
+v2 testnet challenge or a safely disabled paid endpoint.
 
 The built-in fallback uses Arc's primary public Testnet RPC. The example
 configuration shows additional public endpoints in failover order; override
@@ -129,6 +129,15 @@ chain ID, RPC URL, USDC address, or payment facilitator. Activation requires:
 4. read-only shadow traffic;
 5. a human approval flag;
 6. a canary deployment before wider traffic.
+
+The 5042 Shadow is a separate read-only monitor at
+`GET /v1/shadow/arc-mainnet`. It compares a full state RPC with an independent
+chain observer for chain ID and block-height convergence, while the state RPC
+also verifies critical-contract bytecode. It contains no signer,
+transaction-submission path, or mainnet x402 middleware.
+`ARC_MAINNET_ENABLED`, an exact configuration fingerprint, and the separate
+`APPROVE_ARC_MAINNET_CANARY` release phrase are all required before the
+production network registry can activate.
 
 Changing one environment variable cannot bypass these checks. See
 [`docs/MAINNET_RUNBOOK.md`](docs/MAINNET_RUNBOOK.md) for the fingerprint-based

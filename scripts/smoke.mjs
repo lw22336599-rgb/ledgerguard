@@ -67,6 +67,38 @@ const mainnet = networks.networks.find((network) => network.name === "arcMainnet
 if (!mainnet || mainnet.enabled !== false) {
   throw new Error("/v1/networks: Arc Mainnet safety gate is not closed");
 }
+const shadow = networks.shadows?.find(
+  (entry) => entry.name === "arcMainnet5042",
+);
+if (
+  !shadow ||
+  shadow.realFundsEnabled !== false ||
+  shadow.signingEnabled !== false ||
+  shadow.x402MainnetEnabled !== false
+) {
+  throw new Error("/v1/networks: Arc 5042 shadow safety flags are invalid");
+}
+
+let shadowState = "5042 shadow disabled";
+if (process.env.EXPECT_ARC_MAINNET_SHADOW === "true") {
+  const { body: shadowStatus } = await request("/v1/shadow/arc-mainnet");
+  if (
+    !shadowStatus.ok ||
+    shadowStatus.chainId !== 5042 ||
+    shadowStatus.mode !== "read-only-shadow" ||
+    shadowStatus.realFundsEnabled !== false ||
+    shadowStatus.signingEnabled !== false ||
+    shadowStatus.x402MainnetEnabled !== false ||
+    shadowStatus.healthyRpcs < 1 ||
+    shadowStatus.healthyObservers < 1 ||
+    !shadowStatus.contractsConsistent
+  ) {
+    throw new Error(
+      `/v1/shadow/arc-mainnet: invalid status ${JSON.stringify(shadowStatus)}`,
+    );
+  }
+  shadowState = `5042 shadow ${shadowStatus.healthyRpcs} RPC + ${shadowStatus.healthyObservers} observer`;
+}
 
 const { body: preflight } = await request("/v1/preflight", {
   method: "POST",
@@ -121,5 +153,5 @@ if (paidResponse.status === 402) {
 }
 
 console.log(
-  `PASS ${baseUrl} | Arc ${ready.chainId} block ${ready.blockNumber} | preflight REVIEW (simulation required) | mainnet closed | ${paymentState}`,
+  `PASS ${baseUrl} | Arc ${ready.chainId} block ${ready.blockNumber} | preflight REVIEW (simulation required) | mainnet closed | ${shadowState} | ${paymentState}`,
 );

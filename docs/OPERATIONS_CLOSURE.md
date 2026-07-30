@@ -11,6 +11,7 @@ service level.
 | Public discovery and self-service testing | GO after production smoke | `/`, `/test`, `/docs`, `/catalog`, machine catalog |
 | Arc Testnet safety API | GO after production smoke | CI, coverage gate, live chain-ID check, preflight and evidence tests |
 | x402 test-payment delivery | GO for valueless test assets | 402 challenge, buyer runbook, settlement receipt and explorer link |
+| Arc chain 5042 read-only Shadow | GO after two-source production smoke | full state RPC plus independent chain observer, chain-ID and block convergence, critical-contract bytecode, funds/signing/x402 flags false |
 | Tester feedback and follow-up | GO | GitHub Issue Forms, request IDs, repository notifications |
 | Mainnet or real-fund use | HOLD | official parameters, independent security review, shadow traffic, explicit human approval and canary |
 | Repeatable commercial revenue | UNVERIFIED | one external payer, accepted delivery, gross margin, repeat use or renewal |
@@ -35,6 +36,8 @@ service level.
 8. Testers submit structured results or bugs through GitHub Issues. Repository
    notifications provide a durable follow-up queue.
 9. GitHub Actions runs the production smoke check hourly.
+10. The same smoke check verifies that the 5042 Shadow has two-source consensus
+    while all real-fund, signing, and mainnet-payment capabilities remain off.
 
 ## Evidence and retention
 
@@ -75,5 +78,6 @@ verified performance.
 Mainnet never switches automatically from a single environment-variable change.
 Activation follows `docs/MAINNET_RUNBOOK.md`: official network fingerprint,
 two-source verification, conformance tests, read-only shadow traffic, explicit
-human approval, canary release, and a tested rollback. Unknown or conflicting
-parameters fail closed.
+human approval phrase, canary release, and a tested rollback. The Shadow is
+observation-only and cannot activate mainnet. Unknown or conflicting parameters
+fail closed.

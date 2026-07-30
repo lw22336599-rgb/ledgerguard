@@ -55,6 +55,33 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/shadow/arc-mainnet": {
+      get: {
+        summary: "Read-only Arc chain 5042 consensus and contract monitor",
+        description:
+          "Observes multiple independent RPC endpoints. This endpoint cannot sign, transfer funds, or enable mainnet x402 charging.",
+        responses: {
+          "200": {
+            description:
+              "RPC quorum agrees on chain ID, block height, and critical contract bytecode",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ShadowStatus" },
+              },
+            },
+          },
+          "503": {
+            description:
+              "Shadow is disabled, incomplete, circuit-broken, or lacks consensus",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ShadowStatus" },
+              },
+            },
+          },
+        },
+      },
+    },
     "/v1/preflight": {
       post: {
         summary: "Inspect and simulate an unsigned transaction",
@@ -382,6 +409,100 @@ export const openApiDocument = {
           error: { type: "string" },
           message: { type: "string" },
           issues: { type: "array", items: { type: "object" } },
+        },
+      },
+      ShadowStatus: {
+        type: "object",
+        required: [
+          "ok",
+          "enabled",
+          "ready",
+          "mode",
+          "releaseStage",
+          "realFundsEnabled",
+          "signingEnabled",
+          "x402MainnetEnabled",
+          "chainId",
+          "requiredHealthyRpcs",
+          "healthyRpcs",
+          "requiredHealthyObservers",
+          "healthyObservers",
+          "contractsConsistent",
+          "rpcHosts",
+          "observerHosts",
+          "failures",
+          "checkedAt",
+        ],
+        properties: {
+          ok: { type: "boolean" },
+          enabled: { type: "boolean" },
+          ready: { type: "boolean" },
+          mode: { type: "string", const: "read-only-shadow" },
+          releaseStage: { type: "string", const: "pre-ga-observed" },
+          realFundsEnabled: { type: "boolean", const: false },
+          signingEnabled: { type: "boolean", const: false },
+          x402MainnetEnabled: { type: "boolean", const: false },
+          chainId: { type: "integer", const: 5042 },
+          configFingerprint: {
+            oneOf: [{ type: "string" }, { type: "null" }],
+          },
+          requiredHealthyRpcs: { type: "integer", minimum: 1 },
+          healthyRpcs: { type: "integer", minimum: 0 },
+          requiredHealthyObservers: { type: "integer", minimum: 1 },
+          healthyObservers: { type: "integer", minimum: 0 },
+          headBlock: {
+            oneOf: [{ type: "string" }, { type: "null" }],
+          },
+          blockLag: {
+            oneOf: [{ type: "string" }, { type: "null" }],
+          },
+          maximumBlockLag: { type: "integer", minimum: 1 },
+          contractsConsistent: { type: "boolean" },
+          rpcHosts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: [
+                "host",
+                "healthy",
+                "chainId",
+                "blockNumber",
+                "criticalContractsPresent",
+              ],
+              properties: {
+                host: { type: "string" },
+                healthy: { type: "boolean" },
+                chainId: {
+                  oneOf: [{ type: "integer" }, { type: "null" }],
+                },
+                blockNumber: {
+                  oneOf: [{ type: "string" }, { type: "null" }],
+                },
+                criticalContractsPresent: { type: "boolean" },
+              },
+            },
+          },
+          observerHosts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["host", "healthy", "chainId", "blockNumber"],
+              properties: {
+                host: { type: "string" },
+                healthy: { type: "boolean" },
+                chainId: {
+                  oneOf: [{ type: "integer" }, { type: "null" }],
+                },
+                blockNumber: {
+                  oneOf: [{ type: "string" }, { type: "null" }],
+                },
+              },
+            },
+          },
+          failures: { type: "array", items: { type: "string" } },
+          checkedAt: { type: "string", format: "date-time" },
+          cached: { type: "boolean" },
+          circuitOpen: { type: "boolean" },
         },
       },
     },

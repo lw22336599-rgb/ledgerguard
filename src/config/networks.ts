@@ -17,7 +17,11 @@ export interface NetworkRecord {
   rpcUrls: readonly string[];
   usdcAddress: `0x${string}` | null;
   explorerUrl: string | null;
-  activation: "automatic-safe" | "manual-required" | "disabled";
+  activation:
+    | "automatic-safe"
+    | "manual-required"
+    | "manual-canary"
+    | "disabled";
   configFingerprint: string | null;
 }
 
@@ -76,8 +80,13 @@ function parseMainnetConfiguration(): Omit<
   const approvalMatches =
     process.env.ARC_MAINNET_CONFIG_APPROVED_SHA256?.trim().toLowerCase() ===
     configFingerprint;
+  const releaseApproved =
+    process.env.ARC_MAINNET_RELEASE_APPROVAL ===
+    "APPROVE_ARC_MAINNET_CANARY";
   const enabled =
-    process.env.ARC_MAINNET_ENABLED === "true" && approvalMatches;
+    process.env.ARC_MAINNET_ENABLED === "true" &&
+    approvalMatches &&
+    releaseApproved;
 
   return {
     enabled,
@@ -86,7 +95,7 @@ function parseMainnetConfiguration(): Omit<
     rpcUrls: [rpcUrl!],
     usdcAddress: usdcAddress as `0x${string}`,
     explorerUrl: explorerUrl!,
-    activation: enabled ? "automatic-safe" : "manual-required",
+    activation: enabled ? "manual-canary" : "manual-required",
     configFingerprint,
   };
 }

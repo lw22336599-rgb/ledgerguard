@@ -31,9 +31,15 @@ describe("network activation gate", () => {
 
       process.env.ARC_MAINNET_CONFIG_APPROVED_SHA256 =
         pending.configFingerprint!;
+      const fingerprintOnly = getNetworkRegistry().arcMainnet;
+      expect(fingerprintOnly.enabled).toBe(false);
+      expect(fingerprintOnly.activation).toBe("manual-required");
+
+      process.env.ARC_MAINNET_RELEASE_APPROVAL =
+        "APPROVE_ARC_MAINNET_CANARY";
       const approved = getNetworkRegistry().arcMainnet;
       expect(approved.enabled).toBe(true);
-      expect(approved.activation).toBe("automatic-safe");
+      expect(approved.activation).toBe("manual-canary");
     } finally {
       process.env = original;
     }

@@ -6,6 +6,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { getAddress, type Address, type Hex } from "viem";
 import { getNetworkRegistry, requireEnabledNetwork } from "./config/networks.js";
 import { getPublicBaseUrl } from "./config/public.js";
+import { getArcMainnetShadowConfiguration } from "./config/shadow.js";
 import {
   createNetworkClient,
   probeRpc,
@@ -21,6 +22,7 @@ import { openApiDocument } from "./openapi.js";
 import { evidenceSchema, preflightSchema } from "./schemas.js";
 import { buildEvidence } from "./services/evidence.js";
 import { evaluatePreflight } from "./services/preflight.js";
+import { getArcMainnetShadowStatus } from "./services/shadow.js";
 import {
   notifyPaymentSettlement,
   paymentReceipt,
@@ -158,11 +160,20 @@ app.get("/status", async (context) => {
     readiness = { ready: false };
   }
   const registry = getNetworkRegistry();
+  const shadow = await getArcMainnetShadowStatus();
   return context.html(
     statusHtml({
       ...readiness,
       x402: x402Enabled(),
       mainnet: registry.arcMainnet.enabled,
+      shadow: {
+        ok: shadow.ok,
+        enabled: shadow.enabled,
+        chainId: shadow.chainId,
+        headBlock: shadow.headBlock,
+        healthyRpcs: shadow.healthyRpcs,
+        healthyObservers: shadow.healthyObservers,
+      },
     }),
   );
 });
@@ -223,6 +234,9 @@ app.get("/v1/meta", (context) =>
     version: "0.1.0",
     mode: "non-custodial-read-only",
     mainnet: "disabled",
+    arc5042Shadow: getArcMainnetShadowConfiguration().enabled
+      ? "read-only"
+      : "disabled",
     x402Testnet: x402Enabled() ? "enabled" : "disabled",
     docs: "/docs",
     openapi: "/openapi.json",
@@ -281,6 +295,7 @@ app.get("/ready", async (context) => {
 
 app.get("/v1/networks", (context) => {
   const registry = getNetworkRegistry();
+  const shadow = getArcMainnetShadowConfiguration();
   return context.json({
     networks: Object.values(registry).map((network) => {
       const { rpcUrls, ...publicNetwork } = network;
@@ -289,7 +304,32 @@ app.get("/v1/networks", (context) => {
         rpcConfigured: rpcUrls.length > 0,
       };
     }),
+    shadows: [
+      {
+        name: "arcMainnet5042",
+        enabled: shadow.enabled,
+        ready: shadow.ready,
+        mode: shadow.mode,
+        releaseStage: shadow.releaseStage,
+        chainId: shadow.chainId,
+        rpcHosts: shadow.rpcHosts,
+        observerHosts: shadow.observerHosts,
+        minimumHealthyRpcs: shadow.minimumHealthyRpcs,
+        minimumHealthyObservers: shadow.minimumHealthyObservers,
+        maximumBlockLag: shadow.maximumBlockLag,
+        configFingerprint: shadow.configFingerprint,
+        realFundsEnabled: false,
+        signingEnabled: false,
+        x402MainnetEnabled: false,
+        reason: shadow.reason,
+      },
+    ],
   });
+});
+
+app.get("/v1/shadow/arc-mainnet", async (context) => {
+  const status = await getArcMainnetShadowStatus();
+  return context.json(status, status.ok ? 200 : 503);
 });
 
 app.get("/v1/paid/network-risk", async (context) => {

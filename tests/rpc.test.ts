@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   probeRpc,
+  probeRpcConsensus,
   simulateReadOnly,
   withDeadline,
 } from "../src/lib/rpc.js";
@@ -81,5 +82,97 @@ describe("RPC reliability", () => {
       status: "failed",
       error: "Read-only RPC simulation failed.",
     });
+  });
+
+  it("requires multi-RPC agreement for the 5042 shadow", async () => {
+    const code = "0x6001600055";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input) => {
+        const host = new URL(String(input)).host;
+        const block = host === "one.example" ? "0x64" : "0x66";
+        return Response.json([
+          { jsonrpc: "2.0", id: 1, result: "0x13b2" },
+          { jsonrpc: "2.0", id: 2, result: block },
+          { jsonrpc: "2.0", id: 3, result: code },
+          { jsonrpc: "2.0", id: 4, result: code },
+        ]);
+      },
+    );
+
+    const result = await probeRpcConsensus({
+      rpcUrls: ["https://one.example", "https://two.example"],
+      expectedChainId: 5_042,
+      minimumHealthyRpcs: 2,
+      maximumBlockLag: 5,
+      contracts: [
+        {
+          label: "USDC",
+          address: "0x3600000000000000000000000000000000000000",
+        },
+        {
+          label: "GatewayMinter",
+          address: "0x2222222d7164433c4C09B0b0D809a9b52C04C205",
+        },
+      ],
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      healthyRpcs: 2,
+      blockLag: 2n,
+      contractsConsistent: true,
+      failures: [],
+    });
+    fetchMock.mockRestore();
+  });
+
+  it("fails closed on chain, height, or bytecode disagreement", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input) => {
+        const wrong = new URL(String(input)).host === "two.example";
+        return Response.json([
+          {
+            jsonrpc: "2.0",
+            id: 1,
+            result: wrong ? "0x1" : "0x13b2",
+          },
+          {
+            jsonrpc: "2.0",
+            id: 2,
+            result: wrong ? "0xc8" : "0x64",
+          },
+          {
+            jsonrpc: "2.0",
+            id: 3,
+            result: wrong ? "0x6002" : "0x6001",
+          },
+          { jsonrpc: "2.0", id: 4, result: "0x6001" },
+        ]);
+      },
+    );
+
+    const result = await probeRpcConsensus({
+      rpcUrls: ["https://one.example", "https://two.example"],
+      expectedChainId: 5_042,
+      minimumHealthyRpcs: 2,
+      maximumBlockLag: 5,
+      contracts: [
+        {
+          label: "USDC",
+          address: "0x3600000000000000000000000000000000000000",
+        },
+        {
+          label: "GatewayMinter",
+          address: "0x2222222d7164433c4C09B0b0D809a9b52C04C205",
+        },
+      ],
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.healthyRpcs).toBe(1);
+    expect(result.failures.join(" ")).toMatch(/chain ID 1/);
+    expect(result.failures.join(" ")).toMatch(/Only 1\/2/);
+    expect(result.failures.join(" ")).toMatch(/bytecode/);
+    fetchMock.mockRestore();
   });
 });
