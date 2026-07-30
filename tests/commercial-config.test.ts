@@ -3,7 +3,9 @@ import { getCommercialCandidate } from "../src/config/commercial.js";
 
 const keys = [
   "BASE_MAINNET_X402_ENABLED",
-  "REAL_FUNDS_APPROVED",
+  "BASE_MAINNET_RELEASE_APPROVAL",
+  "BASE_MAINNET_CONFIG_APPROVED_SHA256",
+  "BASE_MAINNET_PRICE_MICRO_USDC",
   "CDP_API_KEY_ID",
   "CDP_API_KEY_SECRET",
   "SELLER_ADDRESS",
@@ -24,7 +26,15 @@ describe("commercial production candidate", () => {
       ready: false,
       realFundsEnabled: false,
     });
-    expect(candidate.activationGates.every((gate) => gate.passed)).toBe(false);
+    expect(
+      candidate.activationGates.find((gate) => gate.id === "explicit-enable")
+        ?.passed,
+    ).toBe(false);
+    expect(
+      candidate.activationGates.find(
+        (gate) => gate.id === "bounded-canary-price",
+      )?.passed,
+    ).toBe(true);
   });
 
   it("requires independent approval, credentials, and a valid seller address", () => {
@@ -35,19 +45,34 @@ describe("commercial production candidate", () => {
       realFundsEnabled: false,
     });
 
-    process.env.REAL_FUNDS_APPROVED = "true";
+    process.env.BASE_MAINNET_RELEASE_APPROVAL =
+      "APPROVE_BASE_MAINNET_CANARY";
     process.env.CDP_API_KEY_ID = "organizations/example/apiKeys/example";
     process.env.CDP_API_KEY_SECRET = "sensitive";
     process.env.SELLER_ADDRESS =
       "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c";
-    expect(getCommercialCandidate()).toMatchObject({
+    const reviewCandidate = getCommercialCandidate();
+    expect(reviewCandidate).toMatchObject({
       requested: true,
       ready: false,
       realFundsEnabled: false,
     });
+    process.env.BASE_MAINNET_CONFIG_APPROVED_SHA256 =
+      reviewCandidate.configFingerprint;
+    expect(getCommercialCandidate()).toMatchObject({
+      requested: true,
+      ready: true,
+      realFundsEnabled: true,
+    });
+  });
+
+  it("rejects an invalid or excessive canary price", () => {
+    process.env.BASE_MAINNET_PRICE_MICRO_USDC = "100001";
+    const candidate = getCommercialCandidate();
+    expect(candidate.priceMicroUsdc).toBe("100001");
     expect(
-      getCommercialCandidate().activationGates.find(
-        (gate) => gate.id === "production-settlement-adapter",
+      candidate.activationGates.find(
+        (gate) => gate.id === "bounded-canary-price",
       )?.passed,
     ).toBe(false);
   });

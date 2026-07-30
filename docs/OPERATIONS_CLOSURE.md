@@ -143,9 +143,12 @@ rotation. Paid testnet settlements are written to the durable payment ledger
 when the configured store is available.
 
 `GET /v1/commercial-candidate` publishes the future Base charging parameters
-and independent activation gates. The production settlement adapter remains
-hard closed until its real-funds implementation and controlled test are
-separately approved.
+and independent activation gates. The production settlement adapter is
+implemented at `POST /v1/paid/base/evidence` and deployed fail-closed. It cannot
+charge until the CDP credentials, seller, bounded price, reviewed fingerprint,
+exact action-time approval phrase, and explicit enable flag all pass. A signed
+retry is checked for deliverable evidence before the payment middleware can
+settle it.
 
 This is a complete technical acquisition-to-delivery loop. It is not yet a
 verified commercial loop: the first independent external user, accepted paid
@@ -155,8 +158,8 @@ value, attributable gross margin, and repeat behavior remain evidence gates.
 
 - Arc Testnet remains the Circle/Arc technical-validation, grant, and official
   collaboration surface.
-- Base Mainnet is the first real-value x402 candidate, not an active payment
-  network. Its independent adapter is deliberately hard closed.
+- Base Mainnet is the first real-value x402 candidate. Its independent adapter
+  is deployed but charging remains disabled pending a controlled canary.
 - Additional EVM networks must use CAIP-2 identifiers and thin network
   adapters. The policy and evidence engines are not forked or rewritten.
 - No chain is activated from rumors, explorer activity, or a single environment

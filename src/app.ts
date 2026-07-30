@@ -7,7 +7,10 @@ import { secureHeaders } from "hono/secure-headers";
 import { getAddress, type Address, type Hex } from "viem";
 import { getNetworkRegistry, requireEnabledNetwork } from "./config/networks.js";
 import { getPublicBaseUrl } from "./config/public.js";
-import { getCommercialCandidate } from "./config/commercial.js";
+import {
+  BASE_MAINNET_EVIDENCE_PATH,
+  getCommercialCandidate,
+} from "./config/commercial.js";
 import { getBazaarCandidate } from "./config/bazaar.js";
 import { getArcMainnetShadowConfiguration } from "./config/shadow.js";
 import {
@@ -21,6 +24,7 @@ import {
   type AppEnvironment,
   requestTelemetry,
 } from "./middleware/request-telemetry.js";
+import { paidEvidencePrecheck } from "./middleware/paid-evidence-precheck.js";
 import { openApiDocument } from "./openapi.js";
 import {
   developerRegistrationSchema,
@@ -37,6 +41,7 @@ import {
   BAZAAR_EVIDENCE_PATH,
   baseSepoliaPaymentGate,
 } from "./services/base-sepolia-x402.js";
+import { baseMainnetPaymentGate } from "./services/base-mainnet-x402.js";
 import { evaluatePreflight } from "./services/preflight.js";
 import {
   createGuardLinkPreflight,
@@ -301,12 +306,15 @@ Public testing: https://ledgerguard-gules.vercel.app/test
 Prefilled human receipt: GET /guard
 Free Arc transaction preflight: POST /v1/preflight
 Paid Arc Testnet x402 resource: GET /v1/paid/network-risk
+Base Mainnet x402 canary: POST /v1/paid/base/evidence (fail-closed until every release gate passes)
 Safety: non-custodial; never send a seed phrase or private key.
-Mainnet: disabled until official parameters pass the documented release gate.
+Arc Mainnet: unavailable until Circle publishes official production parameters.
+Base Mainnet: production adapter deployed; real-funds charging remains disabled until the documented canary gate passes.
 `),
 );
-app.get("/.well-known/ledgerguard.json", (context) =>
-  context.json({
+app.get("/.well-known/ledgerguard.json", (context) => {
+  const commercialCandidate = getCommercialCandidate();
+  return context.json({
     service: "LedgerGuard",
     production: getPublicBaseUrl(),
     humanDocs: `${getPublicBaseUrl()}/docs`,
@@ -318,13 +326,19 @@ app.get("/.well-known/ledgerguard.json", (context) =>
       "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     custody: "none",
     signing: "client-side-only",
-    mainnet: "disabled",
+    mainnet: commercialCandidate.realFundsEnabled
+      ? "base-canary"
+      : "disabled",
+    arcMainnet: "official-parameters-unavailable",
+    baseMainnet: commercialCandidate.realFundsEnabled
+      ? "canary-enabled"
+      : "candidate-disabled",
     mcp: {
       endpoint: `${getPublicBaseUrl()}/mcp`,
       transport: "streamable-http",
       authentication: "bearer-api-key",
     },
-    commercialCandidate: getCommercialCandidate(),
+    commercialCandidate,
     bazaarCandidate: getBazaarCandidate(),
     resources: [
       {
@@ -360,10 +374,27 @@ app.get("/.well-known/ledgerguard.json", (context) =>
         enabled: getBazaarCandidate().settleEnabled,
         indexed: false,
       },
+      {
+        id: "base-mainnet-strict-evidence",
+        method: "POST",
+        path: BASE_MAINNET_EVIDENCE_PATH,
+        paymentProtocol: "x402-v2",
+        network: "eip155:8453",
+        priceMicroUsdc: commercialCandidate.priceMicroUsdc,
+        payTo: commercialCandidate.sellerAddress,
+        deliverable: "strict-evidence-receipt",
+        discovery: "cdp-bazaar",
+        analyzesNetwork: "eip155:5042002",
+        enabled: commercialCandidate.realFundsEnabled,
+        lifecycle: "mainnet-canary",
+      },
     ],
-  }),
-);
+  });
+});
+app.use(BAZAAR_EVIDENCE_PATH, paidEvidencePrecheck);
 app.use(BAZAAR_EVIDENCE_PATH, baseSepoliaPaymentGate);
+app.use(BASE_MAINNET_EVIDENCE_PATH, paidEvidencePrecheck);
+app.use(BASE_MAINNET_EVIDENCE_PATH, baseMainnetPaymentGate);
 app.get("/v1/commercial-candidate", (context) =>
   context.json(getCommercialCandidate()),
 );
@@ -382,7 +413,9 @@ app.get("/v1/meta", (context) =>
     service: "LedgerGuard",
     version: "0.1.0",
     mode: "non-custodial-read-only",
-    mainnet: "disabled",
+    mainnet: getCommercialCandidate().realFundsEnabled
+      ? "base-canary"
+      : "disabled",
     arc5042Shadow: getArcMainnetShadowConfiguration().enabled
       ? "read-only"
       : "disabled",
@@ -789,7 +822,8 @@ app.post(BAZAAR_EVIDENCE_PATH, async (context) => {
   }
 
   try {
-    const evidence = await retrieveEvidence(parsed.data);
+    const evidence =
+      context.get("paidEvidence") ?? (await retrieveEvidence(parsed.data));
     return context.json({
       paid: true,
       paymentNetwork: "eip155:84532",
@@ -809,6 +843,47 @@ app.post(BAZAAR_EVIDENCE_PATH, async (context) => {
       {
         error: "EVIDENCE_UNAVAILABLE",
         message: "Strict evidence retrieval failed before settlement.",
+      },
+      503,
+    );
+  }
+});
+
+app.post(BASE_MAINNET_EVIDENCE_PATH, async (context) => {
+  const parsed = evidenceSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+
+  try {
+    const evidence =
+      context.get("paidEvidence") ?? (await retrieveEvidence(parsed.data));
+    const candidate = getCommercialCandidate();
+    return context.json({
+      paid: true,
+      paymentNetwork: candidate.network,
+      analyzedNetwork: "eip155:5042002",
+      testAssetsOnly: false,
+      deliverable: "strict-evidence-receipt",
+      evidence,
+    });
+  } catch (error) {
+    if (error instanceof TransactionNotFoundError) {
+      return context.json(
+        { error: "TRANSACTION_NOT_FOUND", message: error.message },
+        404,
+      );
+    }
+    return context.json(
+      {
+        error: "EVIDENCE_UNAVAILABLE",
+        message:
+          "Strict evidence retrieval failed; the paid route is unavailable.",
       },
       503,
     );

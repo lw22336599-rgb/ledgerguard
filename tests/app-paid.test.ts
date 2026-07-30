@@ -50,6 +50,9 @@ const { resetTenantStoreForTests } = await import(
 const { resetBaseSepoliaPaymentMiddlewareForTests } = await import(
   "../src/services/base-sepolia-x402.js"
 );
+const { resetBaseMainnetPaymentMiddlewareForTests } = await import(
+  "../src/services/base-mainnet-x402.js"
+);
 
 describe("paid HTTP delivery", () => {
   beforeEach(() => {
@@ -70,12 +73,17 @@ describe("paid HTTP delivery", () => {
     delete process.env.OPERATIONS_WEBHOOK_URL;
     process.env.LEDGERGUARD_STORAGE_BACKEND = "memory";
     delete process.env.BASE_SEPOLIA_X402_ENABLED;
+    delete process.env.BASE_MAINNET_X402_ENABLED;
+    delete process.env.BASE_MAINNET_RELEASE_APPROVAL;
+    delete process.env.BASE_MAINNET_CONFIG_APPROVED_SHA256;
+    delete process.env.BASE_MAINNET_PRICE_MICRO_USDC;
     delete process.env.CDP_API_KEY_ID;
     delete process.env.CDP_API_KEY_SECRET;
     process.env.SELLER_ADDRESS =
       "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c";
     resetTenantStoreForTests();
     resetBaseSepoliaPaymentMiddlewareForTests();
+    resetBaseMainnetPaymentMiddlewareForTests();
   });
 
   it("returns a standards-shaped CDP x402 challenge when the testnet candidate is explicitly enabled", async () => {
@@ -162,6 +170,67 @@ describe("paid HTTP delivery", () => {
       indexed: false,
     });
     expect(evidence.retrieveEvidence).not.toHaveBeenCalled();
+  });
+
+  it("publishes the Base Mainnet adapter but fails closed before real-funds gates pass", async () => {
+    const catalog = await app.request("/.well-known/ledgerguard.json");
+    expect(catalog.status).toBe(200);
+    expect(await catalog.json()).toMatchObject({
+      arcMainnet: "official-parameters-unavailable",
+      baseMainnet: "candidate-disabled",
+      mainnet: "disabled",
+    });
+
+    const response = await app.request("/v1/paid/base/evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        network: "arcTestnet",
+        txHash: `0x${"aa".repeat(32)}`,
+        intent: {
+          action: "transfer",
+          purpose: "Base Mainnet paid Arc evidence",
+        },
+      }),
+    });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({
+      error: "BASE_MAINNET_NOT_READY",
+      realFundsEnabled: false,
+    });
+    expect(evidence.retrieveEvidence).not.toHaveBeenCalled();
+  });
+
+  it("does not reach a payment gate when signed evidence cannot be delivered", async () => {
+    evidence.retrieveEvidence.mockRejectedValueOnce(
+      new evidence.TransactionNotFoundError("missing"),
+    );
+    const response = await app.request("/v1/paid/base/evidence", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "payment-signature": "signed-but-undeliverable",
+      },
+      body: JSON.stringify({
+        network: "arcTestnet",
+        txHash: `0x${"aa".repeat(32)}`,
+        intent: {
+          action: "transfer",
+          expectedDebitAddress:
+            "0x1111111111111111111111111111111111111111",
+          expectedRecipient:
+            "0x2222222222222222222222222222222222222222",
+          expectedAssetAddress:
+            "0x3600000000000000000000000000000000000000",
+          expectedAmountMicroUsdc: "1000000",
+          purpose: "Undeliverable evidence",
+        },
+      }),
+    });
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({
+      error: "TRANSACTION_NOT_FOUND",
+    });
   });
 
   it("returns a payment challenge before settlement", async () => {

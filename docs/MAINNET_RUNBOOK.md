@@ -1,4 +1,44 @@
-# Arc Mainnet activation runbook
+# Production network activation runbook
+
+Arc Mainnet and Base Mainnet serve different roles. Arc remains the network
+being analyzed and cannot be activated until Circle publishes official
+production parameters. Base Mainnet is an already supported x402 payment rail
+for purchasing an Arc Testnet evidence receipt.
+
+## Base Mainnet x402 canary
+
+The deployed route is `POST /v1/paid/base/evidence`. It uses CAIP-2 network
+`eip155:8453`, Base USDC
+`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, and the authenticated CDP
+facilitator. It is fail-closed by default.
+
+Before a one-request real-funds canary:
+
+1. Configure encrypted `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET` in the hosting
+   provider; never commit them.
+2. Confirm `SELLER_ADDRESS` and set a bounded
+   `BASE_MAINNET_PRICE_MICRO_USDC` between 1 and 100000.
+3. Leave `BASE_MAINNET_X402_ENABLED=false`, deploy, and read
+   `GET /v1/commercial-candidate`.
+4. Independently review the network, USDC asset, facilitator, seller, price,
+   route, and adapter version, then copy `configFingerprint` to
+   `BASE_MAINNET_CONFIG_APPROVED_SHA256`.
+5. Obtain action-time approval for a real-funds canary and only then set
+   `BASE_MAINNET_RELEASE_APPROVAL=APPROVE_BASE_MAINNET_CANARY` and
+   `BASE_MAINNET_X402_ENABLED=true`.
+6. Execute one bounded buyer request, confirm delivery plus the facilitator
+   settlement receipt, and immediately review logs and the recipient balance.
+7. Disable the route again if the receipt, amount, recipient, attribution, or
+   delivered evidence differs from the reviewed intent.
+
+Changing only the enable flag cannot activate charging. Any change to the
+recipient, price, route, asset, network, facilitator, or adapter version changes
+the fingerprint and fails closed.
+
+Rollback is `BASE_MAINNET_X402_ENABLED=false` followed by redeployment. Because
+the service is non-custodial, rollback does not require moving user funds.
+
+## Arc Mainnet activation
 
 LedgerGuard never guesses an unreleased network configuration and never signs
 or submits a transaction. The production switch is configuration-driven, but

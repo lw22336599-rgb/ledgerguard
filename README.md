@@ -4,7 +4,8 @@ LedgerGuard is an Arc-first, non-custodial transaction safety service for AI
 agents. It checks an intended transaction before signing and produces normalized
 evidence after settlement.
 
-Current status: **testnet MVP / mainnet disabled**.
+Current status: **testnet MVP / Base Mainnet adapter deployed fail-closed /
+Arc Mainnet unavailable**.
 
 Public demo: **https://ledgerguard-gules.vercel.app**
 
@@ -35,6 +36,7 @@ GitHub contact: **lw22336599-rgb**
 - `POST /mcp` - authenticated Streamable HTTP MCP server for read-only tools.
 - `POST /v1/paid/evidence` - x402 testnet purchase of a strict evidence receipt.
 - `POST /v1/paid/base-sepolia/evidence` - fail-closed CDP Bazaar candidate paid with Base Sepolia test USDC.
+- `POST /v1/paid/base/evidence` - fail-closed Base Mainnet x402 canary for strict Arc evidence.
 - `GET /v1/bazaar-candidate` - machine-readable CDP activation and indexing-proof gates.
 - `GET /v1/commercial-candidate` - fail-closed Base production-candidate gates.
 - `GET /guard?...` - prefilled, no-wallet payment intent receipt for people.
@@ -137,10 +139,11 @@ operating loop, evidence sources, ownership, and production gates. See
 evidence-based ecosystem application pack. This testnet demo has no verified
 customer or revenue claim.
 
-## Mainnet activation gate
+## Mainnet activation gates
 
-Mainnet is represented in the network registry but deliberately has no guessed
-chain ID, RPC URL, USDC address, or payment facilitator. Activation requires:
+Arc Mainnet is represented in the network registry but deliberately has no
+guessed chain ID, RPC URL, USDC address, or payment facilitator. Activation
+requires:
 
 1. official Arc and Circle parameters;
 2. two-source configuration verification;
@@ -161,3 +164,11 @@ production network registry can activate.
 Changing one environment variable cannot bypass these checks. See
 [`docs/MAINNET_RUNBOOK.md`](docs/MAINNET_RUNBOOK.md) for the fingerprint-based
 activation and rollback procedure.
+
+Base Mainnet is a separate payment rail for the protected Arc Testnet evidence
+resource. Its adapter is deployed at `POST /v1/paid/base/evidence`, but remains
+disabled until six independent gates pass: explicit enablement, the exact
+action-time approval phrase, CDP credentials, a valid seller address, a bounded
+canary price, and the reviewed configuration fingerprint. This separation does
+not imply that Arc Mainnet exists, and it does not let LedgerGuard sign or hold
+funds.

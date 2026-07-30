@@ -358,6 +358,57 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/paid/base/evidence": {
+      post: {
+        summary:
+          "Purchase strict Arc evidence with USDC on Base Mainnet",
+        description:
+          "Production x402 canary using the CDP facilitator and Base Mainnet USDC. The deployed route fails closed until the explicit enable flag, action-time release phrase, CDP credentials, valid seller address, bounded price, and reviewed configuration fingerprint all match.",
+        parameters: [
+          {
+            in: "header",
+            name: "X-LedgerGuard-Client",
+            required: false,
+            schema: { type: "string", maxLength: 80 },
+          },
+          {
+            in: "header",
+            name: "X-LedgerGuard-Integration",
+            required: false,
+            schema: { type: "string", maxLength: 80 },
+          },
+          {
+            in: "header",
+            name: "PAYMENT-SIGNATURE",
+            required: false,
+            schema: { type: "string" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/EvidenceRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description:
+              "Base Mainnet payment settled and strict Arc evidence delivered",
+          },
+          "400": { description: "Invalid request; no charge attempted" },
+          "402": { description: "CDP x402 payment required or rejected" },
+          "404": {
+            description: "Arc transaction not found; no charge attempted",
+          },
+          "503": {
+            description:
+              "Canary disabled, activation gates incomplete, evidence unavailable, or facilitator unavailable",
+          },
+        },
+      },
+    },
     "/v1/paid/network-risk": {
       get: {
         summary: "Purchase an Arc network-risk snapshot with x402",

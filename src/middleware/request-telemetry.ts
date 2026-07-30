@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { MiddlewareHandler } from "hono";
+import type { EvidenceResult } from "../services/evidence.js";
 
 export type AppEnvironment = {
   Variables: {
     requestId: string;
+    paidEvidence?: EvidenceResult;
   };
 };
 
