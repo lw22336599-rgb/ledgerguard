@@ -64,17 +64,19 @@ describe("HTTP API", () => {
     expect(protect.status).toBe(200);
     expect(await protect.text()).toContain("Let rules protect funds.");
 
-    const meter = await app.request("/meter", { redirect: "manual" });
-    expect(meter.status).toBe(302);
-    expect(meter.headers.get("location")).toBe(
-      "https://arc-meter-xi.vercel.app/",
-    );
+    const meter = await app.request("/meter");
+    const meterHtml = await meter.text();
+    expect(meter.status).toBe(200);
+    expect(meterHtml).toContain("METER MODULE");
+    expect(meterHtml).toContain('class="portal-nav"');
+    expect(meterHtml).toContain("https://arc-meter-xi.vercel.app/");
 
-    const receipts = await app.request("/receipts", { redirect: "manual" });
-    expect(receipts.status).toBe(302);
-    expect(receipts.headers.get("location")).toBe(
-      "https://arc-meter-xi.vercel.app/#flow",
-    );
+    const receipts = await app.request("/receipts");
+    const receiptsHtml = await receipts.text();
+    expect(receipts.status).toBe(200);
+    expect(receiptsHtml).toContain("RECEIPTS");
+    expect(receiptsHtml).toContain('class="portal-nav"');
+    expect(receiptsHtml).toContain("https://arc-meter-xi.vercel.app/#flow");
   });
 
   it("rejects malformed Guard Links and publishes protocol boundaries", async () => {

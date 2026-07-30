@@ -98,7 +98,9 @@ import {
   guardLinkHtml,
   guardLinkJs,
   integrationBoundaryHtml,
+  meterHtml,
   portalHtml,
+  receiptsHtml,
   routesHtml,
   siteCss,
   statusHtml,
@@ -208,12 +210,8 @@ app.get("/routes", (context) =>
     }),
   ),
 );
-app.get("/meter", (context) =>
-  context.redirect("https://arc-meter-xi.vercel.app/", 302),
-);
-app.get("/receipts", (context) =>
-  context.redirect("https://arc-meter-xi.vercel.app/#flow", 302),
-);
+app.get("/meter", (context) => context.html(meterHtml));
+app.get("/receipts", (context) => context.html(receiptsHtml));
 app.get("/developers", (context) => context.redirect("/docs", 301));
 app.get("/guard/create", (context) => context.html(guardBuilderHtml));
 app.get("/canary", (context) => {

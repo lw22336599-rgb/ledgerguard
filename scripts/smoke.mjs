@@ -42,6 +42,8 @@ for (const [path, marker] of [
   ["/guard/create", "Create a USDC payment link."],
   ["/routes", "route-readiness"],
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
+  ["/meter", "METER MODULE"],
+  ["/receipts", "RECEIPTS"],
 ]) {
   const response = await fetch(`${baseUrl}${path}`, {
     signal: AbortSignal.timeout(20_000),

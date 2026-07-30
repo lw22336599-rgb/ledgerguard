@@ -14,7 +14,13 @@ const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Arc Public
 
 const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/docs">Developers</a><a href="/testnet-help">Testnet funding</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a>`;
 
-export function portalNavHtml(badge = "ARC PUBLIC TESTNET"): string {
+export const meterAppOrigin = "https://arc-meter-xi.vercel.app";
+
+export function portalNavHtml(
+  badge = "ARC PUBLIC TESTNET",
+  options?: { danger?: boolean },
+): string {
+  const badgeClass = options?.danger ? "badge danger" : "badge";
   return `<nav class="portal-nav">
       <a class="brand" href="/">LedgerGuard</a>
       <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
@@ -22,7 +28,7 @@ export function portalNavHtml(badge = "ARC PUBLIC TESTNET"): string {
       <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
       <button id="nav-connect" class="nav-wallet-btn" type="button">Connect Wallet</button>
       <span id="nav-wallet-display" class="nav-wallet-display"></span>
-      <span class="badge">${badge}</span>
+      <span class="${badgeClass}">${badge}</span>
     </nav>`;
 }
 
@@ -557,7 +563,9 @@ export function developerConsoleHtml(input: {
   )}
 <body>
   <main>
-    ${portalNavHtml(available ? "TESTNET SELF-SERVICE" : "SETUP PENDING")}
+    ${portalNavHtml(available ? "TESTNET SELF-SERVICE" : "SETUP PENDING", {
+      danger: !available,
+    })}
     <section class="subhero">
       <p class="eyebrow">DEVELOPER SELF-SERVICE</p>
       <h1 class="compact">One key. Metered safety checks.</h1>
@@ -663,6 +671,71 @@ export const integrationBoundaryHtml = `${pageHead(
       <article class="doc-card"><span>FAIL CLOSED</span><h2>Unknown means no ALLOW</h2><p>Unknown calls, failed simulation, network mismatch, or unapproved mainnet configuration never produce a conclusion that is safe to sign.</p></article>
     </section>
     <section class="notice"><strong>Important:</strong> LedgerGuard is an additional safety layer. It does not replace wallet confirmation, contract audits, organizational approval, or the user's final judgment.</section>
+    ${footer}
+  </main>${portalPageScripts()}
+</body>
+</html>`;
+
+export const meterHtml = `${pageHead(
+  "LedgerGuard | Meter module",
+  "Issue x402 quotes, verify settlement, deliver protected resources, and persist linked receipts on Arc Testnet.",
+)}
+<body>
+  <main>
+    ${portalNavHtml("METER MODULE")}
+    <section class="subhero">
+      <p class="eyebrow">SETTLE BEFORE DELIVERY &middot; X402 TESTNET</p>
+      <h1 class="compact">Meter turns payment into delivery.</h1>
+      <p class="lead">The Meter module issues an x402 quote, verifies settlement, delivers the protected resource, and writes linked receipts. It runs as a companion app while LedgerGuard keeps Protect, Guard Links, and developer APIs on this site.</p>
+    </section>
+    <section class="panel builder-panel">
+      <div>
+        <p class="step">OPEN METER</p>
+        <h2>Continue in the Meter app</h2>
+        <p class="muted">Meter UI, receipt explorer, and tenant-linked usage events live in the dedicated Meter deployment. LedgerGuard links here so navigation stays consistent without breaking the existing Meter workflow.</p>
+      </div>
+      <div class="wallet-buttons">
+        <a class="button-link" href="${meterAppOrigin}/" rel="noreferrer">Open Meter app</a>
+        <a class="secondary-action" href="/test">Join public x402 testing</a>
+        <a class="secondary-action" href="/docs">Read developer docs</a>
+      </div>
+    </section>
+    <section class="docs-grid">
+      <article class="doc-card"><span>WHAT IT DOES</span><h2>402 quote to delivery</h2><p>Buyers receive a standard payment challenge, settle in test USDC, then receive the protected HTTP or MCP resource automatically.</p></article>
+      <article class="doc-card"><span>WHAT STAYS HERE</span><h2>Protect + Guard Links</h2><p>Preflight checks, Guard Link creation, and evidence reconciliation remain on LedgerGuard. Meter handles settlement-linked delivery.</p><a href="/guard/create">Create a Guard Link</a></article>
+      <article class="doc-card"><span>RECEIPTS</span><h2>Dual receipt trail</h2><p>Settlement and delivery receipts are linked for audit. Open the receipt explorer from the Meter app or the Receipts page here.</p><a href="/receipts">Open receipt explorer</a></article>
+    </section>
+    <section class="notice"><strong>Testnet only:</strong> Meter uses Arc Testnet assets with no financial value. Mainnet x402 remains fail-closed until release gates pass.</section>
+    ${footer}
+  </main>${portalPageScripts()}
+</body>
+</html>`;
+
+export const receiptsHtml = `${pageHead(
+  "LedgerGuard | Receipt explorer",
+  "Review settlement and delivery receipts linked to Meter-protected resources on Arc Testnet.",
+)}
+<body>
+  <main>
+    ${portalNavHtml("RECEIPTS")}
+    <section class="subhero">
+      <p class="eyebrow">SETTLEMENT + DELIVERY &middot; LINKED EVIDENCE</p>
+      <h1 class="compact">Inspect the receipt trail.</h1>
+      <p class="lead">Receipts connect an x402 settlement to the protected resource that was delivered afterward. The interactive explorer runs in the Meter app; this page keeps the same navigation and explains what you are opening.</p>
+    </section>
+    <section class="panel builder-panel">
+      <div>
+        <p class="step">OPEN EXPLORER</p>
+        <h2>Continue to receipt flow</h2>
+        <p class="muted">The Meter deployment hosts the live receipt explorer and end-to-end acceptance flow. LedgerGuard routes you there without dropping the site navigation context first.</p>
+      </div>
+      <div class="wallet-buttons">
+        <a class="button-link" href="${meterAppOrigin}/#flow" rel="noreferrer">Open receipt explorer</a>
+        <a class="secondary-action" href="/meter">Back to Meter overview</a>
+        <a class="secondary-action" href="/status">Live status</a>
+      </div>
+    </section>
+    <section class="notice"><strong>Non-custodial:</strong> Receipts summarize onchain settlement and delivery events. They do not replace wallet confirmation or your own approval process.</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>

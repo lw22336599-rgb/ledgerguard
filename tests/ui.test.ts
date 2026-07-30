@@ -10,7 +10,9 @@ import {
   guardLinkHtml,
   guardLinkJs,
   integrationBoundaryHtml,
+  meterHtml,
   portalHtml,
+  receiptsHtml,
   statusHtml,
   testerHtml,
 } from "../src/ui.js";
@@ -181,6 +183,8 @@ describe("browser demo experience", () => {
         registrationEnabled: true,
       }),
       integrationBoundaryHtml,
+      meterHtml,
+      receiptsHtml,
     ]) {
       expect(html).toContain('class="portal-nav"');
       expect(html).toContain('id="nav-connect"');
@@ -203,6 +207,28 @@ describe("browser demo experience", () => {
         },
       }),
     ).toContain("/site-nav.js");
+  });
+
+  it("shows a danger badge when developer self-service is unavailable", () => {
+    expect(
+      developerConsoleHtml({
+        storageReady: false,
+        registrationEnabled: false,
+      }),
+    ).toContain('class="badge danger"');
+    expect(
+      developerConsoleHtml({
+        storageReady: true,
+        registrationEnabled: true,
+      }),
+    ).not.toContain('class="badge danger"');
+  });
+
+  it("bridges Meter and Receipts through branded pages", () => {
+    expect(meterHtml).toContain("Open Meter app");
+    expect(meterHtml).toContain("https://arc-meter-xi.vercel.app/");
+    expect(receiptsHtml).toContain("Open receipt explorer");
+    expect(receiptsHtml).toContain("https://arc-meter-xi.vercel.app/#flow");
   });
 
   it("leads with a plain-language payment link promise on the portal", () => {
