@@ -5,6 +5,7 @@ import {
   demoJs,
   developerConsoleHtml,
   developerDocsHtml,
+  guardLinkHtml,
   testerHtml,
 } from "../src/ui.js";
 
@@ -85,5 +86,23 @@ describe("browser demo experience", () => {
         registrationEnabled: true,
       }),
     ).toContain("Run non-enforcing shadow");
+  });
+
+  it("renders a no-input Guard Link receipt with escaped intent details", () => {
+    const html = guardLinkHtml({
+      payer: "Not declared",
+      recipient: "0x2222222222222222222222222222222222222222",
+      amount: "1.25",
+      limit: "2",
+      purpose: "Invoice & delivery",
+      decision: "REVIEW",
+      findings: [{ code: "SIMULATION_REQUIRED", message: "Review first" }],
+      requestId: "request-123",
+    });
+    expect(html).toContain("Payment intent receipt");
+    expect(html).toContain("Invoice &amp; delivery");
+    expect(html).not.toContain("Invoice & delivery");
+    expect(html).toContain("REVIEW");
+    expect(html).toContain("request-123");
   });
 });

@@ -82,6 +82,32 @@ if (!mainnet || mainnet.enabled !== false) {
   throw new Error("/v1/networks: Arc Mainnet safety gate is not closed");
 }
 
+const guard = await fetch(
+  `${baseUrl}/guard?recipient=0x2222222222222222222222222222222222222222&amount=1.00&limit=2.00&purpose=Release%20smoke`,
+  { signal: AbortSignal.timeout(20_000) },
+);
+const guardHtml = await guard.text();
+if (
+  guard.status !== 200 ||
+  !guardHtml.includes("Payment intent receipt") ||
+  !guardHtml.includes("Release smoke") ||
+  !guardHtml.includes("REVIEW")
+) {
+  throw new Error("/guard: prefilled human receipt is unavailable");
+}
+
+const { body: adapters } = await request("/v1/adapters");
+if (
+  !adapters.adapters?.some(
+    (adapter) =>
+      adapter.id === "ap2-mandate" &&
+      adapter.status === "interface-only" &&
+      adapter.enabled === false,
+  )
+) {
+  throw new Error("/v1/adapters: truthful protocol boundary is missing");
+}
+
 const { body: meta } = await request("/v1/meta");
 if (meta.developerConsole !== "/developer") {
   throw new Error("/v1/meta: developer console discovery is missing");

@@ -33,6 +33,12 @@ import {
 } from "./services/evidence-retrieval.js";
 import { strictEvidenceDiscoveryExtension } from "./services/discovery.js";
 import { evaluatePreflight } from "./services/preflight.js";
+import {
+  createGuardLinkPreflight,
+  guardLinkQuerySchema,
+  isGuardLinkExpired,
+} from "./services/guard-link.js";
+import { paymentAdapterRegistry } from "./adapters/payment-context.js";
 import { createLedgerGuardMcpServer } from "./mcp/server.js";
 import { getArcMainnetShadowStatus } from "./services/shadow.js";
 import {
@@ -64,6 +70,7 @@ import {
   developerConsoleJs,
   developerDocsHtml,
   faviconSvg,
+  guardLinkHtml,
   integrationBoundaryHtml,
   statusHtml,
   testerHtml,
@@ -151,6 +158,43 @@ app.use(
 );
 
 app.get("/", (context) => context.html(demoHtml));
+app.get("/guard", async (context) => {
+  const parsed = guardLinkQuerySchema.safeParse(context.req.query());
+  if (!parsed.success) {
+    return context.json(
+      {
+        error: "INVALID_GUARD_LINK",
+        message:
+          "The prefilled payment intent is incomplete or invalid. Ask the sender for a corrected Guard Link.",
+        issues: parsed.error.issues,
+      },
+      400,
+    );
+  }
+  const result = await runPreflight(createGuardLinkPreflight(parsed.data));
+  const expired = isGuardLinkExpired(parsed.data);
+  return context.html(
+    guardLinkHtml({
+      payer: parsed.data.payer ?? "Not declared",
+      recipient: parsed.data.recipient,
+      amount: parsed.data.amount,
+      limit: parsed.data.limit ?? parsed.data.amount,
+      purpose: parsed.data.purpose,
+      ...(parsed.data.expires ? { validUntil: parsed.data.expires } : {}),
+      decision: expired ? "BLOCK" : result.decision,
+      findings: expired
+        ? [
+            {
+              code: "GUARD_LINK_EXPIRED",
+              message: "The declared payment intent has expired.",
+            },
+            ...result.findings,
+          ]
+        : result.findings,
+      requestId: context.get("requestId") as string,
+    }),
+  );
+});
 app.get("/docs", (context) => context.html(developerDocsHtml));
 app.get("/developer", (context) =>
   context.html(
@@ -248,6 +292,7 @@ Production: https://ledgerguard-gules.vercel.app
 OpenAPI: https://ledgerguard-gules.vercel.app/openapi.json
 Service catalog: https://ledgerguard-gules.vercel.app/.well-known/ledgerguard.json
 Public testing: https://ledgerguard-gules.vercel.app/test
+Prefilled human receipt: GET /guard
 Free Arc transaction preflight: POST /v1/preflight
 Paid Arc Testnet x402 resource: GET /v1/paid/network-risk
 Safety: non-custodial; never send a seed phrase or private key.
@@ -261,6 +306,8 @@ app.get("/.well-known/ledgerguard.json", (context) =>
     humanDocs: `${getPublicBaseUrl()}/docs`,
     openapi: `${getPublicBaseUrl()}/openapi.json`,
     testing: `${getPublicBaseUrl()}/test`,
+    guardLinkTemplate: `${getPublicBaseUrl()}/guard?recipient={publicAddress}&amount={decimalUsdc}&limit={decimalUsdc}&purpose={urlEncodedPurpose}`,
+    protocolAdapters: `${getPublicBaseUrl()}/v1/adapters`,
     support:
       "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     custody: "none",
@@ -297,6 +344,13 @@ app.get("/.well-known/ledgerguard.json", (context) =>
 );
 app.get("/v1/commercial-candidate", (context) =>
   context.json(getCommercialCandidate()),
+);
+app.get("/v1/adapters", (context) =>
+  context.json({
+    adapters: paymentAdapterRegistry,
+    boundary:
+      "Adapters normalize declared payment context only. LedgerGuard never signs or holds keys.",
+  }),
 );
 app.get("/v1/meta", (context) =>
   context.json({

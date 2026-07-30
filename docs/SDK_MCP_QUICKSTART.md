@@ -3,6 +3,19 @@
 LedgerGuard remains non-custodial: it accepts unsigned transaction data or a
 public transaction hash. It never receives a wallet key and never signs.
 
+## Prefilled Guard Link
+
+A merchant or agent can share a no-input, human-readable receipt:
+
+```text
+https://ledgerguard-gules.vercel.app/guard?recipient=0x2222222222222222222222222222222222222222&amount=1.00&limit=2.00&purpose=Example%20invoice
+```
+
+The recipient, amount, purpose, policy limit, network, and deterministic result
+are shown before signing. A payer may be declared with the optional `payer`
+query parameter to bind the intent and request read-only simulation. The page
+never connects a wallet or submits a transaction.
+
 ## Five-minute HTTP integration
 
 1. Open `https://ledgerguard-gules.vercel.app/developer`.
@@ -55,3 +68,10 @@ transactions are rejected before settlement so they are not charged.
 parameters and independent activation gates. Real funds remain fail-closed.
 Configuration alone cannot enable charging until the production settlement
 adapter has passed its own controlled test.
+
+## Protocol boundaries
+
+`GET /v1/adapters` publishes what is actually implemented. The x402 receipt
+adapter only normalizes declared settlement context for evidence verification.
+AP2 is an interface placeholder and is disabled; LedgerGuard does not claim AP2
+parsing, verification, or signing support.
