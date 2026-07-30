@@ -220,6 +220,37 @@ describe("evidence", () => {
     );
   });
 
+  it("ignores Arc native USDC mirror logs when an ERC-20 transfer matches", () => {
+    const mirrorAddress =
+      "0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE" as Address;
+    const input = evidenceSchema.parse({
+      network: "arcTestnet",
+      txHash,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: from,
+        expectedRecipient: to,
+        expectedAssetAddress: ARC_TESTNET_USDC,
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Arc ERC-20 with native mirror",
+      },
+    });
+    const { transaction, receipt } = fixture([
+      {
+        ...transferLog(from, to, 1_000_000_000_000_000_000n, 0),
+        address: mirrorAddress,
+      } as Log,
+      transferLog(),
+    ]);
+    const result = buildEvidence(input, transaction, receipt);
+
+    expect(result.status).toBe("VERIFIED");
+    expect(result.transfers).toHaveLength(2);
+    expect(result.findings.map((finding) => finding.code)).not.toContain(
+      "UNEXPECTED_TRANSFER",
+    );
+  });
+
   it("does not verify a matching transfer when extra transfers or approvals exist", () => {
     const input = evidenceSchema.parse({
       txHash,

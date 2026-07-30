@@ -13,6 +13,10 @@ import {
 import type { EvidenceInput } from "../schemas.js";
 import { ARC_TESTNET_USDC } from "../config/networks.js";
 
+/** Arc Testnet emits a companion native USDC Transfer log for ERC-20 USDC moves. */
+const ARC_NATIVE_USDC_MIRROR =
+  "0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE" as const;
+
 const transferEvent = parseAbiItem(
   "event Transfer(address indexed from, address indexed to, uint256 value)",
 );
@@ -74,6 +78,19 @@ function stableStringify(value: unknown): string {
 
 function sameAddress(left: string, right: string): boolean {
   return isAddressEqual(getAddress(left), getAddress(right));
+}
+
+function isArcNativeMirrorTransfer(
+  transfer: NormalizedTransfer,
+  matchingTransfer: NormalizedTransfer | undefined,
+): boolean {
+  if (!matchingTransfer) return false;
+  if (!sameAddress(transfer.assetAddress, ARC_NATIVE_USDC_MIRROR)) return false;
+  if (!sameAddress(transfer.from, matchingTransfer.from)) return false;
+  if (!sameAddress(transfer.to, matchingTransfer.to)) return false;
+  const expectedMirrorAmount =
+    BigInt(matchingTransfer.amount) * 1_000_000_000_000n;
+  return BigInt(transfer.amount) === expectedMirrorAmount;
 }
 
 export function extractTransfers(logs: readonly Log[]): NormalizedTransfer[] {
@@ -290,7 +307,12 @@ export function buildEvidence(
       });
     }
     const unexpectedTransfers = transfers.filter(
-      (transfer) => transfer !== matchingTransfer,
+      (transfer) =>
+        transfer !== matchingTransfer &&
+        !(
+          input.network === "arcTestnet" &&
+          isArcNativeMirrorTransfer(transfer, matchingTransfer)
+        ),
     );
     if (unexpectedTransfers.length > 0) {
       findings.push({
