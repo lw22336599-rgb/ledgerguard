@@ -34,6 +34,8 @@ GitHub contact: **lw22336599-rgb**
 - `POST /v1/developer/shadow` - authenticated, metered, non-enforcing evaluation.
 - `POST /mcp` - authenticated Streamable HTTP MCP server for read-only tools.
 - `POST /v1/paid/evidence` - x402 testnet purchase of a strict evidence receipt.
+- `POST /v1/paid/base-sepolia/evidence` - fail-closed CDP Bazaar candidate paid with Base Sepolia test USDC.
+- `GET /v1/bazaar-candidate` - machine-readable CDP activation and indexing-proof gates.
 - `GET /v1/commercial-candidate` - fail-closed Base production-candidate gates.
 - `GET /guard?...` - prefilled, no-wallet payment intent receipt for people.
 - `GET /v1/adapters` - truthful x402/AP2 protocol implementation boundary.
@@ -127,6 +129,8 @@ HTTP, SDK, and MCP path,
 tenant/API-key and durable-ledger operating boundary.
 [`docs/X402_BUYER_RUNBOOK.md`](docs/X402_BUYER_RUNBOOK.md) for the controlled
 test-payment procedure. See
+[`docs/EXTERNAL_VALIDATION.md`](docs/EXTERNAL_VALIDATION.md) for attributable
+external integration evidence and honest adoption gates. See
 [`docs/OPERATIONS_CLOSURE.md`](docs/OPERATIONS_CLOSURE.md) for the end-to-end
 operating loop, evidence sources, ownership, and production gates. See
 [`docs/OFFICIAL_SUBMISSION.md`](docs/OFFICIAL_SUBMISSION.md) for the

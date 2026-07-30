@@ -125,6 +125,20 @@ describe("HTTP API", () => {
       network: "eip155:8453",
       realFundsEnabled: false,
     });
+    expect(body.bazaarCandidate).toMatchObject({
+      network: "eip155:84532",
+      testAssetsOnly: true,
+      indexed: false,
+    });
+    expect(body.resources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "base-sepolia-strict-evidence",
+          network: "eip155:84532",
+          discovery: "cdp-bazaar-candidate",
+        }),
+      ]),
+    );
     expect(body.humanDocs).toBe(
       "https://ledgerguard-gules.vercel.app/docs",
     );
@@ -138,6 +152,17 @@ describe("HTTP API", () => {
     const llms = await app.request("/llms.txt");
     expect(llms.status).toBe(200);
     expect(await llms.text()).toContain("never send a seed phrase");
+  });
+
+  it("exposes an honest fail-closed Bazaar readiness endpoint", async () => {
+    const response = await app.request("/v1/bazaar-candidate");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      lifecycle: "testnet",
+      network: "eip155:84532",
+      settleEnabled: false,
+      indexed: false,
+    });
   });
 
   it("reports Arc RPC readiness and renders the live status", async () => {
@@ -170,6 +195,7 @@ describe("HTTP API", () => {
       headers: {
         "x-real-ip": "203.0.113.7",
         "x-ledgerguard-client": "test-suite/1.0",
+        "x-ledgerguard-integration": "public-beta-example",
       },
     });
     const event = info.mock.calls
@@ -186,6 +212,7 @@ describe("HTTP API", () => {
       path: "/v1/meta",
       status: 200,
       client: "test-suite/1.0",
+      integration: "public-beta-example",
     });
     expect(JSON.stringify(event)).not.toContain("203.0.113.7");
     info.mockRestore();

@@ -24,6 +24,7 @@ never connects a wallet or submits a transaction.
 
 ```powershell
 $env:LEDGERGUARD_API_KEY = "lg_test_..."
+$env:LEDGERGUARD_INTEGRATION = "your-public-project-testnet"
 node examples/quickstart.mjs
 ```
 
@@ -61,6 +62,16 @@ non-destructive, and idempotent. They cannot sign or send a transaction.
 transaction exists, then returns an x402 testnet challenge. After successful
 test-asset settlement it delivers a strict evidence receipt. Missing
 transactions are rejected before settlement so they are not charged.
+
+`POST /v1/paid/base-sepolia/evidence` is the separate CDP Bazaar candidate. It
+uses Base Sepolia test USDC to purchase the same Arc Testnet evidence
+deliverable. It remains fail-closed until CDP credentials and explicit testnet
+enablement are configured. A configuration flag is never reported as Bazaar
+indexing; indexing requires a successful CDP settlement and discovery search.
+
+See `docs/EXTERNAL_VALIDATION.md` for attributable request headers and the
+evidence required before an integration, repeat user, pilot, or revenue is
+counted.
 
 ## Production candidate
 

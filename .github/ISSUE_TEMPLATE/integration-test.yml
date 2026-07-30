@@ -1,0 +1,63 @@
+name: Independent integration evidence
+description: Record a reproducible external LedgerGuard integration without sharing secrets.
+title: "[Integration] "
+labels:
+  - integration-evidence
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is used to verify real adoption. Use testnet assets only. Never paste API keys, wallet keys, seed phrases, personal data, or real-fund transaction details.
+  - type: input
+    id: project
+    attributes:
+      label: Public project or organization
+      description: A public repository, product page, or organization name that can be verified.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Integration surface
+      options:
+        - HTTP API
+        - TypeScript SDK
+        - MCP
+        - Guard Link
+        - x402 testnet resource
+    validations:
+      required: true
+  - type: input
+    id: integration
+    attributes:
+      label: Non-secret integration identifier
+      description: The value sent in X-LedgerGuard-Integration, such as project-name-testnet.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reproducible evidence
+      description: Include sanitized request IDs, public testnet hashes, or a public code link. Do not include credentials.
+    validations:
+      required: true
+  - type: dropdown
+    id: repeated
+    attributes:
+      label: Have you used it on more than one day?
+      options:
+        - "No"
+        - "Yes"
+    validations:
+      required: true
+  - type: dropdown
+    id: commercial
+    attributes:
+      label: Commercial next step
+      options:
+        - Test only
+        - Open to a paid pilot
+        - Open to a monthly plan
+        - Need an enterprise/OEM discussion
+    validations:
+      required: true
