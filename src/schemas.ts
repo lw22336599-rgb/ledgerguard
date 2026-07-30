@@ -66,3 +66,15 @@ export const evidenceSchema = z.object({
 });
 
 export type EvidenceInput = z.infer<typeof evidenceSchema>;
+
+export const developerRegistrationSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Name must contain at least 2 characters")
+    .max(80, "Name must contain at most 80 characters")
+    .regex(
+      /^[a-zA-Z0-9][a-zA-Z0-9 ._/@-]*$/,
+      "Name contains unsupported characters",
+    ),
+});

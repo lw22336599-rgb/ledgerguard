@@ -165,6 +165,82 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/developer/register": {
+      post: {
+        summary: "Create an Arc Testnet developer tenant and API key",
+        description:
+          "The plaintext test key is returned once. Only its SHA-256 digest is stored.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["name"],
+                properties: {
+                  name: { type: "string", minLength: 2, maxLength: 80 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Tenant and one-time API key created" },
+          "400": { description: "Invalid registration request" },
+          "503": {
+            description: "Self-service or shared durable storage unavailable",
+          },
+        },
+      },
+    },
+    "/v1/developer/account": {
+      get: {
+        summary: "Read the authenticated tenant and durable usage summary",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Tenant and current-month usage" },
+          "401": { description: "Missing, invalid, or revoked API key" },
+          "503": { description: "Shared durable storage unavailable" },
+        },
+      },
+    },
+    "/v1/developer/keys/rotate": {
+      post: {
+        summary: "Rotate the authenticated tenant API key",
+        description:
+          "Revokes the current key and returns its replacement once.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Previous key revoked; replacement returned" },
+          "401": { description: "Missing, invalid, or revoked API key" },
+          "503": { description: "Shared durable storage unavailable" },
+        },
+      },
+    },
+    "/v1/developer/preflight": {
+      post: {
+        summary: "Run a quota-enforced, durably metered preflight",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PreflightRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description:
+              "ALLOW, REVIEW, or BLOCK decision plus durable usage summary",
+          },
+          "400": { description: "Invalid request" },
+          "401": { description: "Missing, invalid, or revoked API key" },
+          "429": { description: "Monthly tenant quota exhausted" },
+          "503": { description: "Network, RPC, or durable store unavailable" },
+        },
+      },
+    },
     "/v1/paid/network-risk": {
       get: {
         summary: "Purchase an Arc network-risk snapshot with x402",
@@ -228,6 +304,13 @@ export const openApiDocument = {
     },
   },
   components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "LedgerGuard test API key",
+      },
+    },
     schemas: {
       PreflightRequest: {
         type: "object",

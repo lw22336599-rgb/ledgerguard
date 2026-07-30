@@ -37,6 +37,7 @@ for (const [path, marker] of [
   ["/catalog", "SERVICE CATALOG"],
   ["/test", "Complete the test flow end to end"],
   ["/status", "LIVE STATUS"],
+  ["/developer", "Developer Console"],
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
 ]) {
   const response = await fetch(`${baseUrl}${path}`, {
@@ -79,6 +80,19 @@ const { body: networks } = await request("/v1/networks");
 const mainnet = networks.networks.find((network) => network.name === "arcMainnet");
 if (!mainnet || mainnet.enabled !== false) {
   throw new Error("/v1/networks: Arc Mainnet safety gate is not closed");
+}
+
+const { body: meta } = await request("/v1/meta");
+if (meta.developerConsole !== "/developer") {
+  throw new Error("/v1/meta: developer console discovery is missing");
+}
+if (
+  process.env.EXPECT_DEVELOPER_SELF_SERVICE === "true" &&
+  (meta.tenantApi !== "enabled" || ready.developerSelfService !== "ready")
+) {
+  throw new Error(
+    `/v1/meta: developer self-service is not durably ready ${JSON.stringify({ meta, ready })}`,
+  );
 }
 const shadow = networks.shadows?.find(
   (entry) => entry.name === "arcMainnet5042",

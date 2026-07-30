@@ -19,7 +19,12 @@ import {
   requestTelemetry,
 } from "./middleware/request-telemetry.js";
 import { openApiDocument } from "./openapi.js";
-import { evidenceSchema, preflightSchema } from "./schemas.js";
+import {
+  developerRegistrationSchema,
+  evidenceSchema,
+  preflightSchema,
+  type PreflightInput,
+} from "./schemas.js";
 import { buildEvidence } from "./services/evidence.js";
 import { evaluatePreflight } from "./services/preflight.js";
 import { getArcMainnetShadowStatus } from "./services/shadow.js";
@@ -37,10 +42,19 @@ import {
   x402Enabled,
 } from "./services/x402.js";
 import {
+  getTenantStore,
+  QuotaExceededError,
+  TenantCapacityError,
+  selfServiceEnabled,
+  type Tenant,
+} from "./services/tenant-store.js";
+import {
   catalogHtml,
   demoCss,
   demoHtml,
   demoJs,
+  developerConsoleHtml,
+  developerConsoleJs,
   developerDocsHtml,
   faviconSvg,
   integrationBoundaryHtml,
@@ -57,6 +71,7 @@ app.use(
     origin: "*",
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: [
+      "Authorization",
       "Content-Type",
       "Payment-Signature",
       "X-LedgerGuard-Client",
@@ -122,6 +137,14 @@ app.use(
 
 app.get("/", (context) => context.html(demoHtml));
 app.get("/docs", (context) => context.html(developerDocsHtml));
+app.get("/developer", (context) =>
+  context.html(
+    developerConsoleHtml({
+      storageReady: getTenantStore() !== null,
+      registrationEnabled: selfServiceEnabled(),
+    }),
+  ),
+);
 app.get("/docs/integration", (context) =>
   context.html(integrationBoundaryHtml),
 );
@@ -183,6 +206,11 @@ app.get("/styles.css", (context) =>
 app.get("/app.js", (context) =>
   context.body(demoJs, 200, { "Content-Type": "text/javascript; charset=utf-8" }),
 );
+app.get("/developer.js", (context) =>
+  context.body(developerConsoleJs, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+  }),
+);
 for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
   app.get(path, (context) =>
     context.body(faviconSvg, 200, {
@@ -242,11 +270,194 @@ app.get("/v1/meta", (context) =>
     openapi: "/openapi.json",
     catalog: "/.well-known/ledgerguard.json",
     testing: "/test",
+    developerConsole: "/developer",
+    tenantApi:
+      getTenantStore() && selfServiceEnabled() ? "enabled" : "disabled",
     support:
       "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     requestTracking: "X-LedgerGuard-Request-Id",
   }),
 );
+
+function bearerApiKey(value: string | undefined): string | null {
+  const match = value?.match(/^Bearer ([^\s]+)$/i);
+  return match?.[1] ?? null;
+}
+
+async function authenticatedTenant(
+  authorization: string | undefined,
+): Promise<
+  | { ok: true; tenant: Tenant; apiKey: string }
+  | { ok: false; status: 401 | 503; error: string }
+> {
+  const store = getTenantStore();
+  if (!store) {
+    return { ok: false, status: 503, error: "DURABLE_STORE_UNAVAILABLE" };
+  }
+  const apiKey = bearerApiKey(authorization);
+  if (!apiKey) return { ok: false, status: 401, error: "API_KEY_REQUIRED" };
+  const tenant = await store.authenticate(apiKey);
+  return tenant
+    ? { ok: true, tenant, apiKey }
+    : { ok: false, status: 401, error: "INVALID_API_KEY" };
+}
+
+async function runPreflight(input: PreflightInput) {
+  requireEnabledNetwork(input.network);
+  const client = createNetworkClient(input.network);
+  const simulation = await simulateReadOnly(client, {
+    ...(input.from ? { from: getAddress(input.from) as Address } : {}),
+    to: getAddress(input.to) as Address,
+    data: input.data as Hex,
+    value: BigInt(input.valueWei),
+  });
+  return evaluatePreflight(input, simulation);
+}
+
+app.post("/v1/developer/register", async (context) => {
+  if (!selfServiceEnabled()) {
+    return context.json(
+      {
+        error: "REGISTRATION_DISABLED",
+        message: "Developer self-service registration is not enabled.",
+      },
+      503,
+    );
+  }
+  const store = getTenantStore();
+  if (!store) {
+    return context.json(
+      {
+        error: "DURABLE_STORE_UNAVAILABLE",
+        message: "Developer accounts require the shared durable store.",
+      },
+      503,
+    );
+  }
+  const parsed = developerRegistrationSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+  try {
+    const registration = await store.register(parsed.data.name);
+    return context.json(
+      {
+        tenant: registration.tenant,
+        apiKey: registration.apiKey,
+        apiKeyNotice:
+          "Save this test key now. LedgerGuard stores only its hash and cannot display it again.",
+      },
+      201,
+    );
+  } catch (error) {
+    if (error instanceof TenantCapacityError) {
+      return context.json(
+        {
+          error: "TENANT_CAPACITY_REACHED",
+          message:
+            "The bounded public testnet cohort is full. Use the support link to request the next slot.",
+        },
+        429,
+      );
+    }
+    return context.json(
+      {
+        error: "DURABLE_STORE_UNAVAILABLE",
+        message: "The developer account could not be created.",
+      },
+      503,
+    );
+  }
+});
+
+app.get("/v1/developer/account", async (context) => {
+  const auth = await authenticatedTenant(context.req.header("authorization"));
+  if (!auth.ok) return context.json({ error: auth.error }, auth.status);
+  const store = getTenantStore();
+  if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  try {
+    return context.json({
+      tenant: auth.tenant,
+      usage: await store.usage(auth.tenant),
+    });
+  } catch {
+    return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  }
+});
+
+app.post("/v1/developer/keys/rotate", async (context) => {
+  const auth = await authenticatedTenant(context.req.header("authorization"));
+  if (!auth.ok) return context.json({ error: auth.error }, auth.status);
+  const store = getTenantStore();
+  if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  try {
+    const apiKey = await store.rotateKey(
+      auth.tenant,
+      auth.apiKey,
+    );
+    return context.json({
+      apiKey,
+      apiKeyNotice:
+        "The previous key is revoked. Save this replacement now; it is displayed only once.",
+    });
+  } catch {
+    return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  }
+});
+
+app.post("/v1/developer/preflight", async (context) => {
+  const auth = await authenticatedTenant(context.req.header("authorization"));
+  if (!auth.ok) return context.json({ error: auth.error }, auth.status);
+  const parsed = preflightSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+  const store = getTenantStore();
+  if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  const requestId = context.get("requestId") as string;
+  try {
+    const usage = await store.recordUsage(
+      auth.tenant,
+      "preflight",
+      requestId,
+    );
+    const result = await runPreflight(parsed.data);
+    return context.json({ ...result, usage });
+  } catch (error) {
+    if (error instanceof QuotaExceededError) {
+      return context.json(
+        { error: "QUOTA_EXCEEDED", usage: error.usage },
+        429,
+      );
+    }
+    if (
+      error instanceof Error &&
+      error.message.toLowerCase().includes("disabled")
+    ) {
+      return context.json(
+        { error: "NETWORK_DISABLED", message: error.message },
+        503,
+      );
+    }
+    return context.json(
+      {
+        error: "DEVELOPER_PREFLIGHT_UNAVAILABLE",
+        message: "The metered preflight request could not be completed.",
+      },
+      503,
+    );
+  }
+});
 
 app.get("/health", (context) =>
   context.json({
@@ -258,6 +469,19 @@ app.get("/health", (context) =>
 
 app.get("/ready", async (context) => {
   try {
+    const tenantStore = getTenantStore();
+    if (
+      selfServiceEnabled() &&
+      (!tenantStore || !(await tenantStore.health()))
+    ) {
+      return context.json(
+        {
+          ok: false,
+          error: "DURABLE_STORE_UNAVAILABLE",
+        },
+        503,
+      );
+    }
     const network = requireEnabledNetwork("arcTestnet");
     const { chainId, blockNumber } = await probeRpc(network.rpcUrls);
     if (chainId !== network.chainId) {
@@ -276,6 +500,8 @@ app.get("/ready", async (context) => {
       network: network.name,
       chainId,
       blockNumber: blockNumber.toString(),
+      developerSelfService:
+        selfServiceEnabled() && tenantStore ? "ready" : "disabled",
     });
   } catch (error) {
     console.error("Readiness RPC probe failed", {
@@ -390,6 +616,26 @@ app.get("/v1/paid/network-risk", async (context) => {
       requestId,
       ...receipt,
     });
+    let ledgerStatus: "recorded" | "duplicate" | "unavailable" = "unavailable";
+    const tenantStore = getTenantStore();
+    if (tenantStore) {
+      try {
+        ledgerStatus = await tenantStore.recordPayment({
+          requestId,
+          payer: receipt.payer,
+          settlementTransaction: receipt.settlementTransaction,
+          amountMicroUsdc: receipt.amountMicroUsdc,
+          network: "arcTestnet",
+          recordedAt: new Date().toISOString(),
+        });
+      } catch {
+        console.error({
+          event: "payment.ledger_unavailable",
+          requestId,
+          settlementTransaction: receipt.settlementTransaction,
+        });
+      }
+    }
     await notifyPaymentSettlement({
       requestId,
       payer: receipt.payer,
@@ -402,6 +648,7 @@ app.get("/v1/paid/network-risk", async (context) => {
       payer: receipt.payer,
       settlementTransaction: receipt.settlementTransaction,
       receipt,
+      ledgerStatus,
       networkRisk: {
         lifecycle: arc.lifecycle,
         mainnetEnabled: getNetworkRegistry().arcMainnet.enabled,
@@ -457,17 +704,7 @@ app.post("/v1/preflight", async (context) => {
     );
   }
 
-  const client = createNetworkClient(parsed.data.network);
-  const simulation = await simulateReadOnly(client, {
-    ...(parsed.data.from
-      ? { from: getAddress(parsed.data.from) as Address }
-      : {}),
-    to: getAddress(parsed.data.to) as Address,
-    data: parsed.data.data as Hex,
-    value: BigInt(parsed.data.valueWei),
-  });
-
-  return context.json(evaluatePreflight(parsed.data, simulation));
+  return context.json(await runPreflight(parsed.data));
 });
 
 app.post("/v1/evidence", async (context) => {

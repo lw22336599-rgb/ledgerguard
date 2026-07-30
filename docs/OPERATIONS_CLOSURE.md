@@ -15,7 +15,8 @@ service level.
 | Tester feedback and follow-up | GO | GitHub Issue Forms, request IDs, repository notifications |
 | Mainnet or real-fund use | HOLD | official parameters, independent security review, shadow traffic, explicit human approval and canary |
 | Repeatable commercial revenue | UNVERIFIED | one external payer, accepted delivery, gross margin, repeat use or renewal |
-| Enterprise SLA and global quota | HOLD | shared durable state, alerting destination, retention policy and load/failure tests |
+| Tenant/API-key self-service and global quota | GO after durable-store production smoke | `/developer`, one-time keys, rotation, shared usage ledger, fail-closed readiness |
+| Enterprise SLA | HOLD | alerting destination, contractual retention policy and load/failure tests |
 
 ## Commercial product loop
 
@@ -27,18 +28,17 @@ LedgerGuard uses one deterministic safety core through three product surfaces:
 | API, SDK, and future MCP server | Wallets, AI agents, and developers | Self-service integration and x402 testnet delivery | Usage-based x402 pricing after real-value mainnet approval |
 | Policy Console | Teams and enterprises | Not implemented | Subscription, policy administration, evidence retention, alerts, and SLA |
 
-The current repository completes the free testnet and machine-payment
-demonstration surfaces. It does **not** yet complete a repeatable revenue loop.
-The minimum missing production capabilities are:
+The current repository completes the free testnet, tenant/API-key, persistent
+usage-ledger, and machine-payment demonstration surfaces. It does **not** yet
+complete a repeatable real-value revenue loop. The remaining production
+capabilities are:
 
-1. tenant identity and revocable API keys;
-2. a shared durable quota, usage, and replay-safe billing ledger;
-3. self-service plan selection, invoicing or subscription collection, and
+1. self-service plan selection, invoicing or subscription collection, and
    payment-failure handling;
-4. a Policy Console for team budgets, allowlists, approvals, evidence history,
+2. a Policy Console for team budgets, allowlists, approvals, evidence history,
    and alerts;
-5. customer support, privacy, retention, incident, tax, and commercial terms;
-6. one independent integration, accepted delivery, real payment, measured gross
+3. customer support, privacy, retention, incident, tax, and commercial terms;
+4. one independent integration, accepted delivery, real payment, measured gross
    margin, and repeat-use evidence.
 
 MCP Registry or x402 Bazaar publication can improve discovery, but neither is a
@@ -51,20 +51,25 @@ above.
    machine-readable catalog.
 2. `/test` routes the tester to the browser demo, API examples, or the x402
    buyer runbook.
-3. Every API response returns `X-LedgerGuard-Request-Id`; a caller may send a
+3. `/developer` lets a tester create a bounded Arc Testnet tenant, receive an
+   API key once, run metered preflights, inspect persistent usage, and rotate
+   the key without operator assistance.
+4. Every API response returns `X-LedgerGuard-Request-Id`; a caller may send a
    non-secret `X-LedgerGuard-Client` label.
-4. Preflight and evidence checks fail closed when required chain data or intent
+5. Preflight and evidence checks fail closed when required chain data or intent
    fields are unavailable.
-5. The paid endpoint returns an x402 challenge until a valid testnet payment is
+6. The paid endpoint returns an x402 challenge until a valid testnet payment is
    settled.
-6. Successful delivery returns a receipt with payer, amount, settlement
+7. Successful delivery returns a receipt with payer, amount, settlement
    transaction, network, and explorer link.
-7. Vercel Web Analytics records aggregate human page traffic. Sanitized runtime
+8. A durable ledger stores monthly usage events and replay-safe settlement
+   fingerprints. API-key hashes are stored; plaintext keys are not.
+9. Vercel Web Analytics records aggregate human page traffic. Sanitized runtime
    events correlate API activity by request ID without logging source IPs.
-8. Testers submit structured results or bugs through GitHub Issues. Repository
+10. Testers submit structured results or bugs through GitHub Issues. Repository
    notifications provide a durable follow-up queue.
-9. GitHub Actions runs the production smoke check hourly.
-10. The same smoke check verifies that the 5042 Shadow has two-source consensus
+11. GitHub Actions runs the production smoke check hourly.
+12. The same smoke check verifies that the 5042 Shadow has two-source consensus
     while all real-fund, signing, and mainnet-payment capabilities remain off.
 
 ## Evidence and retention
@@ -73,6 +78,8 @@ above.
 - GitHub Issues are the durable tester-feedback record.
 - GitHub Actions runs are the durable uptime-check record.
 - Vercel Web Analytics measures human discovery and page use.
+- The managed Redis REST store is the tenant, quota, usage, and replay-safe
+  test-payment ledger. It is not evidence of real-value revenue.
 - Vercel runtime logs are short-lived diagnostics and are not a billing ledger.
 - `OPERATIONS_WEBHOOK_URL` may forward sanitized settlement events to a
   user-controlled HTTPS destination. It is optional and remains unset until an
@@ -83,12 +90,10 @@ financial information in an issue, log, webhook payload, or project document.
 
 ## What remains intentionally external
 
-The zero-cost testnet deployment uses a bounded in-memory rate limiter. Multiple
-serverless instances do not share that state. Production-wide quotas, tenant
-usage accounting, replay-safe billing records, and an enterprise SLA require a
-shared durable store such as managed Redis or a database. Provisioning one
-creates a provider account and terms relationship, so it is a separate,
-explicitly authorized production step.
+Provisioning the managed durable store creates a provider terms relationship.
+The application therefore keeps developer registration disabled and readiness
+fail-closed until an authorized store is attached. Storage health is part of
+`/ready` whenever self-service is enabled.
 
 Real adoption cannot be created by code. The commercial gate requires at least:
 

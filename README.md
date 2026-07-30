@@ -18,6 +18,7 @@ GitHub contact: **lw22336599-rgb**
 - `GET /docs` - human-readable API guide; raw JSON remains at `/openapi.json`.
 - `GET /catalog` - human-readable service and pricing catalog.
 - `GET /test` - one public path for browser, API, x402, and feedback testing.
+- `GET /developer` - self-service Arc Testnet tenant, API-key, usage, and key-rotation console.
 - `GET /status` - live, read-only Arc Testnet readiness page.
 - `GET /v1/meta` - machine-readable service metadata.
 - `POST /v1/preflight` - decode and compare a transaction against an explicit intent and policy.
@@ -26,6 +27,10 @@ GitHub contact: **lw22336599-rgb**
 - `GET /ready` - read-only Arc Testnet RPC readiness and chain-ID verification.
 - `GET /v1/networks` - machine-readable network activation state.
 - `GET /v1/paid/network-risk` - Circle Gateway x402 testnet payment demo.
+- `POST /v1/developer/register` - create a bounded testnet tenant and receive its API key once.
+- `GET /v1/developer/account` - read the tenant and persistent monthly usage.
+- `POST /v1/developer/keys/rotate` - revoke the current key and receive a replacement once.
+- `POST /v1/developer/preflight` - authenticated, metered preflight.
 - `GET /openapi.json` - OpenAPI 3.1 machine discovery document.
 - `GET /.well-known/ledgerguard.json` - agent-readable service and price catalog.
 - `GET /llms.txt` - concise discovery instructions for AI agents.
@@ -110,6 +115,8 @@ tests, the production build, and production dependency vulnerabilities on every
 pull request and main-branch push.
 
 See [`docs/INTEGRATION.md`](docs/INTEGRATION.md) for developer onboarding and
+[`docs/DEVELOPER_SELF_SERVICE.md`](docs/DEVELOPER_SELF_SERVICE.md) for the
+tenant/API-key and durable-ledger operating boundary.
 [`docs/X402_BUYER_RUNBOOK.md`](docs/X402_BUYER_RUNBOOK.md) for the controlled
 test-payment procedure. See
 [`docs/OPERATIONS_CLOSURE.md`](docs/OPERATIONS_CLOSURE.md) for the end-to-end

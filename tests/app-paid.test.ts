@@ -28,11 +28,16 @@ vi.mock("../src/services/x402.js", () => ({
 }));
 
 const { app } = await import("../src/app.js");
+const { resetTenantStoreForTests } = await import(
+  "../src/services/tenant-store.js"
+);
 
 describe("paid HTTP delivery", () => {
   beforeEach(() => {
     x402.settlePayment.mockReset();
     delete process.env.OPERATIONS_WEBHOOK_URL;
+    process.env.LEDGERGUARD_STORAGE_BACKEND = "memory";
+    resetTenantStoreForTests();
   });
 
   it("returns a payment challenge before settlement", async () => {
@@ -59,6 +64,7 @@ describe("paid HTTP delivery", () => {
     expect(response.headers.get("payment-response")).toBeTruthy();
     expect(await response.json()).toMatchObject({
       paid: true,
+      ledgerStatus: "recorded",
       receipt: {
         amountMicroUsdc: "1000",
         network: "arcTestnet",
