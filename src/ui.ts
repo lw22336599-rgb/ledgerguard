@@ -285,6 +285,8 @@ export const portalHtml = `${pageHead(
     <nav class="portal-nav">
       <a class="brand" href="/">LedgerGuard</a>
       <div class="portal-nav-links"><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a></div>
+      <button id="nav-connect" class="nav-wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+      <span id="nav-wallet-display" style="display:none;font-size:12px;color:#8aa4ff;font-family:monospace;white-space:nowrap"></span>
       <span class="badge">ARC PUBLIC TESTNET</span>
     </nav>
     <section class="hero portal-hero">
@@ -318,6 +320,29 @@ export const portalHtml = `${pageHead(
     </section>
     <section class="notice"><strong>Current status:</strong> the protected API/MCP payment path, durable receipts, and capped browser-wallet crosschain route are implemented on test networks. An externally signed end-to-end crosschain record, repeat partner use, and a paid pilot remain acceptance gates.</section>
     ${footer}
+<script>
+(function(){var p=[],a=null,c=null;
+window.addEventListener("eip6963:announceProvider",function(e){p.push(e.detail)});
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+var b=document.getElementById('nav-connect'),d=document.getElementById('nav-wallet-display');
+function doConnect(pr){
+pr.request({method:'eth_requestAccounts'}).then(function(ac){
+if(ac&&ac[0]){a=ac[0];b.textContent=ac[0].slice(0,6)+'...'+ac[0].slice(-4);b.classList.add('connected');
+pr.request({method:'eth_chainId'}).then(function(id){c=id;if(d){d.textContent='eip155:'+parseInt(id);d.style.display='inline'}})}
+}).catch(function(){alert('Connection cancelled')})
+}
+if(b)b.onclick=function(){
+if(a){a=null;c=null;b.textContent='Connect Wallet';b.classList.remove('connected');if(d)d.style.display='none';return}
+if(p.length>1){var s=p.map(function(x,i){return i+':'+x.info.name}).join(', ');var n=prompt('Select wallet ('+s+'):');if(n!==null){var idx=parseInt(n);if(!isNaN(idx)&&p[idx])doConnect(p[idx].provider)}}
+else if(p.length===1)doConnect(p[0].provider);
+else if(window.ethereum)doConnect(window.ethereum);
+else alert('No wallet found');
+};
+if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(function(ac){
+if(ac&&ac[0]){a=ac[0];b.textContent=ac[0].slice(0,6)+'...'+ac[0].slice(-4);b.classList.add('connected')}
+}).catch(function(){});
+})();
+</script>
   </main>
 </body>
 </html>`;
@@ -689,6 +714,9 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .builder-panel form{grid-template-columns:1fr 1fr}
 .builder-panel form label:nth-of-type(1),.builder-panel form label:nth-of-type(2),.builder-panel form label:nth-of-type(5),.builder-panel form button{grid-column:1/-1}
 .links a{color:#c6d0ff}
+#nav-connect{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;background:linear-gradient(135deg,#7b2ff7,#5b1fd7);border:none;color:#fff;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;margin:0 6px}
+#nav-connect:hover{box-shadow:0 4px 15px rgba(123,47,247,.4)}
+#nav-connect.connected{background:transparent;border:1px solid #4ade80;color:#4ade80;font-size:10px}
 footer{border-color:#ffffff19;line-height:1.9}
 @media(max-width:900px){
   .portal-nav-links{display:none}
