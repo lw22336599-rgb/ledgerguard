@@ -10,9 +10,13 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
-const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Guard Links on Arc Testnet &middot; Base Mainnet canary at <a href="/canary">/canary</a> &middot; <a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="https://x.com/HuiLibaa" rel="me noreferrer">Official X @HuiLibaa</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
+const footer = `<footer class="site-footer">
+  <div class="footer-primary">LedgerGuard &middot; Protect + Meter &middot; Guard Links on Arc Testnet &middot; Base Mainnet canary at <a href="/canary">/canary</a></div>
+  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
+</footer>`;
 
-const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/docs">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a>`;
+const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/docs">Developers</a><a href="/status">Status</a>`;
 
 export const meterAppOrigin = "https://arc-meter-xi.vercel.app";
 
@@ -161,21 +165,20 @@ export const guardBuilderHtml = `${pageHead(
 )}
 <body>
   <main>
-    ${portalNavHtml("GUARD LINK BUILDER")}
+    ${portalNavHtml("GUARD LINK")}
     <section class="subhero">
-      <p class="eyebrow">USDC PAYMENT LINKS · BASE + ARC</p>
+      <p class="eyebrow">USDC PAYMENT LINKS · ARC TESTNET</p>
       <h1 class="compact">Create a USDC payment link.</h1>
-      <p class="lead">Connect your wallet, pick a network, enter the amount, and share the link or QR code. The payer sees exactly who receives what before signing.</p>
+      <p class="lead">Connect your wallet on Arc Testnet, enter the amount, and share the link or QR code. The payer sees exactly who receives what before signing.</p>
     </section>
     <section id="guard-verified-notice" class="notice" hidden><strong>Welcome back.</strong> Your receiving address is prefilled from your verified payment. Connect the same wallet or edit the address before creating a link.</section>
     <section class="panel builder-panel">
       <div class="chain-selector-row">
-        <label for="guard-chain">Network</label>
-        <select id="guard-chain" class="chain-select">
-          <option value="arc-testnet" selected>Arc Testnet</option>
-          <option value="base-mainnet" disabled>Base Mainnet (coming soon)</option>
-        </select>
-        <p id="guard-chain-notice" class="chain-selector-notice">Guard Links currently settle on Arc Testnet. Base Mainnet support is in progress — use <a href="/canary">/canary</a> for the live mainnet payment check.</p>
+        <div class="chain-network-active">
+          <span class="chain-network-label">Network</span>
+          <strong id="guard-chain-label">Arc Testnet</strong>
+          <p class="chain-selector-notice">Guard Links settle on Arc Testnet. For the live Base Mainnet payment check, use the <a href="/canary">0.001 USDC canary</a>.</p>
+        </div>
       </div>
       <div id="wallet-section" class="wallet-status-card">
         <div class="wallet-status-row">
@@ -785,7 +788,7 @@ nav{min-height:80px;gap:24px;border-color:#ffffff19}
 .portal-nav-links,.nav-actions{display:flex;align-items:center;gap:24px}
 .portal-nav-links a,.nav-actions a{color:var(--muted);font-size:14px;text-decoration:none}
 .portal-nav-links a:hover,.nav-actions a:hover{color:var(--text)}
-.badge{color:#b8c6ff;border-color:#52649f;background:#111936cc;box-shadow:inset 0 0 20px #6f8cff14}
+.badge{color:#b8c6ff;border-color:#52649f;background:#111936cc;box-shadow:inset 0 0 20px #6f8cff14;user-select:none;pointer-events:none;flex-shrink:0;white-space:nowrap}
 .eyebrow,.step{color:#aebcff;font-family:ui-monospace,Consolas,monospace}
 .hero{padding:92px 0 58px}
 .portal-hero{max-width:1080px;padding-bottom:84px}
@@ -841,11 +844,17 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .button-link{display:inline-flex;align-items:center;justify-content:center;padding:13px 16px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;text-decoration:none;font-weight:800}
 .builder-panel{align-items:start}
 .chain-selector-row{display:grid;gap:8px;margin-bottom:18px;padding:14px 16px;border:1px solid #2b355b;border-radius:12px;background:#0b1123}
-.chain-selector-row label{font-size:13px;font-weight:700;color:#c6d0ff}
-.chain-select{width:100%;max-width:360px;padding:10px 12px;border:1px solid #334065;border-radius:10px;background:#060817;color:var(--text);font:inherit}
-.chain-select:disabled{color:#8e99ba}
+.chain-network-active{display:grid;gap:6px}
+.chain-network-label{font-size:13px;font-weight:700;color:#c6d0ff}
+.chain-network-active strong{font-size:18px;color:var(--text)}
 .chain-selector-notice{margin:0;font-size:13px;line-height:1.55;color:var(--muted)}
 .chain-selector-notice a{color:#c6d0ff}
+.site-footer{display:grid;gap:10px;padding:28px 0 36px;border-top:1px solid #ffffff19;line-height:1.7}
+.footer-primary,.footer-links{color:var(--muted);font-size:14px}
+.footer-links a,.footer-primary a{color:#c6d0ff;text-decoration:none}
+.footer-social{padding-top:6px;border-top:1px solid #ffffff12}
+.footer-social a{color:#dbe3ff;font-weight:700;text-decoration:none}
+.footer-social a:hover{color:#fff}
 .builder-panel .result input{margin:14px 0}
 .builder-panel form{grid-template-columns:1fr 1fr}
 .builder-panel form label:nth-of-type(1),.builder-panel form label:nth-of-type(2),.builder-panel form details,.builder-panel form button{grid-column:1/-1}
@@ -879,6 +888,7 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .nav-wallet-btn.connected,#nav-connect.connected,#w-btn.w-connected{background:transparent;border:1px solid var(--success);color:var(--success)}
 .nav-wallet-display{display:none;font-size:12px;color:#8aa4ff;font-family:ui-monospace,monospace;white-space:nowrap}
 .portal-nav{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px;border-bottom:1px solid #ffffff19;padding:18px 0;margin-bottom:12px}
+.portal-nav #nav-connect{margin-left:auto}
 .nav-menu-toggle{display:none;background:#151e3e;border:1px solid #3b4a79;color:#dbe3ff;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
 .nav-mobile-panel{display:none;flex-direction:column;gap:12px;width:100%;padding:14px 0 4px}
 .nav-mobile-panel a{color:var(--muted);text-decoration:none;font-size:15px}

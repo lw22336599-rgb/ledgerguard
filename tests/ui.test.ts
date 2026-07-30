@@ -242,7 +242,8 @@ describe("browser demo experience", () => {
   });
 
   it("publishes the official X account on the public portal", () => {
-    expect(portalHtml).toContain("Official X @HuiLibaa");
+    expect(portalHtml).toContain("Follow on X @HuiLibaa");
+    expect(portalHtml).not.toContain('rel="me noreferrer">X @HuiLibaa</a></div>');
     expect(portalHtml).toContain('rel="me noreferrer"');
   });
 });
