@@ -206,7 +206,9 @@ describe("HTTP API", () => {
     expect(css.status).toBe(200);
     expect(css.headers.get("content-type")).toContain("text/css");
     const cssText = await css.text();
-    expect(cssText).toContain(".result.neutral{border-color:#667de0}");
+    expect(cssText).toContain(":root{color-scheme:light}");
+    expect(cssText).toContain("--bg:#f8fafc");
+    expect(cssText).toContain(".result.neutral{border-color:#93c5fd");
     expect(cssText).toContain(".portal-nav{");
     expect(cssText.match(/\.panel\{[^}]*border-radius:18px/)).toBeTruthy();
 
