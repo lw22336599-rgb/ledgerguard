@@ -80,13 +80,43 @@ const bridgeParams = () => {
   };
 };
 
+const BASE_SEPOLIA_CHAIN_ID = Number.parseInt(BASE_SEPOLIA.chainId, 16);
+
+function chainLabel(chainNumeric: number | null): string {
+  if (chainNumeric === 8453) return "Base Mainnet (8453)";
+  if (chainNumeric === BASE_SEPOLIA_CHAIN_ID) return "Base Sepolia (84532)";
+  if (chainNumeric === 5042002) return "Arc Testnet (5042002)";
+  return chainNumeric ? `chain ${chainNumeric}` : "unknown chain";
+}
+
+readiness.addEventListener("click", async (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return;
+  if (target.id === "route-switch-network") {
+    target.setAttribute("disabled", "true");
+    try {
+      await wallet().ensureChain(BASE_SEPOLIA);
+      await updateReadiness();
+    } catch (error) {
+      show(
+        progressOutput,
+        "error",
+        error instanceof Error ? error.message : "Network switch was rejected.",
+      );
+    } finally {
+      target.removeAttribute("disabled");
+    }
+  }
+});
+
 async function updateReadiness(): Promise<void> {
   if (!readiness) return;
   const state = wallet().getState();
   if (!state.connected) {
     readiness.className = "route-readiness neutral";
-    readiness.innerHTML =
-      "<strong>Before you connect</strong><p>Install MetaMask or another EVM wallet, add Base Sepolia, and fund it with test USDC from the <a href=\"https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet\" rel=\"noreferrer\" target=\"_blank\">Base Sepolia faucet</a>.</p>";
+    readiness.innerHTML = `<strong>Step 1: Connect wallet</strong>
+      <p>Click <strong>Connect wallet</strong> below. If MetaMask opens, choose your account and click <strong>Connect</strong>.</p>
+      <p class="route-help">Need test funds later? Use the <a id="route-open-faucet" href="https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet" rel="noreferrer" target="_blank">Base Sepolia faucet</a> after switching network.</p>`;
     quoteButton.disabled = true;
     executeButton.disabled = true;
     return;
@@ -95,12 +125,13 @@ async function updateReadiness(): Promise<void> {
   const chainNumeric = state.chainId
     ? Number.parseInt(state.chainId, 16)
     : null;
-  const onBaseSepolia = chainNumeric === Number.parseInt(BASE_SEPOLIA.chainId, 16);
-  let balanceText = "unknown";
+  const onBaseSepolia = chainNumeric === BASE_SEPOLIA_CHAIN_ID;
+  let balanceMicro = 0n;
+  let balanceText = "0";
   try {
     if (onBaseSepolia) {
-      const balance = await wallet().readErc20Balance(BASE_SEPOLIA_USDC);
-      balanceText = `${wallet().formatUsdc(balance)} test USDC`;
+      balanceMicro = await wallet().readErc20Balance(BASE_SEPOLIA_USDC);
+      balanceText = wallet().formatUsdc(balanceMicro);
     }
   } catch {
     balanceText = "could not read";
@@ -108,16 +139,30 @@ async function updateReadiness(): Promise<void> {
 
   if (!onBaseSepolia) {
     readiness.className = "route-readiness review";
-    readiness.innerHTML =
-      `<strong>Switch network</strong><p>Wallet ${wallet().shortAddress(state.account)} is connected on chain ${chainNumeric ?? "unknown"}. Switch to Base Sepolia before requesting a quote.</p>`;
+    readiness.innerHTML = `<strong>Step 2: Switch network</strong>
+      <p>Wallet ${wallet().shortAddress(state.account)} is on <strong>${chainLabel(chainNumeric)}</strong>. This route requires <strong>Base Sepolia (84532)</strong>.</p>
+      <p><button id="route-switch-network" type="button" class="route-action-btn">Switch to Base Sepolia</button></p>
+      <p class="route-help">MetaMask will open. Click <strong>Approve</strong> or <strong>Switch network</strong>.</p>`;
+    quoteButton.disabled = true;
+    executeButton.disabled = true;
+    return;
+  }
+
+  if (balanceMicro <= 0n) {
+    readiness.className = "route-readiness review";
+    readiness.innerHTML = `<strong>Step 3: Get test USDC</strong>
+      <p>You are on Base Sepolia, but this wallet has <strong>0 test USDC</strong>.</p>
+      <p><a id="route-open-faucet" class="route-action-link" href="https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet" rel="noreferrer" target="_blank">Open Base Sepolia faucet</a></p>
+      <p class="route-help">Claim test USDC, wait ~30 seconds, then refresh this page and click <strong>Get protected quote</strong>.</p>`;
     quoteButton.disabled = true;
     executeButton.disabled = true;
     return;
   }
 
   readiness.className = "route-readiness allow";
-  readiness.innerHTML =
-    `<strong>Ready to quote</strong><p>Wallet ${wallet().shortAddress(state.account)} is on Base Sepolia. Balance: ${balanceText}. Destination Arc Testnet mint address will default to your wallet if left blank.</p>`;
+  readiness.innerHTML = `<strong>Ready</strong>
+    <p>Wallet ${wallet().shortAddress(state.account)} is on Base Sepolia with <strong>${balanceText} test USDC</strong>.</p>
+    <p class="route-help">Next: click <strong>Get protected quote</strong>, then <strong>Review and execute</strong>, and approve each MetaMask popup.</p>`;
   quoteButton.disabled = false;
 }
 

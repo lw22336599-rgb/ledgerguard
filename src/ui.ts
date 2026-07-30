@@ -689,6 +689,9 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 .route-readiness{border:1px solid #303a5d;border-radius:12px;padding:14px 16px;margin:16px 0;background:#0b1123}
 .route-readiness p{margin:8px 0 0;color:var(--muted);line-height:1.55}
 .route-readiness a{color:#c6d0ff}
+.route-help{font-size:14px}
+.route-action-btn,.route-action-link{display:inline-flex;align-items:center;justify-content:center;margin-top:10px;padding:12px 18px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));border:none;color:#fff;font-weight:800;cursor:pointer;text-decoration:none}
+.route-action-link{box-shadow:0 10px 35px #0004}
 .route-readiness.neutral{border-color:#344273}
 .route-readiness.allow{border-color:var(--success)}
 .route-readiness.review{border-color:#ba91ff}

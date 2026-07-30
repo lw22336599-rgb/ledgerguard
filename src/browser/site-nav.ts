@@ -1,3 +1,5 @@
+import { BASE_SEPOLIA } from "./wallet-chains.js";
+
 function bindNavWallet(): void {
   const button = document.querySelector<HTMLButtonElement>("#nav-connect");
   const display = document.querySelector<HTMLElement>("#nav-wallet-display");
@@ -33,6 +35,13 @@ function bindNavWallet(): void {
         wallet.disconnect();
       } else {
         await wallet.connect();
+        if (location.pathname === "/routes") {
+          try {
+            await wallet.ensureChain(BASE_SEPOLIA);
+          } catch {
+            // Routes page shows the one-click switch button if this is rejected.
+          }
+        }
       }
     } catch (error) {
       window.alert(
