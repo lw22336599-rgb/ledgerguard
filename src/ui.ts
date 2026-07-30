@@ -136,6 +136,14 @@ export const guardBuilderHtml = `${pageHead(
       <p class="lead">Prefill the recipient, amount, purpose, limit, and expiry. The recipient can review the request without understanding calldata or policy fields.</p>
     </section>
     <section class="panel builder-panel">
+      <div id="wallet-section" style="border:1px solid #2a2a5a;border-radius:12px;padding:16px;margin-bottom:20px;background:#0d0d25">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div id="w-dot" style="width:10px;height:10px;border-radius:50%;background:#555"></div>
+          <span id="w-status" style="flex:1;color:#aaa">No wallet connected</span>
+          <button id="w-btn" style="background:linear-gradient(135deg,#7b2ff7,#5b1fd7);border:none;border-radius:8px;padding:8px 16px;color:#fff;font-size:13px;cursor:pointer">Connect Wallet</button>
+        </div>
+        <div id="w-detail" style="display:none;font-family:monospace;font-size:13px;color:#aabbdd;word-break:break-all"></div>
+      </div>
       <form id="guard-builder">
         <label>Requested by (optional, self-declared)<input id="guard-issuer" name="issuer" maxlength="80" placeholder="Example Agent or merchant"></label>
         <label>Recipient public address<input id="guard-recipient" name="recipient" value="0x2222222222222222222222222222222222222222" required pattern="0x[0-9a-fA-F]{40}" autocomplete="off"></label>
@@ -160,6 +168,38 @@ export const guardBuilderHtml = `${pageHead(
     ${footer}
   </main>
   <script src="/guard-builder.js" defer></script>
+<script>
+(function(){
+var b=document.getElementById('w-btn'),s=document.getElementById('w-status'),d=document.getElementById('w-detail'),dot=document.getElementById('w-dot'),sec=document.getElementById('wallet-section'),addrI=document.getElementById('guard-recipient'),ac='',ch='';
+function ui(account,chainId){
+ac=account;ch=chainId;
+if(account){
+s.textContent='Connected: '+account.slice(0,6)+'...'+account.slice(-4);
+b.textContent='Disconnect';b.className='w-connected';dot.style.background='#4ade80';
+sec.style.borderColor='#4ade80';d.style.display='block';
+d.textContent='Wallet: '+account+(chainId?' | Chain: eip155:'+parseInt(chainId):'');
+if(addrI&&(!addrI.value||addrI.value==='0x2222222222222222222222222222222222222222'))addrI.value=account;
+}else{
+s.textContent='No wallet connected';b.textContent='Connect Wallet';b.className='';
+dot.style.background='#555';sec.style.borderColor='#2a2a5a';d.style.display='none';
+}}
+b.addEventListener('click',function(){
+if(ac){ui('','');return}
+if(!window.ethereum){s.textContent='No wallet found. Install MetaMask.';return}
+b.disabled=true;
+window.ethereum.request({method:'eth_requestAccounts'}).then(function(acc){
+if(acc&&acc[0])window.ethereum.request({method:'eth_chainId'}).then(function(c){ui(acc[0],c)});
+}).catch(function(){s.textContent='Connection cancelled'}).finally(function(){b.disabled=false});
+});
+if(window.ethereum){
+window.ethereum.request({method:'eth_accounts'}).then(function(acc){
+if(acc&&acc[0])window.ethereum.request({method:'eth_chainId'}).then(function(c){ui(acc[0],c)});
+}).catch(function(){});
+window.ethereum.on('accountsChanged',function(acc){if(acc&&acc[0])ui(acc[0],ch);else ui('','')});
+window.ethereum.on('chainChanged',function(c){ch=c;if(ac)ui(ac,c)});
+}
+})();
+</script>
 </body>
 </html>`;
 
