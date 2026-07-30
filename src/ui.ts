@@ -12,6 +12,74 @@ const pageHead = (title: string, description: string) => `<!doctype html>
 
 const footer = `<footer>Arc Testnet software · Mainnet stays disabled until official parameters are verified and a human release approval is recorded. Contact: <a href="mailto:lw22336599@gmail.com">Email</a> · <a href="/test">Join testing</a> · <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
 
+function escapeHtml(value: string): string {
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character]!,
+  );
+}
+
+export function guardLinkHtml(input: {
+  payer: string;
+  recipient: string;
+  amount: string;
+  limit: string;
+  purpose: string;
+  validUntil?: string;
+  decision: "ALLOW" | "REVIEW" | "BLOCK";
+  findings: Array<{ code: string; message: string }>;
+  requestId: string;
+}): string {
+  const fields: Array<[string, string]> = [
+    ["Initiated by", input.payer],
+    ["Pay to", input.recipient],
+    ["Amount", `${input.amount} USDC`],
+    ["Purpose", input.purpose],
+    ["Maximum allowed", `${input.limit} USDC`],
+    ["Valid until", input.validUntil ?? "Not declared"],
+    ["Network", "Arc Testnet"],
+  ];
+  return `${pageHead(
+    "LedgerGuard | Payment Intent Receipt",
+    "A prefilled, human-readable Arc Testnet payment intent and deterministic safety decision.",
+  )}
+<body>
+  <main>
+    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">PREFILLED GUARD LINK</span></nav>
+    <section class="subhero">
+      <p class="eyebrow">NO WALLET CONNECTION &middot; NO SIGNATURE</p>
+      <h1 class="compact">Payment intent receipt</h1>
+      <p class="lead">Review the declared payment before any wallet signs. Technical details remain available as evidence.</p>
+    </section>
+    <section class="panel">
+      <div>
+        <p class="step">DECLARED INTENT</p>
+        <dl>${fields.map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`).join("")}</dl>
+      </div>
+      <section class="result ${input.decision.toLowerCase()}">
+        <strong>${escapeHtml(input.decision)}</strong>
+        <p>${input.decision === "ALLOW" ? "All implemented checks passed." : input.decision === "BLOCK" ? "A defined policy risk was detected." : "Review is required before signing."}</p>
+        <details><summary>View evidence</summary>
+          <ul>${input.findings.map((finding) => `<li><strong>${escapeHtml(finding.code)}</strong>: ${escapeHtml(finding.message)}</li>`).join("")}</ul>
+          <p>Request ID: <code>${escapeHtml(input.requestId)}</code></p>
+        </details>
+      </section>
+    </section>
+    <section class="notice"><strong>Testnet only:</strong> This receipt does not sign, submit, or settle a transaction. Arc Testnet assets have no financial value.</section>
+    <div class="links bottom-links"><a href="/">Open checker</a><a href="/docs">Developer docs</a><a href="/test">Join testing</a></div>
+    ${footer}
+  </main>
+</body>
+</html>`;
+}
+
 export const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LedgerGuard">
   <rect width="64" height="64" rx="16" fill="#06140f"/>
   <path d="M32 10 51 18v13c0 12-7.5 20.5-19 24-11.5-3.5-19-12-19-24V18l19-8Z" fill="#7df2bd"/>
@@ -128,7 +196,7 @@ export function catalogHtml(
       <p class="lead">People use the web checker, developers call the API, and AI agents read the machine catalog and purchase resources through x402.</p>
     </section>
     <section class="docs-grid">
-      <article class="doc-card"><span>FREE</span><h2>Guard Link</h2><p>Check payment intent without connecting a wallet. Designed to make transaction risk understandable.</p><a href="/">Check now</a></article>
+      <article class="doc-card"><span>FREE</span><h2>Guard Link</h2><p>Open a prefilled payment intent without connecting a wallet. Designed to make transaction risk understandable.</p><a href="/guard?recipient=0x2222222222222222222222222222222222222222&amp;amount=1.00&amp;limit=2.00&amp;purpose=Example%20invoice">Open sample receipt</a></article>
       <article class="doc-card"><span>FREE API</span><h2>Preflight + Evidence</h2><p>Pre-signing checks and post-settlement reconciliation for wallets, agents, and payment applications.</p><a href="/docs">Read the docs</a></article>
       <article class="doc-card"><span>X402 TESTNET</span><h2>Network Risk</h2><p>Currently priced at ${priceMicroUsdc} micro-USDC in test assets to validate automated discovery, payment, and delivery.</p><a href="/.well-known/ledgerguard.json">Machine catalog</a></article>
     </section>
@@ -156,7 +224,7 @@ export function testerHtml(
       <p class="lead">Anyone can try the free checker, developers can copy an API request, and a wallet holding Arc test assets can validate x402 payment, settlement, and resource delivery. The entire flow uses test assets with no financial value.</p>
     </section>
     <section class="docs-grid">
-      <article class="doc-card"><span>1 · EVERYONE</span><h2>Web safety check</h2><p>No wallet connection is needed. Enter public addresses and an amount to review the decision and technical details.</p><a href="/">Open Guard Link</a></article>
+      <article class="doc-card"><span>1 &middot; EVERYONE</span><h2>Prefilled payment receipt</h2><p>No wallet connection or manual policy entry is needed. Review who pays whom, how much, why, and the maximum allowed.</p><a href="/guard?recipient=0x2222222222222222222222222222222222222222&amp;amount=1.00&amp;limit=2.00&amp;purpose=Example%20invoice">Open sample Guard Link</a></article>
       <article class="doc-card"><span>2 · DEVELOPERS</span><h2>Use a metered API key</h2><p>Create a revocable test API key, call <code>POST /v1/developer/preflight</code>, and inspect the durable usage ledger. The free endpoint remains <code>POST /v1/preflight</code>.</p><a href="/developer">Open developer console</a></article>
       <article class="doc-card"><span>3 · X402</span><h2>Test automated payment</h2><p><code>GET /v1/paid/network-risk</code> returns a standard 402 challenge for ${priceMicroUsdc} micro-USDC. After a buyer script signs and settles, the resource and onchain receipt are delivered automatically.</p><a href="https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/X402_BUYER_RUNBOOK.md" rel="noreferrer">Payment test runbook</a></article>
     </section>

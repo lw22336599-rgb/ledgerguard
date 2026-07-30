@@ -97,14 +97,27 @@ fail-closed until an authorized store is attached. Storage health is part of
 
 Real adoption cannot be created by code. The commercial gate requires at least:
 
-1. one external tester who completes the flow without operator guidance;
-2. one settled real-value payment after mainnet approval;
-3. confirmation that the delivered result was useful;
-4. measured delivery cost and gross margin;
-5. repeat use, renewal, or referral evidence.
+1. three non-project developers who integrate without operator control;
+2. one real agent or application integration and at least 100 attributable
+   non-project calls;
+3. one repeated use event;
+4. one explicit paid-pilot or monthly-subscription answer;
+5. one settled real-value payment only after mainnet approval;
+6. confirmation that the delivered result was useful;
+7. measured delivery cost, positive gross margin, and zero known critical
+   security defects.
 
 Until those facts exist, all revenue projections remain scenarios rather than
 verified performance.
+
+If 20 qualified projects are contacted without three integrations or one paid
+intent, feature expansion stops. The next experiment becomes a narrow ecosystem
+adapter, paid audit export, or paid implementation service.
+
+The x402 discovery metadata is implemented, but Bazaar indexing remains
+unverified until an independent buyer completes a successful CDP-facilitated
+testnet settlement and the resource is found through Bazaar search. Metadata or
+a 402 response alone is not proof of listing, usage, or revenue.
 
 ## Mainnet rule
 
@@ -119,7 +132,7 @@ fail closed.
 
 One deterministic core now has four entry points:
 
-1. the public Guard Link for ordinary users;
+1. a prefilled public Guard Link for ordinary users;
 2. the authenticated REST and TypeScript client path for developers;
 3. the authenticated, metered MCP endpoint for AI agents;
 4. x402 testnet purchases for network-risk and strict evidence receipts.
@@ -137,3 +150,16 @@ separately approved.
 This is a complete technical acquisition-to-delivery loop. It is not yet a
 verified commercial loop: the first independent external user, accepted paid
 value, attributable gross margin, and repeat behavior remain evidence gates.
+
+## Chain rollout
+
+- Arc Testnet remains the Circle/Arc technical-validation, grant, and official
+  collaboration surface.
+- Base Mainnet is the first real-value x402 candidate, not an active payment
+  network. Its independent adapter is deliberately hard closed.
+- Additional EVM networks must use CAIP-2 identifiers and thin network
+  adapters. The policy and evidence engines are not forked or rewritten.
+- No chain is activated from rumors, explorer activity, or a single environment
+  variable. Official RPC, chain ID, asset contracts, facilitator support,
+  conformance, shadow observation, explicit approval, canary, and rollback are
+  all mandatory.

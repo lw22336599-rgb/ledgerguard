@@ -35,6 +35,8 @@ GitHub contact: **lw22336599-rgb**
 - `POST /mcp` - authenticated Streamable HTTP MCP server for read-only tools.
 - `POST /v1/paid/evidence` - x402 testnet purchase of a strict evidence receipt.
 - `GET /v1/commercial-candidate` - fail-closed Base production-candidate gates.
+- `GET /guard?...` - prefilled, no-wallet payment intent receipt for people.
+- `GET /v1/adapters` - truthful x402/AP2 protocol implementation boundary.
 - `GET /openapi.json` - OpenAPI 3.1 machine discovery document.
 - `GET /.well-known/ledgerguard.json` - agent-readable service and price catalog.
 - `GET /llms.txt` - concise discovery instructions for AI agents.

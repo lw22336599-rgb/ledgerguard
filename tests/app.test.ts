@@ -53,6 +53,31 @@ describe("HTTP API", () => {
     );
   });
 
+  it("rejects malformed Guard Links and publishes protocol boundaries", async () => {
+    const guard = await app.request("/guard?amount=1&purpose=Missing%20recipient");
+    expect(guard.status).toBe(400);
+    expect(await guard.json()).toMatchObject({
+      error: "INVALID_GUARD_LINK",
+    });
+
+    const adapters = await app.request("/v1/adapters");
+    expect(adapters.status).toBe(200);
+    expect(await adapters.json()).toMatchObject({
+      adapters: expect.arrayContaining([
+        expect.objectContaining({
+          id: "x402-receipt",
+          status: "implemented-read-only",
+          signing: false,
+        }),
+        expect.objectContaining({
+          id: "ap2-mandate",
+          status: "interface-only",
+          enabled: false,
+        }),
+      ]),
+    });
+  });
+
   it("serves browser assets and machine documents with correct formats", async () => {
     const css = await app.request("/styles.css");
     expect(css.status).toBe(200);

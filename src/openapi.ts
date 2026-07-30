@@ -55,6 +55,16 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/adapters": {
+      get: {
+        summary: "Truthful payment-protocol adapter registry",
+        description:
+          "Publishes implemented and interface-only adapters. No adapter signs or holds keys.",
+        responses: {
+          "200": { description: "Protocol adapter status and safety boundary" },
+        },
+      },
+    },
     "/v1/shadow/arc-mainnet": {
       get: {
         summary: "Read-only Arc chain 5042 consensus and contract monitor",
