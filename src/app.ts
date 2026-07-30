@@ -101,6 +101,8 @@ import {
   portalHtml,
   routesHtml,
   statusHtml,
+  testnetHelpHtml,
+  testnetHelpJs,
   testerHtml,
   unifiedBrandCss,
 } from "./ui.js";
@@ -211,6 +213,13 @@ app.get("/receipts", (context) =>
 );
 app.get("/developers", (context) => context.html(developerDocsHtml));
 app.get("/guard/create", (context) => context.html(guardBuilderHtml));
+app.get("/testnet-help", (context) => context.html(testnetHelpHtml));
+app.get("/testnet-help.js", (context) =>
+  context.body(testnetHelpJs, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  }),
+);
 app.post("/v1/guard-links", async (context) => {
   const parsed = guardLinkQuerySchema.safeParse(
     await context.req.json().catch(() => null),

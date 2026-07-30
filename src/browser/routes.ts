@@ -116,7 +116,7 @@ async function updateReadiness(): Promise<void> {
     readiness.className = "route-readiness neutral";
     readiness.innerHTML = `<strong>Step 1: Connect wallet</strong>
       <p>Click <strong>Connect wallet</strong> below. If MetaMask opens, choose your account and click <strong>Connect</strong>.</p>
-      <p class="route-help">Need test funds later? Use the <a id="route-open-faucet" href="https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet" rel="noreferrer" target="_blank">Base Sepolia faucet</a> after switching network.</p>`;
+      <p class="route-help">Need test funds later? Open the <a href="/testnet-help">testnet funding guide</a> after switching network.</p>`;
     quoteButton.disabled = true;
     executeButton.disabled = true;
     return;
@@ -152,8 +152,8 @@ async function updateReadiness(): Promise<void> {
     readiness.className = "route-readiness review";
     readiness.innerHTML = `<strong>Step 3: Get test USDC</strong>
       <p>You are on Base Sepolia, but this wallet has <strong>0 test USDC</strong>.</p>
-      <p><a id="route-open-faucet" class="route-action-link" href="https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet" rel="noreferrer" target="_blank">Open Base Sepolia faucet</a></p>
-      <p class="route-help">Claim test USDC, wait ~30 seconds, then refresh this page and click <strong>Get protected quote</strong>.</p>`;
+      <p><a class="route-action-link" href="/testnet-help">Open testnet funding guide</a></p>
+      <p class="route-help">This page lists Circle and other faucets. You only need about 0.001 test USDC for the crosschain demo.</p>`;
     quoteButton.disabled = true;
     executeButton.disabled = true;
     return;

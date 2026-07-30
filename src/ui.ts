@@ -260,6 +260,52 @@ export function routesHtml(input: {
 </html>`;
 }
 
+export const testnetHelpHtml = `${pageHead(
+  "LedgerGuard | Testnet funding guide",
+  "Step-by-step guide to fund a wallet on Base Sepolia for the protected crosschain test route.",
+)}
+<body>
+  <main>
+    ${portalNavHtml("TESTNET FUNDING")}
+    <section class="subhero">
+      <p class="eyebrow">BASE SEPOLIA ONLY &middot; NO REAL FUNDS</p>
+      <h1 class="compact">Fund your wallet for the crosschain demo.</h1>
+      <p class="lead">The protected route needs a small amount of Base Sepolia test ETH (gas) and test USDC. LedgerGuard cannot claim faucet tokens for you because every faucet requires your browser to pass anti-abuse checks.</p>
+    </section>
+    <section class="panel builder-panel">
+      <div id="fund-wallet-panel" class="wallet-status-card">
+        <div class="wallet-status-row">
+          <div id="fund-dot" class="wallet-status-dot"></div>
+          <span id="fund-status" class="wallet-status-label">Wallet not connected</span>
+          <button id="fund-connect" type="button" class="nav-wallet-btn">Connect Wallet</button>
+        </div>
+        <p id="fund-address" class="wallet-status-detail" hidden></p>
+        <div class="wallet-buttons">
+          <button id="fund-copy" type="button" class="secondary" disabled>Copy address</button>
+          <button id="fund-refresh" type="button" class="secondary" disabled>Refresh balances</button>
+        </div>
+        <section id="fund-balances" class="route-readiness neutral" aria-live="polite">
+          <strong>Balances on Base Sepolia</strong>
+          <p>Connect a wallet to read test ETH and test USDC balances.</p>
+        </section>
+      </div>
+      <section class="docs-grid">
+        <article class="doc-card"><span>STEP 1</span><h2>Get test ETH</h2><p>You need a little Base Sepolia ETH to pay gas before USDC can move.</p><a href="https://www.alchemy.com/faucets/base-sepolia" rel="noreferrer" target="_blank">Alchemy Base Sepolia faucet</a></article>
+        <article class="doc-card"><span>STEP 2</span><h2>Get test USDC</h2><p>Circle sends up to 20 test USDC on Base Sepolia every 2 hours per wallet.</p><a href="https://faucet.circle.com/" rel="noreferrer" target="_blank">Circle testnet faucet</a></article>
+        <article class="doc-card"><span>STEP 3</span><h2>Return to Routes</h2><p>Switch to Base Sepolia, refresh balances here, then open the protected route.</p><a href="/routes">Open protected route</a></article>
+      </section>
+    </section>
+    <section class="notice"><strong>Why faucets fail:</strong> Coinbase and Alchemy often require mainnet activity, verified accounts, or regional eligibility. If Circle shows “Limit Exceeded”, wait 2 hours or try another wallet. If you are still blocked, email <a href="mailto:lw22336599@gmail.com">lw22336599@gmail.com</a> with your public address and we can review manual testnet support options.</section>
+    ${footer}
+  </main>
+  <script src="/wallet.js" defer></script>
+  <script src="/testnet-help.js" defer></script>
+  <script src="/site-nav.js" defer></script>
+</body>
+</html>`;
+
+export const testnetHelpJs = `const BASE_SEPOLIA={chainId:"0x14a34",chainName:"Base Sepolia",nativeCurrency:{name:"Ether",symbol:"ETH",decimals:18},rpcUrls:["https://sepolia.base.org"],blockExplorerUrls:["https://sepolia.basescan.org"]};const USDC="0x036CbD53842c5426634c792Dc1eC00166AEAcF62";const connect=document.querySelector("#fund-connect");const copy=document.querySelector("#fund-copy");const refresh=document.querySelector("#fund-refresh");const status=document.querySelector("#fund-status");const dot=document.querySelector("#fund-dot");const address=document.querySelector("#fund-address");const balances=document.querySelector("#fund-balances");const wallet=()=>window.LedgerGuardWallet;const fmtUsdc=(micro)=>{const whole=micro/1000000n;const fraction=micro%1000000n;return whole+"."+fraction.toString().padStart(6,"0").replace(/0+$/,"").replace(/\\.$/,".0")};const fmtEth=(wei)=>{const whole=wei/1000000000000000000n;const fraction=wei%1000000000000000000n;return whole+"."+fraction.toString().padStart(18,"0").slice(0,6).replace(/0+$/,"")};async function renderBalances(){if(!wallet()||!wallet().getState().connected){balances.className="route-readiness neutral";balances.innerHTML="<strong>Balances on Base Sepolia</strong><p>Connect a wallet to read test ETH and test USDC balances.</p>";return}try{await wallet().ensureChain(BASE_SEPOLIA);const ethRaw=await wallet().getProvider().request({method:"eth_getBalance",params:[wallet().getState().account,"latest"]});const usdcRaw=await wallet().readErc20Balance(USDC);const eth=fmtEth(BigInt(ethRaw));const usdc=fmtUsdc(usdcRaw);const ready=BigInt(ethRaw)>0n&&usdcRaw>0n;balances.className="route-readiness "+(ready?"allow":"review");balances.innerHTML="<strong>Balances on Base Sepolia</strong><p>ETH: <strong>"+eth+"</strong> · USDC: <strong>"+usdc+"</strong></p><p>"+(ready?"You can return to /routes and request a quote.":"You still need test ETH and/or test USDC. Use the faucet links above.")+"</p>"}catch(error){balances.className="route-readiness review";balances.innerHTML="<strong>Could not read balances</strong><p>"+(error instanceof Error?error.message:"Unknown error")+"</p>"}}function renderWallet(){if(!wallet())return;const state=wallet().getState();if(state.connected){status.textContent="Connected";dot.style.background="#4ade80";address.hidden=false;address.textContent=state.account;copy.disabled=false;refresh.disabled=false;connect.textContent="Disconnect"}else{status.textContent="Wallet not connected";dot.style.background="#555";address.hidden=true;copy.disabled=true;refresh.disabled=true;connect.textContent="Connect Wallet"}void renderBalances()}if(wallet()){wallet().subscribe(()=>renderWallet());void wallet().restore().finally(renderWallet)}connect?.addEventListener("click",async()=>{connect.disabled=true;try{if(wallet().getState().connected)wallet().disconnect();else{await wallet().connect();try{await wallet().ensureChain(BASE_SEPOLIA)}catch{}}}finally{connect.disabled=false}});copy?.addEventListener("click",async()=>{const value=wallet()?.getState().account;if(!value)return;try{await navigator.clipboard.writeText(value);status.textContent="Address copied"}catch{status.textContent="Copy the address manually"}});refresh?.addEventListener("click",()=>{void renderBalances()});`;
+
 export const portalHtml = `${pageHead(
   "LedgerGuard | Protect payments. Meter delivery.",
   "One control and settlement platform for agent payments: Protect evaluates intent, while Meter charges for delivery and records verifiable receipts.",
