@@ -10,7 +10,7 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
-const footer = `<footer>Arc Testnet software · Mainnet stays disabled until official parameters are verified and a human release approval is recorded. Contact: <a href="mailto:lw22336599@gmail.com">Email</a> · <a href="/test">Join testing</a> · <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
+const footer = `<footer>LedgerGuard &middot; Protect + Meter &middot; Arc Public Testnet only. Mainnet stays disabled until release gates pass. <a href="/protect">Protect</a> &middot; <a href="/meter">Meter</a> &middot; <a href="/receipts">Receipts</a> &middot; <a href="/developers">Developers</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></footer>`;
 
 function escapeHtml(value: string): string {
   return value.replace(
@@ -86,13 +86,59 @@ export const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
   <path d="M32 18v28c7.2-3 11-8.2 11-15.5v-7L32 18Z" fill="#06140f"/>
 </svg>`;
 
+export const portalHtml = `${pageHead(
+  "LedgerGuard | Protect payments. Meter delivery.",
+  "One control and settlement platform for agent payments: Protect evaluates intent, while Meter charges for delivery and records verifiable receipts.",
+)}
+<body>
+  <main>
+    <nav class="portal-nav">
+      <a class="brand" href="/">LedgerGuard</a>
+      <div class="portal-nav-links"><a href="/protect">Protect</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a><a href="/status">Status</a></div>
+      <span class="badge">ARC PUBLIC TESTNET</span>
+    </nav>
+    <section class="hero portal-hero">
+      <p class="eyebrow">ONE BUSINESS &middot; TWO ISOLATED SERVICES</p>
+      <h1>Control what may be paid.<br><span>Prove what was delivered.</span></h1>
+      <p class="lead">LedgerGuard connects deterministic payment protection with settlement-linked delivery. Protect checks the intent before signing. Meter charges protected API and MCP calls, then records settlement and delivery receipts.</p>
+      <div class="portal-actions"><a class="primary-action" href="/protect">Open Protect</a><a class="secondary-action" href="/meter">Explore Meter</a></div>
+      <p class="portal-truth">Non-custodial. No private keys. Test assets only. Browser wallet and cross-chain execution are not yet presented as complete.</p>
+    </section>
+    <section class="product-map" aria-label="LedgerGuard products">
+      <article class="product-module protect-module">
+        <div class="module-number">01 / PROTECT</div>
+        <h2>Decide before a wallet signs.</h2>
+        <p>Bind payer, recipient, asset, amount and purpose to deterministic policy. Unknown conditions fail closed.</p>
+        <ul><li>Guard Links for people</li><li>Preflight API, SDK and MCP</li><li>Post-settlement evidence</li></ul>
+        <a href="/protect">Run the live checker &rarr;</a>
+      </article>
+      <article class="product-module meter-module">
+        <div class="module-number">02 / METER</div>
+        <h2>Settle before delivery.</h2>
+        <p>Issue an x402 quote, verify settlement, deliver the protected resource and persist linked receipts.</p>
+        <ul><li>Paid HTTP and MCP resource</li><li>Settlement + delivery receipts</li><li>Tenant-linked usage events</li></ul>
+        <a href="/meter">Open the Meter module &rarr;</a>
+      </article>
+    </section>
+    <section class="platform-flow">
+      <p class="eyebrow">ONE ACCEPTANCE PATH</p>
+      <h2>Protect &rarr; Meter &rarr; Receipts</h2>
+      <div class="flow-row"><span>Declare intent</span><span>ALLOW / REVIEW / BLOCK</span><span>402 settlement</span><span>Protected delivery</span><span>Dual receipt</span></div>
+      <div class="links"><a href="/developers">Developer quickstart</a><a href="/catalog">Service catalog</a><a href="/test">Join public testing</a><a href="/status">Live status</a></div>
+    </section>
+    <section class="notice"><strong>Current status:</strong> the protected API/MCP testnet payment path and durable receipts are technically validated. External partner reuse, a paid pilot, browser-wallet signing and cross-chain execution remain commercial or engineering gates.</section>
+    ${footer}
+  </main>
+</body>
+</html>`;
+
 export const demoHtml = `${pageHead(
   "LedgerGuard | Arc Payment Safety Check",
   "LedgerGuard checks Arc USDC payment intent before signing without accessing private keys or signing for users.",
 )}
 <body>
   <main>
-    <nav><a class="brand" href="/">LedgerGuard</a><span class="badge">ARC TESTNET</span></nav>
+    <nav><a class="brand" href="/">LedgerGuard <small>/ Protect</small></a><div class="nav-actions"><a href="/meter">Meter</a><span class="badge">ARC TESTNET</span></div></nav>
     <section class="hero">
       <p class="eyebrow">NON-CUSTODIAL PAYMENT FIREWALL</p>
       <h1>Let agents pay.<br><span>Let rules protect funds.</span></h1>
@@ -361,6 +407,106 @@ export const integrationBoundaryHtml = `${pageHead(
 </html>`;
 
 export const demoCss = `:root{color-scheme:dark;--bg:#07100d;--panel:#101b17;--line:#263a32;--text:#effbf5;--muted:#9bb2a8;--mint:#82f4bd;--orange:#ffb86b;--red:#ff7474}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 5%,#17382b 0,transparent 34%),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{width:min(1120px,calc(100% - 40px));margin:auto}nav{height:86px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:20px;letter-spacing:-.03em;text-decoration:none}.badge,.step,.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:800}.badge{color:var(--mint);border:1px solid #4d896d;padding:7px 10px;border-radius:99px}.badge.danger{color:var(--red);border-color:#8b4545}.hero{padding:76px 0 48px;max-width:900px}.subhero{padding:64px 0 38px;max-width:900px}.eyebrow,.step{color:var(--mint)}h1{font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.065em;margin:20px 0 26px}h1.compact{font-size:clamp(44px,6vw,70px)}h1 span{color:var(--mint)}.lead{font-size:20px;color:var(--muted);max-width:760px}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{color:var(--text);text-underline-offset:5px}.notice{background:#10241c;border:1px solid #315846;border-radius:12px;padding:16px 18px;margin:0 0 28px;color:#c8e8d9}.panel{background:linear-gradient(145deg,#13241d,#0d1713);border:1px solid var(--line);border-radius:22px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;box-shadow:0 25px 80px #0005}.developer-panel{margin-bottom:28px}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;background:#07100d;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:13px;font:inherit}input:focus{outline:2px solid var(--mint);outline-offset:1px}button{border:0;border-radius:10px;background:var(--mint);color:#07100d;font-weight:800;padding:14px;cursor:pointer}button.secondary{background:#244137;color:var(--text);border:1px solid #3d6958}button:disabled{opacity:.6}.result{grid-column:1/-1;border-left:4px solid var(--mint);background:#07100d;border-radius:8px;padding:18px;min-height:96px}.result.allow{border-color:var(--mint)}.result.review{border-color:var(--orange)}.result.block,.result.error{border-color:var(--red)}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;background:#050b09;border:1px solid var(--line);border-radius:8px;padding:16px;color:#c8e8d9}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{color:var(--orange);font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card,.code-card{background:linear-gradient(145deg,#13241d,#0d1713);border:1px solid var(--line);border-radius:16px;padding:24px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.status-dot.ok{background:var(--mint)}.status-dot.bad{background:var(--red)}footer{border-top:1px solid var(--line);padding:26px 0 42px;color:var(--muted);font-size:13px}@media(max-width:760px){main{width:min(100% - 24px,1120px)}.hero,.subhero{padding:48px 0 32px}.panel{grid-template-columns:1fr;padding:22px;gap:24px}.grid,.docs-grid{grid-template-columns:1fr;padding-bottom:42px}h1,h1.compact{font-size:46px}.lead{font-size:18px}}`;
+
+export const unifiedBrandCss = `
+:root{
+  --bg:#060817;
+  --panel:#0d1228;
+  --line:#273052;
+  --text:#f4f6ff;
+  --muted:#9ba6c8;
+  --mint:#8aa4ff;
+  --orange:#b990ff;
+  --red:#ff758d;
+  --brand:#6f8cff;
+  --brand-2:#9c6cff;
+  --success:#55d6a7;
+}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 82% 4%,#5536c638 0,transparent 30rem),
+    radial-gradient(circle at 12% 20%,#245bca2f 0,transparent 34rem),
+    linear-gradient(#ffffff06 1px,transparent 1px),
+    linear-gradient(90deg,#ffffff06 1px,transparent 1px),
+    var(--bg);
+  background-size:auto,auto,56px 56px,56px 56px,auto;
+}
+main{width:min(1180px,calc(100% - 48px))}
+nav{min-height:80px;gap:24px;border-color:#ffffff19}
+.brand{display:inline-flex;align-items:center;gap:8px;font-size:21px}
+.brand::before{content:"";width:11px;height:25px;border-radius:3px;background:linear-gradient(180deg,var(--brand),var(--brand-2));box-shadow:0 0 28px #6f8cff70}
+.brand small{color:#aebcff;font:800 11px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
+.portal-nav-links,.nav-actions{display:flex;align-items:center;gap:24px}
+.portal-nav-links a,.nav-actions a{color:var(--muted);font-size:14px;text-decoration:none}
+.portal-nav-links a:hover,.nav-actions a:hover{color:var(--text)}
+.badge{color:#b8c6ff;border-color:#52649f;background:#111936cc;box-shadow:inset 0 0 20px #6f8cff14}
+.eyebrow,.step{color:#aebcff;font-family:ui-monospace,Consolas,monospace}
+.hero{padding:92px 0 58px}
+.portal-hero{max-width:1080px;padding-bottom:84px}
+h1{font-size:clamp(54px,8vw,98px);line-height:.94}
+h1 span{background:linear-gradient(90deg,#88a2ff,#bc8cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{max-width:850px;color:#abb4d2;line-height:1.65}
+.portal-actions a{padding:14px 20px;border-radius:8px;box-shadow:0 10px 35px #0004}
+.primary-action,button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff}
+.secondary-action{border-color:#4a567d;background:#0d1430}
+.portal-truth{padding-left:14px;border-left:2px solid #667de0;color:#8e99ba}
+.product-map{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:90px}
+.product-module,.doc-card,.code-card,.panel,.status-list article{
+  background:linear-gradient(145deg,#111831e8,#090d1ee8);
+  border:1px solid #2b355b;
+  box-shadow:0 24px 70px #0004;
+}
+.product-module{position:relative;overflow:hidden;min-height:420px;padding:36px;border-radius:18px;display:flex;flex-direction:column}
+.product-module::after{content:"";position:absolute;right:-100px;bottom:-130px;width:270px;height:270px;border-radius:50%;background:#6f8cff18;filter:blur(2px)}
+.meter-module{border-color:#4b3b72;background:linear-gradient(145deg,#17152ce8,#0b0c1de8)}
+.meter-module::after{background:#a96cff1c}
+.module-number{color:#aebcff;font:800 12px/1 ui-monospace,monospace;letter-spacing:.16em}
+.product-module h2{font-size:clamp(32px,4vw,50px);line-height:1;max-width:480px;margin:42px 0 18px}
+.product-module p,.product-module ul{position:relative;z-index:1;color:var(--muted)}
+.product-module ul{padding-left:20px;line-height:1.9}
+.product-module>a{position:relative;z-index:1;margin-top:auto;color:#bec9ff;font-weight:800}
+.platform-flow{padding:78px 0;border-top:1px solid var(--line)}
+.platform-flow h2{font-size:clamp(38px,6vw,68px)}
+.flow-row{display:grid;grid-template-columns:repeat(5,1fr);margin-top:34px;border:1px solid var(--line);background:#0a0f23}
+.flow-row span{min-height:92px;padding:18px;display:flex;align-items:center;border-right:1px solid var(--line);color:var(--muted);font-size:13px}
+.flow-row span:last-child{border-right:0;color:#c6d0ff;background:#151d3c}
+.notice{border-color:#344273;background:#111a38;color:#cbd3ef;box-shadow:inset 3px 0 #718aff}
+.panel{border-radius:18px}
+input{background:#070b1a;border-color:#334065;border-radius:8px}
+input:focus{outline-color:#7d96ff;box-shadow:0 0 0 4px #6f8cff20}
+button{border-radius:8px}
+button.secondary{background:#151e3e;border-color:#3b4a79}
+.result,.result pre,.code-card pre{background:#070b19;border-color:#2c365a}
+.result.allow{border-color:var(--success)}
+.result.review{border-color:#ba91ff}
+.result.block,.result.error{border-color:var(--red)}
+.grid,.docs-grid{gap:20px}
+.doc-card,.code-card{border-radius:14px}
+.grid span,.doc-card span{color:#a991ff}
+.status-dot.ok{background:var(--success);box-shadow:0 0 14px #55d6a780}
+.status-dot.bad{background:var(--red)}
+.links a{color:#c6d0ff}
+footer{border-color:#ffffff19;line-height:1.9}
+@media(max-width:900px){
+  .portal-nav-links{display:none}
+  .flow-row{grid-template-columns:1fr}
+  .flow-row span{min-height:60px;border-right:0;border-bottom:1px solid var(--line)}
+  .flow-row span:last-child{border-bottom:0}
+}
+@media(max-width:760px){
+  main{width:min(100% - 28px,1180px)}
+  nav{min-height:72px}
+  .hero,.subhero{padding:54px 0 36px}
+  .product-map,.panel,.grid,.docs-grid{grid-template-columns:1fr}
+  .product-map{padding-bottom:0}
+  .product-module{min-height:360px}
+  h1,h1.compact{font-size:clamp(43px,13vw,58px)}
+  .lead{font-size:17px}
+  .badge{font-size:9px}
+}
+`;
 
 export const demoJs = `const form=document.querySelector("#preflight");const result=document.querySelector("#result");const title=document.querySelector("#result-title");const summary=document.querySelector("#result-summary");const findings=document.querySelector("#result-findings");const details=document.querySelector("#result-details");const json=document.querySelector("#result-json");const usdc="0x3600000000000000000000000000000000000000";const messages={ALLOW:"The implemented checks passed. Continue only after reviewing the transaction in your wallet.",REVIEW:"Information is incomplete or an unknown condition remains. Review before proceeding.",BLOCK:"A defined risk was detected. Do not sign or send this transaction."};const clear=()=>{findings.replaceChildren();details.hidden=true;json.textContent=""};const show=(kind,heading,message)=>{result.className="result "+kind;title.textContent=heading;summary.textContent=message};const stale=(message)=>{clear();show("review","Result expired",message)};form.addEventListener("input",()=>stale("The input changed. Run the check again."));form.addEventListener("invalid",()=>stale("Correct the invalid input before running the check."),true);const units=(v)=>{if(!/^\\d+(\\.\\d{0,6})?$/.test(v))throw new Error("The amount must be a positive number with no more than 6 decimal places.");const [w,f=""]=v.split(".");const value=BigInt(w)*1000000n+BigInt((f+"000000").slice(0,6));if(value<=0n)throw new Error("The amount must be greater than zero.");return value.toString()};const address=(v,label)=>{if(!/^0x[0-9a-fA-F]{40}$/.test(v))throw new Error(label+" is not a valid EVM address.");return v};const pad=(v)=>v.slice(2).toLowerCase().padStart(64,"0");form.addEventListener("submit",async(e)=>{e.preventDefault();const button=form.querySelector("button");button.disabled=true;clear();show("neutral","Checking","Parsing the transaction and evaluating Arc Testnet policy…");try{const recipient=address(document.querySelector("#recipient").value.trim(),"Recipient address");const payerValue=document.querySelector("#payer").value.trim();const payer=payerValue?address(payerValue,"Payer public address"):"";const amount=units(document.querySelector("#amount").value.trim());const limit=units(document.querySelector("#limit").value.trim());const data="0xa9059cbb"+pad(recipient)+BigInt(amount).toString(16).padStart(64,"0");const intent={action:"transfer",expectedRecipient:recipient,expectedAssetAddress:usdc,expectedAmountMicroUsdc:amount,purpose:"LedgerGuard browser demo"};if(payer)intent.expectedDebitAddress=payer;const payload={network:"arcTestnet",to:usdc,data,valueWei:"0",intent,policy:{requireSimulation:Boolean(payer),maxAmountMicroUsdc:limit}};if(payer)payload.from=payer;const response=await fetch("/v1/preflight",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const body=await response.json();if(!response.ok)throw new Error(body.message||body.error||"Request failed");show(body.decision.toLowerCase(),body.decision,messages[body.decision]||"Check completed.");for(const item of body.findings||[]){const li=document.createElement("li");li.textContent=item.code+": "+item.message;findings.append(li)}if(!body.findings?.length){const li=document.createElement("li");li.textContent="No known issue was found in the recipient, asset, amount, payer, or simulation.";findings.append(li)}json.textContent=JSON.stringify(body,null,2);details.hidden=false}catch(error){show("error","Check failed",error instanceof Error?error.message:"Unknown error");}finally{button.disabled=false}});`;
 

@@ -82,8 +82,10 @@ import {
   faviconSvg,
   guardLinkHtml,
   integrationBoundaryHtml,
+  portalHtml,
   statusHtml,
   testerHtml,
+  unifiedBrandCss,
 } from "./ui.js";
 import { developerShadowJs } from "./ui-shadow.js";
 
@@ -168,7 +170,15 @@ app.use(
   }),
 );
 
-app.get("/", (context) => context.html(demoHtml));
+app.get("/", (context) => context.html(portalHtml));
+app.get("/protect", (context) => context.html(demoHtml));
+app.get("/meter", (context) =>
+  context.redirect("https://arc-meter-xi.vercel.app/", 302),
+);
+app.get("/receipts", (context) =>
+  context.redirect("https://arc-meter-xi.vercel.app/#flow", 302),
+);
+app.get("/developers", (context) => context.html(developerDocsHtml));
 app.get("/guard", async (context) => {
   const parsed = guardLinkQuerySchema.safeParse(context.req.query());
   if (!parsed.success) {
@@ -279,7 +289,9 @@ app.get("/status", async (context) => {
   );
 });
 app.get("/styles.css", (context) =>
-  context.body(demoCss, 200, { "Content-Type": "text/css; charset=utf-8" }),
+  context.body(`${demoCss}\n${unifiedBrandCss}`, 200, {
+    "Content-Type": "text/css; charset=utf-8",
+  }),
 );
 app.get("/app.js", (context) =>
   context.body(demoJs, 200, { "Content-Type": "text/javascript; charset=utf-8" }),

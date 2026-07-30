@@ -6,6 +6,7 @@ import {
   developerConsoleHtml,
   developerDocsHtml,
   guardLinkHtml,
+  portalHtml,
   testerHtml,
 } from "../src/ui.js";
 
@@ -21,6 +22,10 @@ describe("browser demo experience", () => {
   });
 
   it("routes people to readable pages instead of raw JSON", () => {
+    expect(portalHtml).toContain('href="/protect"');
+    expect(portalHtml).toContain('href="/meter"');
+    expect(portalHtml).toContain('href="/receipts"');
+    expect(portalHtml).toContain('href="/developers"');
     expect(demoHtml).toContain('href="/docs"');
     expect(demoHtml).toContain('href="/catalog"');
     expect(demoHtml).toContain('href="/status"');
@@ -43,6 +48,7 @@ describe("browser demo experience", () => {
   it("uses English as the public default language", () => {
     for (const html of [
       demoHtml,
+      portalHtml,
       developerDocsHtml,
       catalogHtml("1000"),
       testerHtml("1000"),
@@ -55,6 +61,7 @@ describe("browser demo experience", () => {
   it("loads privacy-preserving production analytics on human pages", () => {
     for (const html of [
       demoHtml,
+      portalHtml,
       developerDocsHtml,
       catalogHtml("1000"),
       testerHtml("1000"),

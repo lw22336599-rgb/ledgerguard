@@ -13,7 +13,7 @@ describe("HTTP API", () => {
     const page = await app.request("/");
     expect(page.status).toBe(200);
     expect(page.headers.get("content-type")).toContain("text/html");
-    expect(await page.text()).toContain("Let rules protect funds.");
+    expect(await page.text()).toContain("Control what may be paid.");
     expect(page.headers.get("content-security-policy")).toContain(
       "default-src 'self'",
     );
@@ -36,6 +36,8 @@ describe("HTTP API", () => {
   it("serves human-readable docs, catalog, and status pages", async () => {
     for (const path of [
       "/",
+      "/protect",
+      "/developers",
       "/docs",
       "/catalog",
       "/test",
@@ -50,6 +52,24 @@ describe("HTTP API", () => {
     }
     expect(await (await app.request("/docs")).text()).toContain(
       "API documentation",
+    );
+  });
+
+  it("uses LedgerGuard as the single public entry and routes to Meter", async () => {
+    const protect = await app.request("/protect");
+    expect(protect.status).toBe(200);
+    expect(await protect.text()).toContain("Let rules protect funds.");
+
+    const meter = await app.request("/meter", { redirect: "manual" });
+    expect(meter.status).toBe(302);
+    expect(meter.headers.get("location")).toBe(
+      "https://arc-meter-xi.vercel.app/",
+    );
+
+    const receipts = await app.request("/receipts", { redirect: "manual" });
+    expect(receipts.status).toBe(302);
+    expect(receipts.headers.get("location")).toBe(
+      "https://arc-meter-xi.vercel.app/#flow",
     );
   });
 
