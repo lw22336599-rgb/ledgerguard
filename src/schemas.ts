@@ -67,6 +67,22 @@ export const evidenceSchema = z.object({
 
 export type EvidenceInput = z.infer<typeof evidenceSchema>;
 
+export const cctpEvidenceSchema = z.object({
+  sourceTxHash: hexSchema.refine(
+    (value) => value.length === 66,
+    "Expected a 32-byte source transaction hash",
+  ),
+  recipient: addressSchema,
+  amountMicroUsdc: uintStringSchema.refine(
+    (value) => BigInt(value) > 0n && BigInt(value) <= 1000n,
+    "The public test route is capped at 0.001 USDC",
+  ),
+  feeMicroUsdc: uintStringSchema.refine(
+    (value) => BigInt(value) <= 1n,
+    "The public test route fee is capped at 0.000001 USDC",
+  ),
+});
+
 export const developerRegistrationSchema = z.object({
   name: z
     .string()

@@ -27,11 +27,19 @@ import {
 import { paidEvidencePrecheck } from "./middleware/paid-evidence-precheck.js";
 import { openApiDocument } from "./openapi.js";
 import {
+  cctpEvidenceSchema,
   developerRegistrationSchema,
   evidenceSchema,
   preflightSchema,
   type PreflightInput,
 } from "./schemas.js";
+import {
+  getRouteFeeRecipient,
+  ROUTE_CUSTOM_FEE_USDC,
+  ROUTE_MAX_AMOUNT_USDC,
+} from "./config/routes.js";
+import { routesBundle } from "./generated/routes-bundle.js";
+import { retrieveCctpEvidence } from "./services/cctp-evidence.js";
 import {
   retrieveEvidence,
   TransactionNotFoundError,
@@ -88,6 +96,7 @@ import {
   guardLinkJs,
   integrationBoundaryHtml,
   portalHtml,
+  routesHtml,
   statusHtml,
   testerHtml,
   unifiedBrandCss,
@@ -133,7 +142,12 @@ app.use(
     contentSecurityPolicy: {
       defaultSrc: ["'self'"],
       baseUri: ["'none'"],
-      connectSrc: ["'self'"],
+      connectSrc: [
+        "'self'",
+        "https://sepolia.base.org",
+        "https://rpc.testnet.arc.network",
+        "https://iris-api-sandbox.circle.com",
+      ],
       fontSrc: ["'self'"],
       formAction: ["'self'"],
       frameAncestors: ["'none'"],
@@ -177,6 +191,15 @@ app.use(
 
 app.get("/", (context) => context.html(portalHtml));
 app.get("/protect", (context) => context.html(demoHtml));
+app.get("/routes", (context) =>
+  context.html(
+    routesHtml({
+      maxAmountUsdc: ROUTE_MAX_AMOUNT_USDC,
+      customFeeUsdc: ROUTE_CUSTOM_FEE_USDC,
+      feeRecipient: getRouteFeeRecipient(),
+    }),
+  ),
+);
 app.get("/meter", (context) =>
   context.redirect("https://arc-meter-xi.vercel.app/", 302),
 );
@@ -349,6 +372,12 @@ app.get("/guard-builder.js", (context) =>
     "Content-Type": "text/javascript; charset=utf-8",
   }),
 );
+app.get("/routes.js", (context) =>
+  context.body(routesBundle, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  }),
+);
 for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
   app.get(path, (context) =>
     context.body(faviconSvg, 200, {
@@ -365,6 +394,8 @@ Service catalog: https://ledgerguard-gules.vercel.app/.well-known/ledgerguard.js
 Public testing: https://ledgerguard-gules.vercel.app/test
 Create a human Guard Link: https://ledgerguard-gules.vercel.app/guard/create
 Prefilled human receipt: GET /guard
+Protected crosschain route: GET /routes
+Crosschain CCTP evidence: POST /v1/cctp/evidence
 Free Arc transaction preflight: POST /v1/preflight
 Paid Arc Testnet x402 resource: GET /v1/paid/network-risk
 Base Mainnet x402 canary: POST /v1/paid/base/evidence (fail-closed until every release gate passes)
@@ -384,6 +415,7 @@ app.get("/.well-known/ledgerguard.json", (context) => {
     guardLinkBuilder: `${getPublicBaseUrl()}/guard/create`,
     guardLinkApi: `${getPublicBaseUrl()}/v1/guard-links`,
     guardLinkTemplate: `${getPublicBaseUrl()}/guard?issuer={urlEncodedName}&recipient={publicAddress}&amount={decimalUsdc}&limit={decimalUsdc}&purpose={urlEncodedPurpose}&expires={isoTimestamp}`,
+    protectedRoute: `${getPublicBaseUrl()}/routes`,
     protocolAdapters: `${getPublicBaseUrl()}/v1/adapters`,
     social: {
       x: "https://x.com/HuiLibaa",
@@ -1253,6 +1285,41 @@ app.post("/v1/preflight", async (context) => {
   }
 
   return context.json(await runPreflight(parsed.data));
+});
+
+app.post("/v1/cctp/evidence", async (context) => {
+  const parsed = cctpEvidenceSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_CCTP_EVIDENCE_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+  try {
+    const result = await retrieveCctpEvidence({
+      sourceTxHash: parsed.data.sourceTxHash as Hex,
+      recipient: getAddress(parsed.data.recipient),
+      amountMicroUsdc: parsed.data.amountMicroUsdc,
+      feeMicroUsdc: parsed.data.feeMicroUsdc,
+    });
+    return context.json(result, result.status === "VERIFIED" ? 200 : 202);
+  } catch (error) {
+    console.error("CCTP evidence retrieval failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message:
+        error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+    });
+    return context.json(
+      {
+        error: "CCTP_EVIDENCE_UNAVAILABLE",
+        message:
+          "Burn, attestation, mint, and delivery could not all be verified.",
+      },
+      503,
+    );
+  }
 });
 
 app.post("/v1/evidence", async (context) => {

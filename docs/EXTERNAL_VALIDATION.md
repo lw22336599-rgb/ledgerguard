@@ -35,6 +35,10 @@ Current public claims remain zero until that evidence exists:
 - paid-pilot commitments: 0;
 - real revenue: USD 0.
 
+The protected Base Sepolia to Arc Testnet wallet flow and its exact acceptance
+evidence are defined in `docs/CROSSCHAIN_ACCEPTANCE.md`. That document does not
+lower these external-adoption gates.
+
 ## CDP Bazaar testnet gate
 
 `POST /v1/paid/base-sepolia/evidence` is a fail-closed CDP Bazaar candidate. Its

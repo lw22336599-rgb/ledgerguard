@@ -42,6 +42,7 @@ describe("HTTP API", () => {
       "/catalog",
       "/test",
       "/guard/create",
+      "/routes",
       "/docs/integration",
     ]) {
       const response = await app.request(path);
@@ -97,6 +98,31 @@ describe("HTTP API", () => {
         }),
       ]),
     });
+  });
+
+  it("publishes the protected route bundle and rejects out-of-limit CCTP evidence", async () => {
+    const bundle = await app.request("/routes.js");
+    expect(bundle.status).toBe(200);
+    expect(bundle.headers.get("content-type")).toContain("javascript");
+    expect(await bundle.text()).toContain("LedgerGuard Routes");
+
+    const evidence = await app.request("/v1/cctp/evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        sourceTxHash: `0x${"11".repeat(32)}`,
+        recipient,
+        amountMicroUsdc: "1001",
+        feeMicroUsdc: "1",
+      }),
+    });
+    expect(evidence.status).toBe(400);
+    expect(await evidence.json()).toMatchObject({
+      error: "INVALID_CCTP_EVIDENCE_REQUEST",
+    });
+
+    const openapi = await (await app.request("/openapi.json")).json();
+    expect(openapi.paths["/v1/cctp/evidence"]).toBeDefined();
   });
 
   it("creates a validated, time-bound Guard Link and renders its receipt", async () => {

@@ -358,6 +358,63 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/cctp/evidence": {
+      post: {
+        summary:
+          "Verify Base Sepolia burn, Circle attestation, Arc Testnet mint, and exact USDC delivery",
+        description:
+          "Fail-closed CCTP V2 reconciliation. VERIFIED requires a matching destination domain, recipient, amount, complete attestation, successful destination transaction, and exact USDC mint Transfer log.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: [
+                  "sourceTxHash",
+                  "recipient",
+                  "amountMicroUsdc",
+                  "feeMicroUsdc",
+                ],
+                properties: {
+                  sourceTxHash: {
+                    type: "string",
+                    pattern: "^0x[0-9a-fA-F]{64}$",
+                  },
+                  recipient: {
+                    type: "string",
+                    pattern: "^0x[0-9a-fA-F]{40}$",
+                  },
+                  amountMicroUsdc: {
+                    type: "string",
+                    pattern: "^(0|[1-9][0-9]{0,3})$",
+                    description: "Maximum 1000 micro-USDC (0.001 USDC).",
+                  },
+                  feeMicroUsdc: {
+                    type: "string",
+                    enum: ["0", "1"],
+                    description:
+                      "Configured App Kit custom bridge fee. One micro-USDC maximum.",
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description:
+              "All burn, attestation, mint, and exact delivery evidence verified",
+          },
+          "202": {
+            description:
+              "Evidence is pending or mismatched; no confirmed delivery or billing claim",
+          },
+          "400": { description: "Invalid or out-of-limit request" },
+          "503": { description: "Circle or destination RPC unavailable" },
+        },
+      },
+    },
     "/v1/guard-links": {
       post: {
         summary: "Create a time-bound, human-readable Arc Testnet Guard Link",

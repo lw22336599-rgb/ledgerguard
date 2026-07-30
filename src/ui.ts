@@ -170,6 +170,72 @@ export const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
   <path d="M32 18v28c7.2-3 11-8.2 11-15.5v-7L32 18Z" fill="#f4f6ff" fill-opacity=".92"/>
 </svg>`;
 
+export function routesHtml(input: {
+  maxAmountUsdc: string;
+  customFeeUsdc: string;
+  feeRecipient: string | null;
+}): string {
+  const effectiveFee = input.feeRecipient ? input.customFeeUsdc : "0";
+  return `${pageHead(
+    "LedgerGuard Routes | Protected CCTP transfer",
+    "Quote and execute a capped Base Sepolia to Arc Testnet USDC transfer with browser wallet approval and CCTP evidence.",
+  )}
+<body>
+  <main>
+    <nav class="portal-nav">
+      <a class="brand" href="/">LedgerGuard</a>
+      <div class="portal-nav-links"><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a></div>
+      <span class="badge">CAPPED TEST ROUTE</span>
+    </nav>
+    <section class="subhero route-hero">
+      <p class="eyebrow">BASE SEPOLIA &rarr; ARC TESTNET &middot; CCTP STANDARD</p>
+      <h1 class="compact">Quote first. Sign second. Verify the mint.</h1>
+      <p class="lead">Circle App Kit executes the bridge. LedgerGuard limits the route, shows the fee before signing, and independently reconciles burn, attestation, mint and final delivery.</p>
+    </section>
+    <section id="route-app" class="route-grid"
+      data-max-amount="${escapeHtml(input.maxAmountUsdc)}"
+      data-custom-fee="${escapeHtml(effectiveFee)}"
+      data-fee-recipient="${escapeHtml(input.feeRecipient ?? "")}">
+      <article class="route-card">
+        <p class="step">1 &middot; DECLARE</p>
+        <h2>Protected test route</h2>
+        <dl>
+          <dt>From</dt><dd>Base Sepolia</dd>
+          <dt>To</dt><dd>Arc Testnet</dd>
+          <dt>Asset</dt><dd>Test USDC</dd>
+          <dt>Maximum bridge</dt><dd>${escapeHtml(input.maxAmountUsdc)} USDC</dd>
+          <dt>LedgerGuard fee</dt><dd>${escapeHtml(effectiveFee)} test USDC</dd>
+          <dt>Custody</dt><dd>None</dd>
+        </dl>
+        <label>Amount (test USDC)<input id="route-amount" value="${escapeHtml(input.maxAmountUsdc)}" inputmode="decimal"></label>
+        <label>Destination recipient<input id="route-recipient" placeholder="0x..." autocomplete="off"></label>
+      </article>
+      <article class="route-card">
+        <p class="step">2 &middot; CONNECT + QUOTE</p>
+        <h2>Wallet: <span id="route-wallet">not connected</span></h2>
+        <p id="route-status" class="muted">The quote is read-only. Execution requires explicit browser-wallet signatures.</p>
+        <div class="wallet-buttons">
+          <button id="route-connect" type="button" class="secondary">Connect wallet</button>
+          <button id="route-quote" type="button" disabled>Get protected quote</button>
+          <button id="route-execute" type="button" disabled>Review and execute</button>
+        </div>
+        <section id="route-quote-output" class="result neutral" hidden aria-live="polite"></section>
+      </article>
+      <article class="route-card route-evidence">
+        <p class="step">3 &middot; VERIFY</p>
+        <h2>Four-stage evidence</h2>
+        <div class="stage-row"><span>Burn</span><span>Circle attestation</span><span>Mint</span><span>Final USDC delivery</span></div>
+        <section id="route-progress-output" class="result neutral" hidden aria-live="polite"></section>
+      </article>
+    </section>
+    <section class="notice"><strong>Safety boundary:</strong> this page cannot initiate Arc Mainnet or Base Mainnet transfers. It never receives a seed phrase or private key. Changing the amount after a quote invalidates execution.</section>
+    ${footer}
+  </main>
+  <script src="/routes.js" defer></script>
+</body>
+</html>`;
+}
+
 export const portalHtml = `${pageHead(
   "LedgerGuard | Protect payments. Meter delivery.",
   "One control and settlement platform for agent payments: Protect evaluates intent, while Meter charges for delivery and records verifiable receipts.",
@@ -178,15 +244,15 @@ export const portalHtml = `${pageHead(
   <main>
     <nav class="portal-nav">
       <a class="brand" href="/">LedgerGuard</a>
-      <div class="portal-nav-links"><a href="/protect">Protect</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a></div>
+      <div class="portal-nav-links"><a href="/protect">Protect</a><a href="/routes">Routes</a><a href="/meter">Meter</a><a href="/receipts">Receipts</a><a href="/developers">Developers</a><a href="/status">Status</a><a href="https://x.com/HuiLibaa" rel="me noreferrer">X @HuiLibaa</a></div>
       <span class="badge">ARC PUBLIC TESTNET</span>
     </nav>
     <section class="hero portal-hero">
       <p class="eyebrow">ONE BUSINESS &middot; TWO ISOLATED SERVICES</p>
       <h1>Control what may be paid.<br><span>Prove what was delivered.</span></h1>
       <p class="lead">LedgerGuard connects deterministic payment protection with settlement-linked delivery. Protect checks the intent before signing. Meter charges protected API and MCP calls, then records settlement and delivery receipts.</p>
-      <div class="portal-actions"><a class="primary-action" href="/guard/create">Create a Guard Link</a><a class="secondary-action" href="/protect">Open advanced Protect</a></div>
-      <p class="portal-truth">Non-custodial. No private keys. Test assets only. Browser wallet and cross-chain execution are not yet presented as complete.</p>
+      <div class="portal-actions"><a class="primary-action" href="/routes">Open protected route</a><a class="secondary-action" href="/guard/create">Create a Guard Link</a></div>
+      <p class="portal-truth">Non-custodial. No private keys. Browser signing is live on the capped test route. Base Mainnet real-funds execution remains disabled.</p>
     </section>
     <section class="product-map" aria-label="LedgerGuard products">
       <article class="product-module protect-module">
@@ -210,7 +276,7 @@ export const portalHtml = `${pageHead(
       <div class="flow-row"><span>Declare intent</span><span>ALLOW / REVIEW / BLOCK</span><span>402 settlement</span><span>Protected delivery</span><span>Dual receipt</span></div>
       <div class="links"><a href="/developers">Developer quickstart</a><a href="/catalog">Service catalog</a><a href="/test">Join public testing</a><a href="/status">Live status</a></div>
     </section>
-    <section class="notice"><strong>Current status:</strong> the protected API/MCP testnet payment path and durable receipts are technically validated. External partner reuse, a paid pilot, browser-wallet signing and cross-chain execution remain commercial or engineering gates.</section>
+    <section class="notice"><strong>Current status:</strong> the protected API/MCP payment path, durable receipts, and capped browser-wallet crosschain route are implemented on test networks. An externally signed end-to-end crosschain record, repeat partner use, and a paid pilot remain acceptance gates.</section>
     ${footer}
   </main>
 </body>
@@ -536,6 +602,7 @@ h1 span{background:linear-gradient(90deg,#88a2ff,#bc8cff);-webkit-background-cli
 .primary-action,button{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff}
 .secondary-action{border-color:#4a567d;background:#0d1430}
 .portal-truth{padding-left:14px;border-left:2px solid #667de0;color:#8e99ba}
+.route-hero{max-width:900px}.route-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.route-card{background:linear-gradient(145deg,#10162b,#0a0f20);border:1px solid #283251;border-radius:18px;padding:28px;box-shadow:0 24px 70px #02040c80}.route-evidence{grid-column:1/-1}.stage-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stage-row span{padding:12px;border:1px solid #303a5d;border-radius:10px;background:#0b1123;color:#bdc7e8;text-align:center}.route-card dl{grid-template-columns:minmax(120px,.7fr) 1fr}.route-card input{width:100%;box-sizing:border-box}
 .product-map{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:90px}
 .product-module,.doc-card,.code-card,.panel,.status-list article{
   background:linear-gradient(145deg,#111831e8,#090d1ee8);
@@ -585,6 +652,7 @@ button.secondary{background:#151e3e;border-color:#3b4a79}
 footer{border-color:#ffffff19;line-height:1.9}
 @media(max-width:900px){
   .portal-nav-links{display:none}
+  .route-grid{grid-template-columns:1fr}.route-evidence{grid-column:auto}.stage-row{grid-template-columns:1fr 1fr}
   .flow-row{grid-template-columns:1fr}
   .flow-row span{min-height:60px;border-right:0;border-bottom:1px solid var(--line)}
   .flow-row span:last-child{border-bottom:0}

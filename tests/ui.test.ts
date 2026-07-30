@@ -26,6 +26,7 @@ describe("browser demo experience", () => {
 
   it("routes people to readable pages instead of raw JSON", () => {
     expect(portalHtml).toContain('href="/protect"');
+    expect(portalHtml).toContain('href="/routes"');
     expect(portalHtml).toContain('href="/meter"');
     expect(portalHtml).toContain('href="/receipts"');
     expect(portalHtml).toContain('href="/developers"');
