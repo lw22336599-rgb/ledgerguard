@@ -12,7 +12,7 @@ const pageHead = (title: string, description: string) => `<!doctype html>
 
 const footer = `<footer class="site-footer">
   <div class="footer-primary">LedgerGuard &middot; Protect + Meter &middot; Guard Links on Arc Testnet &middot; Base Mainnet canary at <a href="/canary">/canary</a></div>
-  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
@@ -342,42 +342,59 @@ export const testnetHelpHtml = `${pageHead(
 export const testnetHelpJs = `const BASE_SEPOLIA={chainId:"0x14a34",chainName:"Base Sepolia",nativeCurrency:{name:"Ether",symbol:"ETH",decimals:18},rpcUrls:["https://sepolia.base.org"],blockExplorerUrls:["https://sepolia.basescan.org"]};const USDC="0x036CbD53842c5426634c792Dc1eC00166AEAcF62";const connect=document.querySelector("#fund-connect");const copy=document.querySelector("#fund-copy");const refresh=document.querySelector("#fund-refresh");const status=document.querySelector("#fund-status");const dot=document.querySelector("#fund-dot");const address=document.querySelector("#fund-address");const balances=document.querySelector("#fund-balances");const wallet=()=>window.LedgerGuardWallet;const fmtUsdc=(micro)=>{const whole=micro/1000000n;const fraction=micro%1000000n;return whole+"."+fraction.toString().padStart(6,"0").replace(/0+$/,"").replace(/\\.$/,".0")};const fmtEth=(wei)=>{const whole=wei/1000000000000000000n;const fraction=wei%1000000000000000000n;return whole+"."+fraction.toString().padStart(18,"0").slice(0,6).replace(/0+$/,"")};async function renderBalances(){if(!wallet()||!wallet().getState().connected){balances.className="route-readiness neutral";balances.innerHTML="<strong>Balances on Base Sepolia</strong><p>Connect a wallet to read test ETH and test USDC balances.</p>";return}try{await wallet().ensureChain(BASE_SEPOLIA);const ethRaw=await wallet().getProvider().request({method:"eth_getBalance",params:[wallet().getState().account,"latest"]});const usdcRaw=await wallet().readErc20Balance(USDC);const eth=fmtEth(BigInt(ethRaw));const usdc=fmtUsdc(usdcRaw);const ready=BigInt(ethRaw)>0n&&usdcRaw>0n;balances.className="route-readiness "+(ready?"allow":"review");balances.innerHTML="<strong>Balances on Base Sepolia</strong><p>ETH: <strong>"+eth+"</strong> · USDC: <strong>"+usdc+"</strong></p><p>"+(ready?"You can return to /routes and request a quote.":"You still need test ETH and/or test USDC. Use the faucet links above.")+"</p>"}catch(error){balances.className="route-readiness review";balances.innerHTML="<strong>Could not read balances</strong><p>"+(error instanceof Error?error.message:"Unknown error")+"</p>"}}function renderWallet(){if(!wallet())return;const state=wallet().getState();if(state.connected){status.textContent="Connected";dot.style.background="#4ade80";address.hidden=false;address.textContent=state.account;copy.disabled=false;refresh.disabled=false;connect.textContent="Disconnect"}else{status.textContent="Wallet not connected";dot.style.background="#555";address.hidden=true;copy.disabled=true;refresh.disabled=true;connect.textContent="Connect Wallet"}void renderBalances()}if(wallet()){wallet().subscribe(()=>renderWallet());void wallet().restore().finally(renderWallet)}connect?.addEventListener("click",async()=>{connect.disabled=true;try{if(wallet().getState().connected)wallet().disconnect();else{await wallet().connect();try{await wallet().ensureChain(BASE_SEPOLIA)}catch{}}}finally{connect.disabled=false}});copy?.addEventListener("click",async()=>{const value=wallet()?.getState().account;if(!value)return;try{await navigator.clipboard.writeText(value);status.textContent="Address copied"}catch{status.textContent="Copy the address manually"}});refresh?.addEventListener("click",()=>{void renderBalances()});`;
 
 export const portalHtml = `${pageHead(
-  "LedgerGuard | USDC payment links and protected delivery",
-  "Create a USDC payment link, share it in chat, and let the payer review the exact amount before signing. Developer APIs and mainnet controls stay separate.",
+  "LedgerGuard | Send a USDC payment link",
+  "Create a Guard Link on Arc Testnet, share it in chat or as a QR code, and let the payer review the exact amount before signing. Base Mainnet bounded canary available separately.",
 )}
 <body>
   <main>
     ${portalNavHtml()}
     <section class="hero portal-hero">
-      <p class="eyebrow">USDC PAYMENT LINKS · BASE + ARC</p>
-      <h1>Send a USDC payment link.<br><span>Get paid without asking for an address first.</span></h1>
-      <p class="lead">Create a Guard Link, share it in chat or as a QR code, and let the payer review who receives how much before signing. Now live on Base Mainnet. Arc Testnet ready.</p>
-      <div class="portal-actions"><a class="primary-action" href="/guard/create">Create a Guard Link</a><a class="secondary-action" href="/routes">Move USDC into Arc</a></div>
-      <p class="portal-truth">Non-custodial. No private keys. Browser signing is live on the capped test route.</p>
+      <div class="portal-hero-grid">
+        <div class="portal-hero-copy">
+          <p class="eyebrow">USDC PAYMENT LINKS · BASE + ARC</p>
+          <h1>Send a USDC payment link.<br><span>Get paid without asking for an address first.</span></h1>
+          <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer reviews who receives how much before signing.</p>
+          <p class="portal-network-note">Guard Links run on <strong>Arc Testnet</strong> (demo, no real money). Base Mainnet bounded canary: <a href="/canary">0.001 USDC x402 at /canary</a>.</p>
+          <div class="portal-actions"><a class="primary-action portal-primary-cta" href="/guard/create">Create a Guard Link</a></div>
+          <p class="portal-trust-list">No signup · Non-custodial · Arc Testnet demo</p>
+        </div>
+        <figure class="portal-hero-visual">
+          <img src="/marketing/hero-guard-builder.png" alt="Guard Link builder with QR code and shareable payment link" width="640" height="360" loading="eager">
+        </figure>
+      </div>
     </section>
-    <section class="product-map" aria-label="LedgerGuard products">
-      <article class="product-module protect-module">
-        <div class="module-number">01 / PROTECT</div>
-        <h2>Decide before a wallet signs.</h2>
-        <p>Bind payer, recipient, asset, amount and purpose to deterministic policy. Unknown conditions fail closed.</p>
-        <ul><li>Guard Links for people</li><li>Preflight API, SDK and MCP</li><li>Post-settlement evidence</li></ul>
-        <a href="/guard/create">Create a Guard Link &rarr;</a>
-      </article>
-      <article class="product-module meter-module">
-        <div class="module-number">02 / METER</div>
-        <h2>Settle before delivery.</h2>
-        <p>Issue an x402 quote, verify settlement, deliver the protected resource and persist linked receipts.</p>
-        <ul><li>Paid HTTP and MCP resource</li><li>Settlement + delivery receipts</li><li>Tenant-linked usage events</li></ul>
-        <a href="/meter">Open the Meter module &rarr;</a>
-      </article>
+    <section class="how-it-works" aria-label="How it works">
+      <p class="eyebrow">HOW IT WORKS</p>
+      <h2 class="compact">Three steps to get paid.</h2>
+      <div class="how-steps">
+        <article class="how-step-card">
+          <img src="/marketing/step-create.png" alt="Create a Guard Link with amount and recipient" width="400" height="250" loading="lazy">
+          <p class="step">STEP 1</p>
+          <h3>Create</h3>
+          <p class="muted">Connect your wallet and enter the amount.</p>
+        </article>
+        <article class="how-step-card">
+          <img src="/marketing/step-payment.png" alt="Payment request page showing amount and recipient" width="400" height="250" loading="lazy">
+          <p class="step">STEP 2</p>
+          <h3>Share</h3>
+          <p class="muted">Send the link or QR code in chat.</p>
+        </article>
+        <article class="how-step-card">
+          <img src="/marketing/step-verified.png" alt="Verified payment with option to create your own Guard Link" width="400" height="250" loading="lazy">
+          <p class="step">STEP 3</p>
+          <h3>Get paid</h3>
+          <p class="muted">They review and sign in their wallet, then verify onchain.</p>
+        </article>
+      </div>
+      <div class="portal-actions how-cta"><a class="primary-action portal-primary-cta" href="/guard/create">Create a Guard Link</a></div>
     </section>
-    <section class="platform-flow">
-      <p class="eyebrow">ONE ACCEPTANCE PATH</p>
-      <h2>Protect &rarr; Meter &rarr; Receipts</h2>
-      <div class="flow-row"><span>Declare intent</span><span>ALLOW / REVIEW / BLOCK</span><span>402 settlement</span><span>Protected delivery</span><span>Dual receipt</span></div>
-      <div class="links"><a href="/docs">Developer quickstart</a><a href="/catalog">Service catalog</a><a href="/test">Join public testing</a><a href="/status">Live status</a></div>
+    <section class="portal-developers">
+      <p class="eyebrow">FOR DEVELOPERS</p>
+      <h2 class="compact">Built for agents and developers too.</h2>
+      <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI</p>
+      <div class="links"><a href="/docs">Read the docs</a><a href="/canary">Base Mainnet canary</a><a href="/status">Live status</a></div>
     </section>
-    <section class="notice"><strong>Current status:</strong> the protected API/MCP payment path, durable receipts, and capped browser-wallet crosschain route are implemented on test networks. An externally signed end-to-end crosschain record, repeat partner use, and a paid pilot remain acceptance gates.</section>
+    <section class="notice"><strong>Testnet notice:</strong> Guard Links use Arc Testnet assets with no financial value. The Base Mainnet canary charges a bounded 0.001 USDC x402 payment plus gas.</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
@@ -791,7 +808,29 @@ nav{min-height:80px;gap:24px;border-color:#ffffff19}
 .badge{color:#b8c6ff;border-color:#52649f;background:#111936cc;box-shadow:inset 0 0 20px #6f8cff14;user-select:none;pointer-events:none;flex-shrink:0;white-space:nowrap}
 .eyebrow,.step{color:#aebcff;font-family:ui-monospace,Consolas,monospace}
 .hero{padding:92px 0 58px}
-.portal-hero{max-width:1080px;padding-bottom:84px}
+.portal-hero{max-width:1180px;padding-bottom:64px}
+.portal-hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center}
+.portal-hero-copy .lead{max-width:640px;margin-bottom:18px}
+.portal-hero-visual{margin:0}
+.portal-hero-visual img{display:block;width:100%;height:auto;border:1px solid #2b355b;border-radius:16px;box-shadow:0 24px 70px #0006}
+.portal-network-note{max-width:640px;margin:0 0 22px;color:#9ba6c8;line-height:1.65;font-size:15px}
+.portal-network-note a{color:#c6d0ff}
+.portal-trust-list{margin:16px 0 0;color:#8e99ba;font-size:14px;line-height:1.6}
+.portal-primary-cta{display:inline-flex;align-items:center;justify-content:center;min-width:240px;padding:16px 24px;font-size:17px;font-weight:800;text-decoration:none;background:#2563eb;box-shadow:0 12px 40px #2563eb40}
+.portal-primary-cta:hover{filter:brightness(1.08)}
+.how-it-works{padding:20px 0 72px;border-top:1px solid var(--line)}
+.how-it-works h2.compact{font-size:clamp(34px,5vw,56px);margin:12px 0 28px}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.how-step-card{padding:18px;border:1px solid #2b355b;border-radius:16px;background:linear-gradient(145deg,#111831e8,#090d1ee8)}
+.how-step-card img{display:block;width:100%;height:auto;margin-bottom:14px;border:1px solid #283251;border-radius:12px}
+.how-step-card h3{margin:8px 0;font-size:22px}
+.how-step-card .muted{margin:0;font-size:14px;line-height:1.55}
+.how-cta{margin-top:28px}
+.portal-developers{padding:56px 0 72px;border-top:1px solid var(--line)}
+.portal-developers h2.compact{font-size:clamp(30px,4vw,48px);margin:12px 0 14px}
+.portal-developers .lead{max-width:720px;margin-bottom:18px}
+.portal-developers .links{display:flex;flex-wrap:wrap;gap:18px}
+.portal-developers .links a{color:#c6d0ff;font-weight:700;text-decoration:none}
 h1{font-size:clamp(54px,8vw,98px);line-height:.94}
 h1 span{background:linear-gradient(90deg,#88a2ff,#bc8cff);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lead{max-width:850px;color:#abb4d2;line-height:1.65}
@@ -912,6 +951,9 @@ footer{border-color:#ffffff19;line-height:1.9}
 @media(max-width:900px){
   .portal-nav-links{display:none}
   .nav-menu-toggle{display:inline-flex}
+  .portal-hero-grid{grid-template-columns:1fr;gap:28px}
+  .portal-hero-visual{order:-1}
+  .how-steps{grid-template-columns:1fr}
   .route-grid{grid-template-columns:1fr}.route-evidence{grid-column:auto}.stage-row{grid-template-columns:1fr 1fr}
   .flow-row{grid-template-columns:1fr}
   .flow-row span{min-height:60px;border-right:0;border-bottom:1px solid var(--line)}
@@ -930,6 +972,12 @@ footer{border-color:#ffffff19;line-height:1.9}
   h1,h1.compact{font-size:clamp(43px,13vw,58px)}
   .lead{font-size:17px}
   .badge{font-size:9px}
+  .portal-primary-cta{width:100%;min-width:0}
+}
+@media(max-width:480px){
+  main{width:min(100% - 20px,1180px)}
+  .portal-actions a{width:100%;text-align:center;box-sizing:border-box}
+  .how-step-card{padding:14px}
 }
 `;
 

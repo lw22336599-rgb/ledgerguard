@@ -30,12 +30,11 @@ describe("browser demo experience", () => {
 
   it("routes people to readable pages instead of raw JSON", () => {
     expect(portalHtml).toContain('href="/guard/create"');
-    expect(portalHtml).toContain('href="/routes"');
-    expect(portalHtml).toContain('href="/meter"');
-    expect(portalHtml).toContain('href="/status"');
     expect(portalHtml).toContain('href="/canary"');
+    expect(portalHtml).toContain('href="/status"');
     expect(portalHtml).toContain('href="/docs"');
     expect(portalHtml).toContain('href="/testnet-help"');
+    expect(portalHtml).toContain('href="/routes"');
     expect(portalHtml).toContain('id="nav-connect"');
     expect(portalHtml).toContain('id="nav-menu-toggle"');
     expect(portalHtml).toContain('id="nav-mobile-panel"');
@@ -239,6 +238,13 @@ describe("browser demo experience", () => {
   it("leads with a plain-language payment link promise on the portal", () => {
     expect(portalHtml).toContain("Send a USDC payment link.");
     expect(portalHtml).toContain("Create a Guard Link");
+    expect(portalHtml).toContain("HOW IT WORKS");
+    expect(portalHtml).toContain("/marketing/hero-guard-builder.png");
+    expect(portalHtml).toContain("USDC PAYMENT LINKS · BASE + ARC");
+    expect(portalHtml).toContain("Arc Testnet");
+    expect(portalHtml).not.toContain("Move USDC into Arc");
+    expect(portalHtml).not.toContain("Protect &rarr; Meter &rarr; Receipts");
+    expect(portalHtml).not.toContain("Open the Meter module");
   });
 
   it("publishes the official X account on the public portal", () => {

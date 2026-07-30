@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
@@ -377,6 +379,26 @@ app.get("/status", async (context) => {
     }),
   );
 });
+const MARKETING_IMAGES = [
+  "hero-guard-builder.png",
+  "step-create.png",
+  "step-payment.png",
+  "step-verified.png",
+] as const;
+
+for (const name of MARKETING_IMAGES) {
+  app.get(`/marketing/${name}`, (context) => {
+    const filePath = join(process.cwd(), "public", "marketing", name);
+    if (!existsSync(filePath)) {
+      return context.text("Not found", 404);
+    }
+    return context.body(readFileSync(filePath), 200, {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400",
+    });
+  });
+}
+
 app.get("/styles.css", (context) =>
   context.body(siteCss, 200, {
     "Content-Type": "text/css; charset=utf-8",
