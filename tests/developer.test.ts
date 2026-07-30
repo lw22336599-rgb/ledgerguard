@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { app } from "../src/app.js";
 import {
   getTenantStore,
@@ -170,5 +170,138 @@ describe("developer self-service", () => {
     expect(html).toContain("Developer Console");
     expect(html).not.toMatch(/\p{Script=Han}/u);
     expect(html).not.toMatch(/lg_test_[A-Za-z0-9_-]{43}/);
+  });
+});
+
+describe("Redis REST tenant persistence", () => {
+  const values = new Map<string, string>();
+  const lists = new Map<string, string[]>();
+
+  function execute(command: Array<string | number>): unknown {
+    const [rawName, ...args] = command;
+    const name = String(rawName).toUpperCase();
+    if (name === "PING") return "PONG";
+    if (name === "GET") return values.get(String(args[0])) ?? null;
+    if (name === "INCR" || name === "DECR") {
+      const key = String(args[0]);
+      const delta = name === "INCR" ? 1 : -1;
+      const next = Number.parseInt(values.get(key) ?? "0", 10) + delta;
+      values.set(key, String(next));
+      return next;
+    }
+    if (name === "SET") {
+      const key = String(args[0]);
+      const value = String(args[1]);
+      const nx = args.some((item) => String(item).toUpperCase() === "NX");
+      if (nx && values.has(key)) return null;
+      values.set(key, value);
+      return "OK";
+    }
+    if (name === "DEL") return values.delete(String(args[0])) ? 1 : 0;
+    if (name === "LPUSH") {
+      const key = String(args[0]);
+      const list = lists.get(key) ?? [];
+      list.unshift(String(args[1]));
+      lists.set(key, list);
+      return list.length;
+    }
+    if (name === "LTRIM") {
+      const key = String(args[0]);
+      const list = lists.get(key) ?? [];
+      lists.set(key, list.slice(Number(args[1]), Number(args[2]) + 1));
+      return "OK";
+    }
+    if (name === "LRANGE") {
+      const list = lists.get(String(args[0])) ?? [];
+      return list.slice(Number(args[1]), Number(args[2]) + 1);
+    }
+    if (name === "EVAL") {
+      const usageCounter = String(args[2]);
+      const events = String(args[3]);
+      const quota = Number(args[4]);
+      const current = Number(values.get(usageCounter) ?? "0");
+      if (current >= quota) return [0, current];
+      const next = current + 1;
+      values.set(usageCounter, String(next));
+      const recent = lists.get(events) ?? [];
+      recent.unshift(String(args[6]));
+      lists.set(events, recent.slice(0, 50));
+      return [1, next];
+    }
+    if (name === "EXPIRE") return 1;
+    throw new Error(`Unsupported fake Redis command: ${name}`);
+  }
+
+  beforeEach(() => {
+    values.clear();
+    lists.clear();
+    delete process.env.LEDGERGUARD_STORAGE_BACKEND;
+    process.env.UPSTASH_REDIS_REST_URL = "https://redis.example";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "test-token";
+    process.env.DEVELOPER_MAX_TENANTS = "2";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: unknown, init?: RequestInit) => {
+        const payload = JSON.parse(String(init?.body));
+        const result =
+          Array.isArray(payload[0])
+            ? payload.map((command: Array<string | number>) => ({
+                result: execute(command),
+              }))
+            : { result: execute(payload) };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => result,
+        };
+      }),
+    );
+    resetTenantStoreForTests();
+  });
+
+  afterEach(() => {
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    delete process.env.DEVELOPER_MAX_TENANTS;
+    vi.unstubAllGlobals();
+    resetTenantStoreForTests();
+  });
+
+  it("persists tenant identity, usage, rotation, and payment replay state", async () => {
+    const store = getTenantStore();
+    expect(store).not.toBeNull();
+    await expect(store!.health()).resolves.toBe(true);
+    const registration = await store!.register("Redis Project");
+    await expect(store!.authenticate("bad-key")).resolves.toBeNull();
+    await expect(store!.authenticate(registration.apiKey)).resolves.toMatchObject(
+      { id: registration.tenant.id },
+    );
+    await expect(
+      store!.recordUsage(registration.tenant, "preflight", "redis-request"),
+    ).resolves.toMatchObject({ used: 1, remaining: 999 });
+    await expect(store!.usage(registration.tenant)).resolves.toMatchObject({
+      used: 1,
+    });
+
+    const replacement = await store!.rotateKey(
+      registration.tenant,
+      registration.apiKey,
+    );
+    await expect(store!.authenticate(registration.apiKey)).resolves.toBeNull();
+    await expect(store!.authenticate(replacement)).resolves.toMatchObject({
+      keyVersion: 2,
+    });
+
+    const payment = {
+      requestId: "redis-payment",
+      payer: "0x1111111111111111111111111111111111111111",
+      settlementTransaction:
+        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      amountMicroUsdc: "1000",
+      network: "arcTestnet" as const,
+      recordedAt: "2026-07-30T00:00:00.000Z",
+    };
+    await expect(store!.recordPayment(payment)).resolves.toBe("recorded");
+    await expect(store!.recordPayment(payment)).resolves.toBe("duplicate");
   });
 });
