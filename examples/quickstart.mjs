@@ -21,6 +21,8 @@ const response = await fetch(`${baseUrl}/v1/developer/shadow`, {
     authorization: `Bearer ${apiKey}`,
     "content-type": "application/json",
     "x-ledgerguard-client": "quickstart/0.1.0",
+    "x-ledgerguard-integration":
+      process.env.LEDGERGUARD_INTEGRATION ?? "quickstart-local",
   },
   body: JSON.stringify({
     network: "arcTestnet",

@@ -37,10 +37,18 @@ vi.mock("../src/services/evidence-retrieval.js", () => ({
   TransactionNotFoundError: evidence.TransactionNotFoundError,
   retrieveEvidence: evidence.retrieveEvidence,
 }));
+vi.mock("@coinbase/x402", () => ({
+  createFacilitatorConfig: vi.fn(() => ({
+    url: "https://facilitator.invalid",
+  })),
+}));
 
 const { app } = await import("../src/app.js");
 const { resetTenantStoreForTests } = await import(
   "../src/services/tenant-store.js"
+);
+const { resetBaseSepoliaPaymentMiddlewareForTests } = await import(
+  "../src/services/base-sepolia-x402.js"
 );
 
 describe("paid HTTP delivery", () => {
@@ -61,7 +69,99 @@ describe("paid HTTP delivery", () => {
     });
     delete process.env.OPERATIONS_WEBHOOK_URL;
     process.env.LEDGERGUARD_STORAGE_BACKEND = "memory";
+    delete process.env.BASE_SEPOLIA_X402_ENABLED;
+    delete process.env.CDP_API_KEY_ID;
+    delete process.env.CDP_API_KEY_SECRET;
+    process.env.SELLER_ADDRESS =
+      "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c";
     resetTenantStoreForTests();
+    resetBaseSepoliaPaymentMiddlewareForTests();
+  });
+
+  it("returns a standards-shaped CDP x402 challenge when the testnet candidate is explicitly enabled", async () => {
+    process.env.BASE_SEPOLIA_X402_ENABLED = "true";
+    process.env.CDP_API_KEY_ID = "organizations/example/apiKeys/example";
+    process.env.CDP_API_KEY_SECRET =
+      "MHcCAQEEIFakeTestCredentialOnlyNotARealSecret1234567890";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          kinds: [
+            {
+              x402Version: 2,
+              scheme: "exact",
+              network: "eip155:84532",
+            },
+          ],
+          extensions: ["bazaar"],
+          signers: {},
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    );
+
+    try {
+      const response = await app.request("/v1/paid/base-sepolia/evidence", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify({
+          network: "arcTestnet",
+          txHash: `0x${"aa".repeat(32)}`,
+          intent: {
+            action: "transfer",
+            purpose: "Base Sepolia paid Arc evidence",
+          },
+        }),
+      });
+
+      expect(response.status).toBe(402);
+      expect(response.headers.get("payment-required")).toBeTruthy();
+      const challenge = JSON.parse(
+        Buffer.from(
+          response.headers.get("payment-required")!,
+          "base64",
+        ).toString("utf8"),
+      );
+      expect(challenge.accepts[0]).toMatchObject({
+        scheme: "exact",
+        network: "eip155:84532",
+        asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        amount: "1000",
+      });
+      expect(challenge.extensions).toHaveProperty("bazaar");
+      expect(evidence.retrieveEvidence).not.toHaveBeenCalled();
+    } finally {
+      fetchMock.mockRestore();
+    }
+  });
+
+  it("fails closed on the CDP Bazaar candidate route until every gate passes", async () => {
+    const response = await app.request("/v1/paid/base-sepolia/evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        network: "arcTestnet",
+        txHash: `0x${"aa".repeat(32)}`,
+        intent: {
+          action: "transfer",
+          purpose: "Base Sepolia paid Arc evidence",
+        },
+      }),
+    });
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({
+      error: "BAZAAR_TESTNET_NOT_READY",
+      testAssetsOnly: true,
+      indexed: false,
+    });
+    expect(evidence.retrieveEvidence).not.toHaveBeenCalled();
   });
 
   it("returns a payment challenge before settlement", async () => {

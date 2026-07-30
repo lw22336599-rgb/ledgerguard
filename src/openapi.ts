@@ -307,6 +307,57 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/paid/base-sepolia/evidence": {
+      post: {
+        summary:
+          "Purchase strict Arc Testnet evidence with Base Sepolia test USDC",
+        description:
+          "CDP Bazaar candidate. Fails closed until the encrypted CDP credentials, seller address, and explicit testnet enable flag are configured. Successful configuration is not evidence of Bazaar indexing.",
+        parameters: [
+          {
+            in: "header",
+            name: "X-LedgerGuard-Client",
+            required: false,
+            schema: { type: "string", maxLength: 80 },
+          },
+          {
+            in: "header",
+            name: "X-LedgerGuard-Integration",
+            required: false,
+            schema: { type: "string", maxLength: 80 },
+            description:
+              "Public, non-secret identifier used for sanitized integration attribution.",
+          },
+          {
+            in: "header",
+            name: "PAYMENT-SIGNATURE",
+            required: false,
+            schema: { type: "string" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/EvidenceRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description:
+              "Base Sepolia test payment settled and Arc Testnet evidence delivered",
+          },
+          "400": { description: "Invalid request" },
+          "402": { description: "CDP x402 payment required or rejected" },
+          "404": { description: "Arc Testnet transaction not found" },
+          "503": {
+            description:
+              "Candidate disabled, activation gates incomplete, or facilitator unavailable",
+          },
+        },
+      },
+    },
     "/v1/paid/network-risk": {
       get: {
         summary: "Purchase an Arc network-risk snapshot with x402",

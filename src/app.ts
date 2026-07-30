@@ -8,6 +8,7 @@ import { getAddress, type Address, type Hex } from "viem";
 import { getNetworkRegistry, requireEnabledNetwork } from "./config/networks.js";
 import { getPublicBaseUrl } from "./config/public.js";
 import { getCommercialCandidate } from "./config/commercial.js";
+import { getBazaarCandidate } from "./config/bazaar.js";
 import { getArcMainnetShadowConfiguration } from "./config/shadow.js";
 import {
   createNetworkClient,
@@ -32,6 +33,10 @@ import {
   TransactionNotFoundError,
 } from "./services/evidence-retrieval.js";
 import { strictEvidenceDiscoveryExtension } from "./services/discovery.js";
+import {
+  BAZAAR_EVIDENCE_PATH,
+  baseSepoliaPaymentGate,
+} from "./services/base-sepolia-x402.js";
 import { evaluatePreflight } from "./services/preflight.js";
 import {
   createGuardLinkPreflight,
@@ -90,6 +95,7 @@ app.use(
       "Content-Type",
       "Payment-Signature",
       "X-LedgerGuard-Client",
+      "X-LedgerGuard-Integration",
       "Mcp-Session-Id",
       "Mcp-Protocol-Version",
       "Last-Event-ID",
@@ -319,6 +325,7 @@ app.get("/.well-known/ledgerguard.json", (context) =>
       authentication: "bearer-api-key",
     },
     commercialCandidate: getCommercialCandidate(),
+    bazaarCandidate: getBazaarCandidate(),
     resources: [
       {
         id: "arc-network-risk",
@@ -339,11 +346,29 @@ app.get("/.well-known/ledgerguard.json", (context) =>
         payTo: getConfiguredSellerAddress(),
         deliverable: "strict-evidence-receipt",
       },
+      {
+        id: "base-sepolia-strict-evidence",
+        method: "POST",
+        path: BAZAAR_EVIDENCE_PATH,
+        paymentProtocol: "x402-v2",
+        network: "eip155:84532",
+        priceMicroUsdc: getConfiguredX402PriceMicroUsdc(),
+        payTo: getConfiguredSellerAddress(),
+        deliverable: "strict-evidence-receipt",
+        discovery: "cdp-bazaar-candidate",
+        analyzesNetwork: "eip155:5042002",
+        enabled: getBazaarCandidate().settleEnabled,
+        indexed: false,
+      },
     ],
   }),
 );
+app.use(BAZAAR_EVIDENCE_PATH, baseSepoliaPaymentGate);
 app.get("/v1/commercial-candidate", (context) =>
   context.json(getCommercialCandidate()),
+);
+app.get("/v1/bazaar-candidate", (context) =>
+  context.json(getBazaarCandidate()),
 );
 app.get("/v1/adapters", (context) =>
   context.json({
@@ -750,6 +775,44 @@ app.get("/v1/networks", (context) => {
 app.get("/v1/shadow/arc-mainnet", async (context) => {
   const status = await getArcMainnetShadowStatus();
   return context.json(status, status.ok ? 200 : 503);
+});
+
+app.post(BAZAAR_EVIDENCE_PATH, async (context) => {
+  const parsed = evidenceSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+
+  try {
+    const evidence = await retrieveEvidence(parsed.data);
+    return context.json({
+      paid: true,
+      paymentNetwork: "eip155:84532",
+      analyzedNetwork: "eip155:5042002",
+      testAssetsOnly: true,
+      deliverable: "strict-evidence-receipt",
+      evidence,
+    });
+  } catch (error) {
+    if (error instanceof TransactionNotFoundError) {
+      return context.json(
+        { error: "TRANSACTION_NOT_FOUND", message: error.message },
+        404,
+      );
+    }
+    return context.json(
+      {
+        error: "EVIDENCE_UNAVAILABLE",
+        message: "Strict evidence retrieval failed before settlement.",
+      },
+      503,
+    );
+  }
 });
 
 app.get("/v1/paid/network-risk", async (context) => {

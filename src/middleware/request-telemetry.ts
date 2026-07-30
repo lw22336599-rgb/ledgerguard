@@ -33,5 +33,8 @@ export const requestTelemetry: MiddlewareHandler<AppEnvironment> = async (
     status: context.res.status,
     durationMs: Date.now() - startedAt,
     client: safeClient(context.req.header("x-ledgerguard-client")),
+    integration: safeClient(
+      context.req.header("x-ledgerguard-integration"),
+    ),
   });
 };
