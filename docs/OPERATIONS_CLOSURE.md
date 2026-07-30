@@ -17,6 +17,34 @@ service level.
 | Repeatable commercial revenue | UNVERIFIED | one external payer, accepted delivery, gross margin, repeat use or renewal |
 | Enterprise SLA and global quota | HOLD | shared durable state, alerting destination, retention policy and load/failure tests |
 
+## Commercial product loop
+
+LedgerGuard uses one deterministic safety core through three product surfaces:
+
+| Surface | User | Current role | Revenue role |
+| --- | --- | --- | --- |
+| Guard Link | Individual users and testers | Free discovery, understandable preflight results, and feedback | Acquisition and trust; not the primary payer |
+| API, SDK, and future MCP server | Wallets, AI agents, and developers | Self-service integration and x402 testnet delivery | Usage-based x402 pricing after real-value mainnet approval |
+| Policy Console | Teams and enterprises | Not implemented | Subscription, policy administration, evidence retention, alerts, and SLA |
+
+The current repository completes the free testnet and machine-payment
+demonstration surfaces. It does **not** yet complete a repeatable revenue loop.
+The minimum missing production capabilities are:
+
+1. tenant identity and revocable API keys;
+2. a shared durable quota, usage, and replay-safe billing ledger;
+3. self-service plan selection, invoicing or subscription collection, and
+   payment-failure handling;
+4. a Policy Console for team budgets, allowlists, approvals, evidence history,
+   and alerts;
+5. customer support, privacy, retention, incident, tax, and commercial terms;
+6. one independent integration, accepted delivery, real payment, measured gross
+   margin, and repeat-use evidence.
+
+MCP Registry or x402 Bazaar publication can improve discovery, but neither is a
+customer, a payment guarantee, nor a substitute for the commercial evidence
+above.
+
 ## End-to-end testnet loop
 
 1. A person discovers LedgerGuard through the public site, GitHub, or the

@@ -20,7 +20,12 @@ async function request(path, options, expectedStatus = 200) {
 }
 
 const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) });
-if (home.status !== 200 || !(await home.text()).includes("让规则守住资金")) {
+const homeHtml = await home.text();
+if (
+  home.status !== 200 ||
+  !homeHtml.includes("Let rules protect funds.") ||
+  !homeHtml.includes('<html lang="en">')
+) {
   throw new Error("/: public demo is unavailable");
 }
 if (!home.headers.get("content-security-policy")?.includes("default-src 'self'")) {
@@ -28,14 +33,22 @@ if (!home.headers.get("content-security-policy")?.includes("default-src 'self'")
 }
 
 for (const [path, marker] of [
-  ["/docs", "API 文档"],
-  ["/catalog", "服务目录"],
-  ["/status", "运行状态"],
+  ["/docs", "API documentation"],
+  ["/catalog", "SERVICE CATALOG"],
+  ["/test", "Complete the test flow end to end"],
+  ["/status", "LIVE STATUS"],
+  ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
 ]) {
   const response = await fetch(`${baseUrl}${path}`, {
     signal: AbortSignal.timeout(20_000),
   });
-  if (response.status !== 200 || !(await response.text()).includes(marker)) {
+  const html = await response.text();
+  if (
+    response.status !== 200 ||
+    !html.includes(marker) ||
+    !html.includes('<html lang="en">') ||
+    /\p{Script=Han}/u.test(html)
+  ) {
     throw new Error(`${path}: human-readable page is unavailable`);
   }
 }

@@ -13,7 +13,7 @@ describe("HTTP API", () => {
     const page = await app.request("/");
     expect(page.status).toBe(200);
     expect(page.headers.get("content-type")).toContain("text/html");
-    expect(await page.text()).toContain("让规则守住资金");
+    expect(await page.text()).toContain("Let rules protect funds.");
     expect(page.headers.get("content-security-policy")).toContain(
       "default-src 'self'",
     );
@@ -34,12 +34,23 @@ describe("HTTP API", () => {
   });
 
   it("serves human-readable docs, catalog, and status pages", async () => {
-    for (const path of ["/docs", "/catalog", "/test", "/docs/integration"]) {
+    for (const path of [
+      "/",
+      "/docs",
+      "/catalog",
+      "/test",
+      "/docs/integration",
+    ]) {
       const response = await app.request(path);
       expect(response.status).toBe(200);
       expect(response.headers.get("content-type")).toContain("text/html");
+      const html = await response.text();
+      expect(html).toContain('<html lang="en">');
+      expect(html).not.toMatch(/\p{Script=Han}/u);
     }
-    expect(await (await app.request("/docs")).text()).toContain("API 文档");
+    expect(await (await app.request("/docs")).text()).toContain(
+      "API documentation",
+    );
   });
 
   it("serves browser assets and machine documents with correct formats", async () => {
@@ -108,7 +119,10 @@ describe("HTTP API", () => {
     });
     const status = await app.request("/status");
     expect(status.status).toBe(200);
-    expect(await status.text()).toContain("Block 100");
+    const statusHtml = await status.text();
+    expect(statusHtml).toContain("Block 100");
+    expect(statusHtml).toContain('<html lang="en">');
+    expect(statusHtml).not.toMatch(/\p{Script=Han}/u);
     fetchMock.mockRestore();
   });
 

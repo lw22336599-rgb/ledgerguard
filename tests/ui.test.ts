@@ -10,12 +10,12 @@ import {
 describe("browser demo experience", () => {
   it("invalidates the displayed result when inputs change", () => {
     expect(demoJs).toContain('form.addEventListener("input"');
-    expect(demoJs).toContain("输入已改变，请重新运行检查。");
+    expect(demoJs).toContain("The input changed. Run the check again.");
   });
 
   it("clears stale output when native form validation blocks submission", () => {
     expect(demoJs).toContain('form.addEventListener("invalid"');
-    expect(demoJs).toContain("请先修正无效输入");
+    expect(demoJs).toContain("Correct the invalid input");
   });
 
   it("routes people to readable pages instead of raw JSON", () => {
@@ -28,14 +28,26 @@ describe("browser demo experience", () => {
   });
 
   it("renders plain-language decisions and preserves technical details", () => {
-    expect(demoJs).toContain("发现明确风险，不应签名或发送。");
+    expect(demoJs).toContain("A defined risk was detected.");
     expect(demoJs).toContain("JSON.stringify(body,null,2)");
     expect(demoHtml).toContain("result-details");
   });
 
   it("explains that machine JSON is intentional", () => {
-    expect(developerDocsHtml).toContain("机器文件");
+    expect(developerDocsHtml).toContain("machine-readable file");
     expect(catalogHtml("1000")).toContain("1000 micro-USDC");
+  });
+
+  it("uses English as the public default language", () => {
+    for (const html of [
+      demoHtml,
+      developerDocsHtml,
+      catalogHtml("1000"),
+      testerHtml("1000"),
+    ]) {
+      expect(html).toContain('<html lang="en">');
+      expect(html).not.toMatch(/\p{Script=Han}/u);
+    }
   });
 
   it("loads privacy-preserving production analytics on human pages", () => {
