@@ -143,6 +143,10 @@ describe("browser demo experience", () => {
 
   it("creates and completes Guard Links without server-side signing", () => {
     expect(portalHtml).toContain('href="/guard/create"');
+    expect(guardBuilderHtml).toContain("USDC PAYMENT LINKS · BASE + ARC");
+    expect(guardBuilderHtml).toContain("Base Mainnet</strong> x402 USDC is live");
+    expect(guardBuilderHtml).toContain('href="/canary"');
+    expect(guardBuilderHtml).not.toContain("USDC PAYMENT LINKS · ARC TESTNET");
     expect(guardBuilderHtml).toContain("/site-nav.js");
     expect(guardBuilderHtml).toContain("/guard-builder-wallet.js");
     expect(guardBuilderHtml).toContain("wallet-status-card");
@@ -241,6 +245,8 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain("HOW IT WORKS");
     expect(portalHtml).toContain("/marketing/hero-guard-builder.png");
     expect(portalHtml).toContain("USDC PAYMENT LINKS · BASE + ARC");
+    expect(portalHtml).toContain("Base Mainnet</strong> x402 USDC is live");
+    expect(portalHtml).toContain("BASE + ARC &middot; Guard Links on Arc Testnet");
     expect(portalHtml).toContain("Arc Testnet");
     expect(portalHtml).not.toContain("Move USDC into Arc");
     expect(portalHtml).not.toContain("Protect &rarr; Meter &rarr; Receipts");

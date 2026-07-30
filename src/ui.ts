@@ -10,8 +10,13 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
+const dualChainEyebrow = "USDC PAYMENT LINKS · BASE + ARC";
+const dualChainNetworkNoteHtml =
+  "Guard Links run on <strong>Arc Testnet</strong>. <strong>Base Mainnet</strong> x402 USDC is live and operational at <a href=\"/canary\">/canary</a> — production gates passed, real USDC settlement.";
+const baseMainnetLinkLabel = "Base Mainnet x402";
+
 const footer = `<footer class="site-footer">
-  <div class="footer-primary">LedgerGuard &middot; Protect + Meter &middot; Guard Links on Arc Testnet &middot; Base Mainnet canary at <a href="/canary">/canary</a></div>
+  <div class="footer-primary">LedgerGuard &middot; BASE + ARC &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} at <a href="/canary">/canary</a></div>
   <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
@@ -161,23 +166,23 @@ export function guardLinkHtml(input: {
 
 export const guardBuilderHtml = `${pageHead(
   "LedgerGuard | Create a Guard Link",
-  "Create a USDC payment link on Arc Testnet. Share the link or QR code so someone can review and pay in their wallet.",
+  "Create a Guard Link on Arc Testnet. BASE + ARC: Base Mainnet x402 USDC is live at /canary. Share the link or QR so the payer reviews before signing.",
 )}
 <body>
   <main>
     ${portalNavHtml("GUARD LINK")}
     <section class="subhero">
-      <p class="eyebrow">USDC PAYMENT LINKS · ARC TESTNET</p>
+      <p class="eyebrow">${dualChainEyebrow}</p>
       <h1 class="compact">Create a USDC payment link.</h1>
-      <p class="lead">Connect your wallet on Arc Testnet, enter the amount, and share the link or QR code. The payer sees exactly who receives what before signing.</p>
+      <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer reviews who receives how much before signing.</p>
+      <p class="portal-network-note">${dualChainNetworkNoteHtml}</p>
     </section>
     <section id="guard-verified-notice" class="notice" hidden><strong>Welcome back.</strong> Your receiving address is prefilled from your verified payment. Connect the same wallet or edit the address before creating a link.</section>
     <section class="panel builder-panel">
       <div class="chain-selector-row">
         <div class="chain-network-active">
-          <span class="chain-network-label">Network</span>
+          <span class="chain-network-label">Active network for Guard Links</span>
           <strong id="guard-chain-label">Arc Testnet</strong>
-          <p class="chain-selector-notice">Guard Links settle on Arc Testnet. For the live Base Mainnet payment check, use the <a href="/canary">0.001 USDC canary</a>.</p>
         </div>
       </div>
       <div id="wallet-section" class="wallet-status-card">
@@ -343,7 +348,7 @@ export const testnetHelpJs = `const BASE_SEPOLIA={chainId:"0x14a34",chainName:"B
 
 export const portalHtml = `${pageHead(
   "LedgerGuard | Send a USDC payment link",
-  "Create a Guard Link on Arc Testnet, share it in chat or as a QR code, and let the payer review the exact amount before signing. Base Mainnet bounded canary available separately.",
+  "Create a Guard Link on Arc Testnet, share it in chat or as a QR code, and let the payer review the exact amount before signing. Base Mainnet x402 USDC is live at /canary.",
 )}
 <body>
   <main>
@@ -351,12 +356,12 @@ export const portalHtml = `${pageHead(
     <section class="hero portal-hero">
       <div class="portal-hero-grid">
         <div class="portal-hero-copy">
-          <p class="eyebrow">USDC PAYMENT LINKS · BASE + ARC</p>
+          <p class="eyebrow">${dualChainEyebrow}</p>
           <h1>Send a USDC payment link.<br><span>Get paid without asking for an address first.</span></h1>
           <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer reviews who receives how much before signing.</p>
-          <p class="portal-network-note">Guard Links run on <strong>Arc Testnet</strong> (demo, no real money). Base Mainnet bounded canary: <a href="/canary">0.001 USDC x402 at /canary</a>.</p>
+          <p class="portal-network-note">${dualChainNetworkNoteHtml}</p>
           <div class="portal-actions"><a class="primary-action portal-primary-cta" href="/guard/create">Create a Guard Link</a></div>
-          <p class="portal-trust-list">No signup · Non-custodial · Arc Testnet demo</p>
+          <p class="portal-trust-list">No signup · Non-custodial · Arc Testnet + Base Mainnet x402</p>
         </div>
         <figure class="portal-hero-visual">
           <img src="/marketing/hero-guard-builder.png" alt="Guard Link builder with QR code and shareable payment link" width="640" height="360" loading="eager">
@@ -392,9 +397,9 @@ export const portalHtml = `${pageHead(
       <p class="eyebrow">FOR DEVELOPERS</p>
       <h2 class="compact">Built for agents and developers too.</h2>
       <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI</p>
-      <div class="links"><a href="/docs">Read the docs</a><a href="/canary">Base Mainnet canary</a><a href="/status">Live status</a></div>
+      <div class="links"><a href="/docs">Read the docs</a><a href="/canary">${baseMainnetLinkLabel}</a><a href="/status">Live status</a></div>
     </section>
-    <section class="notice"><strong>Testnet notice:</strong> Guard Links use Arc Testnet assets with no financial value. The Base Mainnet canary charges a bounded 0.001 USDC x402 payment plus gas.</section>
+    <section class="notice"><strong>Networks:</strong> Guard Links use Arc Testnet assets with no financial value. Base Mainnet x402 at <a href="/canary">/canary</a> settles real USDC (0.001 USDC + gas).</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
@@ -521,23 +526,23 @@ export function catalogHtml(
 }
 
 export const mainnetCanaryHtml = `${pageHead(
-  "LedgerGuard | Base Mainnet Canary",
-  "Sign one bounded 0.001 USDC x402 payment on Base Mainnet to complete the production canary.",
+  "LedgerGuard | Base Mainnet x402",
+  "Pay 0.001 USDC on Base Mainnet through live x402 settlement. All production activation gates passed.",
 )}
 <body>
   <main>
-    ${portalNavHtml("BASE MAINNET CANARY")}
+    ${portalNavHtml("BASE MAINNET LIVE")}
     <section class="subhero">
-      <p class="eyebrow">REAL USDC · FAIL-CLOSED CANARY · 0.001 USDC</p>
-      <h1 class="compact">Sign the production canary once.</h1>
-      <p class="lead">Connect a Base Mainnet wallet with a small USDC balance and ETH for gas. LedgerGuard requests a standard x402 payment of 0.001 USDC, then delivers a strict Arc Testnet evidence receipt.</p>
+      <p class="eyebrow">REAL USDC · X402 · PRODUCTION READY</p>
+      <h1 class="compact">Pay with Base Mainnet USDC.</h1>
+      <p class="lead">Connect a Base Mainnet wallet with USDC and ETH for gas. LedgerGuard runs live x402 settlement on Base (0.001 USDC) and delivers a strict evidence receipt. All production gates are enabled and operational.</p>
       <p class="lead"><strong>Important:</strong> do not use the settlement recipient wallet (<code>0xA0Fef5…Ca0b9</code>) as the payer. Use a different Base Mainnet account that holds USDC and ETH for gas.</p>
     </section>
     <section class="panel builder-panel">
       <div class="wallet-buttons">
         <button id="canary-switch" type="button" class="secondary">Switch to Base Mainnet</button>
         <button id="canary-connect" type="button" class="secondary">Connect Base wallet</button>
-        <button id="canary-pay" type="button" disabled>Sign 0.001 USDC canary</button>
+        <button id="canary-pay" type="button" disabled>Pay 0.001 USDC on Base Mainnet</button>
       </div>
       <p id="canary-status" class="muted">Start by switching MetaMask from Base Sepolia to Base Mainnet. LedgerGuard never receives your private key.</p>
       <section id="canary-result" class="result neutral" hidden aria-live="polite"></section>

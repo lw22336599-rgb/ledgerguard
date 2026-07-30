@@ -1,0 +1,9 @@
+Send a USDC payment link. They review before they sign.
+
+Non-custodial Guard Links on Arc Testnet.
+Base Mainnet x402 USDC is live: /canary
+
+Create a link:
+https://ledgerguard-gules.vercel.app/guard/create
+
+#USDC #Web3 #x402 #ArcTestnet #Base

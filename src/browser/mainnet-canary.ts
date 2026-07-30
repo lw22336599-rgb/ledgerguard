@@ -18,7 +18,7 @@ const CANARY_EVIDENCE_BODY = {
     expectedRecipient: "0xF1437d9CD304aE49f2ec005AC967813B3a7c466c",
     expectedAssetAddress: "0x3600000000000000000000000000000000000000",
     expectedAmountMicroUsdc: "10000",
-    purpose: "Base Mainnet canary",
+    purpose: "Base Mainnet x402 payment",
   },
 } as const;
 
@@ -74,7 +74,7 @@ function formatError(error: unknown): string {
   if (error && typeof error === "object" && "message" in error) {
     return String((error as { message: unknown }).message);
   }
-  return "Canary payment failed.";
+  return "Base Mainnet payment failed.";
 }
 
 function serializeTypedDataMessage(
@@ -129,7 +129,7 @@ async function buildPaymentClient() {
   if (!account) throw new Error("No connected account.");
   if (sameAddress(account, SELLER_ADDRESS)) {
     throw new Error(
-      "This wallet is the settlement recipient. Switch MetaMask to a different Base account that holds USDC, then pay 0.001 USDC to complete the canary.",
+      "This wallet is the settlement recipient. Switch MetaMask to a different Base account that holds USDC, then pay 0.001 USDC on Base Mainnet.",
     );
   }
 
@@ -289,12 +289,12 @@ payButton?.addEventListener("click", async () => {
     );
     showResult(
       "allow",
-      `Canary settled. paid=${String(body.paid)} · network=${String(body.paymentNetwork)} · settlement=${JSON.stringify(settlement)} · evidence=${JSON.stringify((body.evidence as { status?: string } | undefined)?.status ?? body)}`,
+      `Payment settled. paid=${String(body.paid)} · network=${String(body.paymentNetwork)} · settlement=${JSON.stringify(settlement)} · evidence=${JSON.stringify((body.evidence as { status?: string } | undefined)?.status ?? body)}`,
     );
-    setStatus("Real-funds canary complete.");
+    setStatus("Base Mainnet payment complete.");
   } catch (error) {
     showResult("error", formatError(error));
-    setStatus("Canary did not complete.");
+    setStatus("Payment did not complete.");
   } finally {
     payButton.disabled = false;
   }
