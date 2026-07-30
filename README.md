@@ -13,6 +13,8 @@ Public contact: **lw22336599@gmail.com**
 
 GitHub contact: **lw22336599-rgb**
 
+Official X: **https://x.com/HuiLibaa**
+
 ## What exists
 
 - `GET /` - public, no-wallet browser demo for an Arc USDC transfer preflight.
@@ -39,7 +41,9 @@ GitHub contact: **lw22336599-rgb**
 - `POST /v1/paid/base/evidence` - fail-closed Base Mainnet x402 canary for strict Arc evidence.
 - `GET /v1/bazaar-candidate` - machine-readable CDP activation and indexing-proof gates.
 - `GET /v1/commercial-candidate` - fail-closed Base production-candidate gates.
-- `GET /guard?...` - prefilled, no-wallet payment intent receipt for people.
+- `GET /guard/create` - browser builder for a time-bound human payment request.
+- `POST /v1/guard-links` - validate an intent and create a shareable Guard Link.
+- `GET /guard?...` - prefilled human receipt with optional client-side Arc Testnet wallet handoff.
 - `GET /v1/adapters` - truthful x402/AP2 protocol implementation boundary.
 - `GET /openapi.json` - OpenAPI 3.1 machine discovery document.
 - `GET /.well-known/ledgerguard.json` - agent-readable service and price catalog.
@@ -62,6 +66,9 @@ provide the durable follow-up channel.
 read-only simulation succeeds. If simulation is intentionally skipped, the
 result remains `REVIEW`; if simulation is required but cannot run, it is
 `BLOCK`.
+
+See [`docs/GUARD_LINK_QUICKSTART.md`](docs/GUARD_LINK_QUICKSTART.md) for the
+ordinary-user review, explicit wallet approval, and evidence flow.
 
 For strict payer-bound checks, integrations should provide `from` and
 `intent.expectedDebitAddress`. `transferFrom` fails closed without a declared

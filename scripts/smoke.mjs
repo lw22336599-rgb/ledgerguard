@@ -23,7 +23,8 @@ const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) })
 const homeHtml = await home.text();
 if (
   home.status !== 200 ||
-  !homeHtml.includes("Let rules protect funds.") ||
+  !homeHtml.includes("Control what may be paid.") ||
+  !homeHtml.includes("https://x.com/HuiLibaa") ||
   !homeHtml.includes('<html lang="en">')
 ) {
   throw new Error("/: public demo is unavailable");
@@ -38,6 +39,7 @@ for (const [path, marker] of [
   ["/test", "Complete the test flow end to end"],
   ["/status", "LIVE STATUS"],
   ["/developer", "Developer Console"],
+  ["/guard/create", "Create one clear payment request."],
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
 ]) {
   const response = await fetch(`${baseUrl}${path}`, {
@@ -94,6 +96,30 @@ if (
   !guardHtml.includes("REVIEW")
 ) {
   throw new Error("/guard: prefilled human receipt is unavailable");
+}
+
+const createdGuard = await fetch(`${baseUrl}/v1/guard-links`, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    issuer: "Release smoke",
+    recipient,
+    amount: "1.00",
+    limit: "1.00",
+    purpose: "Release acceptance",
+    expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  }),
+  signal: AbortSignal.timeout(20_000),
+});
+const createdGuardBody = await createdGuard.json();
+if (
+  createdGuard.status !== 201 ||
+  !createdGuardBody.url?.includes("/guard?") ||
+  !/^[0-9a-f]{20}$/.test(createdGuardBody.intentId ?? "")
+) {
+  throw new Error(
+    `/v1/guard-links: validated link creation failed ${JSON.stringify(createdGuardBody)}`,
+  );
 }
 
 const { body: adapters } = await request("/v1/adapters");

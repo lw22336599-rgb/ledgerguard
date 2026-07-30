@@ -44,7 +44,9 @@ import {
 import { baseMainnetPaymentGate } from "./services/base-mainnet-x402.js";
 import { evaluatePreflight } from "./services/preflight.js";
 import {
+  createGuardLinkUrl,
   createGuardLinkPreflight,
+  guardLinkIntentId,
   guardLinkQuerySchema,
   isGuardLinkExpired,
 } from "./services/guard-link.js";
@@ -80,7 +82,10 @@ import {
   developerConsoleJs,
   developerDocsHtml,
   faviconSvg,
+  guardBuilderHtml,
+  guardBuilderJs,
   guardLinkHtml,
+  guardLinkJs,
   integrationBoundaryHtml,
   portalHtml,
   statusHtml,
@@ -179,6 +184,37 @@ app.get("/receipts", (context) =>
   context.redirect("https://arc-meter-xi.vercel.app/#flow", 302),
 );
 app.get("/developers", (context) => context.html(developerDocsHtml));
+app.get("/guard/create", (context) => context.html(guardBuilderHtml));
+app.post("/v1/guard-links", async (context) => {
+  const parsed = guardLinkQuerySchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_GUARD_LINK", issues: parsed.error.issues },
+      400,
+    );
+  }
+  if (!parsed.data.expires || isGuardLinkExpired(parsed.data)) {
+    return context.json(
+      {
+        error: "INVALID_GUARD_LINK_EXPIRY",
+        message: "A future expiry timestamp is required.",
+      },
+      400,
+    );
+  }
+  return context.json(
+    {
+      url: createGuardLinkUrl(getPublicBaseUrl(), parsed.data),
+      intentId: guardLinkIntentId(parsed.data),
+      network: "arcTestnet",
+      custody: "none",
+      expires: parsed.data.expires ?? null,
+    },
+    201,
+  );
+});
 app.get("/guard", async (context) => {
   const parsed = guardLinkQuerySchema.safeParse(context.req.query());
   if (!parsed.success) {
@@ -196,6 +232,8 @@ app.get("/guard", async (context) => {
   const expired = isGuardLinkExpired(parsed.data);
   return context.html(
     guardLinkHtml({
+      intentId: guardLinkIntentId(parsed.data),
+      ...(parsed.data.issuer ? { issuer: parsed.data.issuer } : {}),
       payer: parsed.data.payer ?? "Not declared",
       recipient: parsed.data.recipient,
       amount: parsed.data.amount,
@@ -301,6 +339,16 @@ app.get("/developer.js", (context) =>
     "Content-Type": "text/javascript; charset=utf-8",
   }),
 );
+app.get("/guard.js", (context) =>
+  context.body(guardLinkJs, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+  }),
+);
+app.get("/guard-builder.js", (context) =>
+  context.body(guardBuilderJs, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+  }),
+);
 for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
   app.get(path, (context) =>
     context.body(faviconSvg, 200, {
@@ -315,6 +363,7 @@ Production: https://ledgerguard-gules.vercel.app
 OpenAPI: https://ledgerguard-gules.vercel.app/openapi.json
 Service catalog: https://ledgerguard-gules.vercel.app/.well-known/ledgerguard.json
 Public testing: https://ledgerguard-gules.vercel.app/test
+Create a human Guard Link: https://ledgerguard-gules.vercel.app/guard/create
 Prefilled human receipt: GET /guard
 Free Arc transaction preflight: POST /v1/preflight
 Paid Arc Testnet x402 resource: GET /v1/paid/network-risk
@@ -332,8 +381,14 @@ app.get("/.well-known/ledgerguard.json", (context) => {
     humanDocs: `${getPublicBaseUrl()}/docs`,
     openapi: `${getPublicBaseUrl()}/openapi.json`,
     testing: `${getPublicBaseUrl()}/test`,
-    guardLinkTemplate: `${getPublicBaseUrl()}/guard?recipient={publicAddress}&amount={decimalUsdc}&limit={decimalUsdc}&purpose={urlEncodedPurpose}`,
+    guardLinkBuilder: `${getPublicBaseUrl()}/guard/create`,
+    guardLinkApi: `${getPublicBaseUrl()}/v1/guard-links`,
+    guardLinkTemplate: `${getPublicBaseUrl()}/guard?issuer={urlEncodedName}&recipient={publicAddress}&amount={decimalUsdc}&limit={decimalUsdc}&purpose={urlEncodedPurpose}&expires={isoTimestamp}`,
     protocolAdapters: `${getPublicBaseUrl()}/v1/adapters`,
+    social: {
+      x: "https://x.com/HuiLibaa",
+      handle: "@HuiLibaa",
+    },
     support:
       "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     custody: "none",
@@ -436,6 +491,7 @@ app.get("/v1/meta", (context) =>
     openapi: "/openapi.json",
     catalog: "/.well-known/ledgerguard.json",
     testing: "/test",
+    guardLinkBuilder: "/guard/create",
     developerConsole: "/developer",
     mcp: "/mcp",
     commercialCandidate: "/v1/commercial-candidate",

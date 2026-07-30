@@ -41,6 +41,7 @@ describe("HTTP API", () => {
       "/docs",
       "/catalog",
       "/test",
+      "/guard/create",
       "/docs/integration",
     ]) {
       const response = await app.request(path);
@@ -98,6 +99,64 @@ describe("HTTP API", () => {
     });
   });
 
+  it("creates a validated, time-bound Guard Link and renders its receipt", async () => {
+    const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const created = await app.request("/v1/guard-links", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        issuer: "Example Agent",
+        recipient,
+        amount: "1.25",
+        limit: "2.00",
+        purpose: "Invoice 42",
+        expires,
+      }),
+    });
+    expect(created.status).toBe(201);
+    const body = await created.json();
+    expect(body).toMatchObject({
+      network: "arcTestnet",
+      custody: "none",
+      expires,
+      intentId: expect.stringMatching(/^[0-9a-f]{20}$/),
+    });
+    expect(body.url).toContain("/guard?");
+    expect(body.url).toContain("issuer=Example+Agent");
+
+    const receipt = await app.request(new URL(body.url).pathname + new URL(body.url).search);
+    expect(receipt.status).toBe(200);
+    const html = await receipt.text();
+    expect(html).toContain("Example Agent");
+    expect(html).toContain(body.intentId);
+    expect(html).toContain("Connect test wallet");
+
+    const invalid = await app.request("/v1/guard-links", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        recipient,
+        amount: "0",
+        purpose: "Invalid zero payment",
+      }),
+    });
+    expect(invalid.status).toBe(400);
+
+    const noExpiry = await app.request("/v1/guard-links", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        recipient,
+        amount: "1",
+        purpose: "Missing expiry",
+      }),
+    });
+    expect(noExpiry.status).toBe(400);
+    expect(await noExpiry.json()).toMatchObject({
+      error: "INVALID_GUARD_LINK_EXPIRY",
+    });
+  });
+
   it("serves browser assets and machine documents with correct formats", async () => {
     const css = await app.request("/styles.css");
     expect(css.status).toBe(200);
@@ -106,6 +165,12 @@ describe("HTTP API", () => {
     const js = await app.request("/app.js");
     expect(js.status).toBe(200);
     expect(js.headers.get("content-type")).toContain("text/javascript");
+
+    for (const path of ["/guard.js", "/guard-builder.js"]) {
+      const asset = await app.request(path);
+      expect(asset.status).toBe(200);
+      expect(asset.headers.get("content-type")).toContain("text/javascript");
+    }
 
     for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
       const icon = await app.request(path);
@@ -168,6 +233,13 @@ describe("HTTP API", () => {
     expect(body.support).toBe(
       "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     );
+    expect(body.guardLinkBuilder).toBe(
+      "https://ledgerguard-gules.vercel.app/guard/create",
+    );
+    expect(body.social).toMatchObject({
+      x: "https://x.com/HuiLibaa",
+      handle: "@HuiLibaa",
+    });
 
     const llms = await app.request("/llms.txt");
     expect(llms.status).toBe(200);

@@ -358,6 +358,36 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/guard-links": {
+      post: {
+        summary: "Create a time-bound, human-readable Arc Testnet Guard Link",
+        description:
+          "Validates a declared payment intent and returns a shareable URL. No wallet credential, signature, or private key is accepted or stored.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/GuardLinkRequest" },
+              example: {
+                issuer: "Example Agent",
+                recipient: "0x2222222222222222222222222222222222222222",
+                amount: "1.00",
+                limit: "1.00",
+                purpose: "Example invoice",
+                expires: "2030-01-01T00:00:00.000Z",
+              },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Validated Guard Link and deterministic intent ID",
+          },
+          "400": { description: "Invalid or unsafe payment intent" },
+          "429": { description: "Rate limit exceeded" },
+        },
+      },
+    },
     "/v1/paid/base/evidence": {
       post: {
         summary:
@@ -480,6 +510,37 @@ export const openApiDocument = {
       },
     },
     schemas: {
+      GuardLinkRequest: {
+        type: "object",
+        required: ["recipient", "amount", "purpose", "expires"],
+        properties: {
+          issuer: {
+            type: "string",
+            minLength: 2,
+            maxLength: 80,
+            description: "Optional self-declared requester name; not verified identity.",
+          },
+          payer: {
+            type: "string",
+            pattern: "^0x[0-9a-fA-F]{40}$",
+            description: "Optional public payer address.",
+          },
+          recipient: {
+            type: "string",
+            pattern: "^0x[0-9a-fA-F]{40}$",
+          },
+          amount: {
+            type: "string",
+            pattern: "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,6})?$",
+          },
+          limit: {
+            type: "string",
+            pattern: "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,6})?$",
+          },
+          purpose: { type: "string", minLength: 1, maxLength: 120 },
+          expires: { type: "string", format: "date-time" },
+        },
+      },
       PreflightRequest: {
         type: "object",
         required: ["to", "intent", "policy"],

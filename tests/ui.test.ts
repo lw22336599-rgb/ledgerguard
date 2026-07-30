@@ -5,7 +5,10 @@ import {
   demoJs,
   developerConsoleHtml,
   developerDocsHtml,
+  guardBuilderHtml,
+  guardBuilderJs,
   guardLinkHtml,
+  guardLinkJs,
   portalHtml,
   testerHtml,
 } from "../src/ui.js";
@@ -26,6 +29,8 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/meter"');
     expect(portalHtml).toContain('href="/receipts"');
     expect(portalHtml).toContain('href="/developers"');
+    expect(portalHtml).toContain('href="/guard/create"');
+    expect(portalHtml).toContain("https://x.com/HuiLibaa");
     expect(demoHtml).toContain('href="/docs"');
     expect(demoHtml).toContain('href="/catalog"');
     expect(demoHtml).toContain('href="/status"');
@@ -52,6 +57,7 @@ describe("browser demo experience", () => {
       developerDocsHtml,
       catalogHtml("1000"),
       testerHtml("1000"),
+      guardBuilderHtml,
     ]) {
       expect(html).toContain('<html lang="en">');
       expect(html).not.toMatch(/\p{Script=Han}/u);
@@ -65,6 +71,7 @@ describe("browser demo experience", () => {
       developerDocsHtml,
       catalogHtml("1000"),
       testerHtml("1000"),
+      guardBuilderHtml,
     ]) {
       expect(html).toContain('src="/_vercel/insights/script.js"');
       expect(html).toContain('href="/favicon.svg"');
@@ -97,6 +104,8 @@ describe("browser demo experience", () => {
 
   it("renders a no-input Guard Link receipt with escaped intent details", () => {
     const html = guardLinkHtml({
+      issuer: "Example Agent",
+      intentId: "a1b2c3d4e5f6",
       payer: "Not declared",
       recipient: "0x2222222222222222222222222222222222222222",
       amount: "1.25",
@@ -111,5 +120,24 @@ describe("browser demo experience", () => {
     expect(html).not.toContain("Invoice & delivery");
     expect(html).toContain("REVIEW");
     expect(html).toContain("request-123");
+    expect(html).toContain("Example Agent");
+    expect(html).toContain("Connect test wallet");
+    expect(html).toContain('src="/guard.js"');
+  });
+
+  it("creates and completes Guard Links without server-side signing", () => {
+    expect(guardBuilderHtml).toContain('id="guard-builder"');
+    expect(guardBuilderHtml).toContain("Identity boundary");
+    expect(guardBuilderJs).toContain('fetch("/v1/guard-links"');
+    expect(guardLinkJs).toContain('"eth_sendTransaction"');
+    expect(guardLinkJs).toContain('fetch("/v1/evidence"');
+    expect(guardLinkJs).not.toMatch(/privateKey|seed phrase/i);
+    expect(() => new Function(guardBuilderJs)).not.toThrow();
+    expect(() => new Function(guardLinkJs)).not.toThrow();
+  });
+
+  it("publishes the official X account on the public portal", () => {
+    expect(portalHtml).toContain("Official X @HuiLibaa");
+    expect(portalHtml).toContain('rel="me noreferrer"');
   });
 });

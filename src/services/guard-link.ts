@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { encodeFunctionData, isAddress, parseAbi } from "viem";
 import { z } from "zod";
 import { ARC_TESTNET_USDC } from "../config/networks.js";
@@ -23,6 +24,16 @@ const publicAddressSchema = z
 
 export const guardLinkQuerySchema = z
   .object({
+    issuer: z
+      .string()
+      .trim()
+      .min(2)
+      .max(80)
+      .refine(
+        (value) => !/[<>\u0000-\u001f\u007f]/.test(value),
+        "Issuer contains unsupported characters",
+      )
+      .optional(),
     payer: publicAddressSchema.optional(),
     recipient: publicAddressSchema,
     amount: usdcAmountSchema,
@@ -49,6 +60,30 @@ export const guardLinkQuerySchema = z
   });
 
 export type GuardLinkQuery = z.infer<typeof guardLinkQuerySchema>;
+
+export function guardLinkIntentId(query: GuardLinkQuery): string {
+  const canonical = JSON.stringify({
+    amount: query.amount,
+    expires: query.expires ?? null,
+    issuer: query.issuer ?? null,
+    limit: query.limit ?? query.amount,
+    payer: query.payer?.toLowerCase() ?? null,
+    purpose: query.purpose,
+    recipient: query.recipient.toLowerCase(),
+  });
+  return createHash("sha256").update(canonical).digest("hex").slice(0, 20);
+}
+
+export function createGuardLinkUrl(
+  baseUrl: string,
+  query: GuardLinkQuery,
+): string {
+  const url = new URL("/guard", baseUrl);
+  for (const [key, value] of Object.entries(query)) {
+    if (value) url.searchParams.set(key, value);
+  }
+  return url.toString();
+}
 
 export function isGuardLinkExpired(
   query: GuardLinkQuery,
