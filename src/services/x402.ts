@@ -134,16 +134,23 @@ function buildRequirements(kind: SupportedKind): PaymentRequirements {
 export function encodePaymentRequired(
   resourceUrl: string,
   requirements: PaymentRequirements,
+  metadata: {
+    description?: string;
+    mimeType?: string;
+    extensions?: Record<string, unknown>;
+  } = {},
 ): string {
   return Buffer.from(
     JSON.stringify({
       x402Version: 2,
       resource: {
         url: resourceUrl,
-        description: "LedgerGuard Arc network risk snapshot",
-        mimeType: "application/json",
+        description:
+          metadata.description ?? "LedgerGuard Arc network risk snapshot",
+        mimeType: metadata.mimeType ?? "application/json",
       },
       accepts: [requirements],
+      ...(metadata.extensions ? { extensions: metadata.extensions } : {}),
     }),
   ).toString("base64");
 }

@@ -241,6 +241,62 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/developer/shadow": {
+      post: {
+        summary: "Run a quota-enforced, non-enforcing shadow evaluation",
+        description:
+          "Returns the decision the deterministic engine would make, but never authorizes, signs, or submits a transaction.",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PreflightRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Shadow decision plus durable usage summary" },
+          "400": { description: "Invalid request" },
+          "401": { description: "Missing, invalid, or revoked API key" },
+          "429": { description: "Monthly tenant quota exhausted" },
+          "503": { description: "Network, RPC, or durable store unavailable" },
+        },
+      },
+    },
+    "/v1/commercial-candidate": {
+      get: {
+        summary: "Inspect fail-closed production-candidate activation gates",
+        responses: {
+          "200": {
+            description:
+              "Public Base mainnet candidate metadata without credentials or secrets",
+          },
+        },
+      },
+    },
+    "/v1/paid/evidence": {
+      post: {
+        summary: "Purchase a strict Arc transaction evidence receipt with x402",
+        description:
+          "Validates transaction availability before returning a Circle Gateway Arc Testnet x402 challenge.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/EvidenceRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Payment settled and strict evidence delivered" },
+          "400": { description: "Invalid request" },
+          "402": { description: "Payment required or rejected" },
+          "404": { description: "Transaction not found; no charge attempted" },
+          "503": { description: "Network or facilitator unavailable" },
+        },
+      },
+    },
     "/v1/paid/network-risk": {
       get: {
         summary: "Purchase an Arc network-risk snapshot with x402",

@@ -98,6 +98,86 @@ describe("developer self-service", () => {
     ).toBe(200);
   });
 
+  it("runs product shadow without authorizing or signing a transaction", async () => {
+    const registration = await app.request("/v1/developer/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "Shadow Project" }),
+    });
+    const created = await registration.json();
+    const shadow = await app.request("/v1/developer/shadow", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${created.apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        network: "arcTestnet",
+        to: usdc,
+        data: transferData,
+        valueWei: "0",
+        intent: {
+          action: "transfer",
+          expectedRecipient: recipient,
+          expectedAssetAddress: usdc,
+          expectedAmountMicroUsdc: "1000000",
+          purpose: "Observe before enforcement",
+        },
+        policy: {
+          requireSimulation: false,
+          maxAmountMicroUsdc: "1000000",
+        },
+      }),
+    });
+    expect(shadow.status).toBe(200);
+    expect(await shadow.json()).toMatchObject({
+      mode: "shadow",
+      enforced: false,
+      wouldDecision: "REVIEW",
+      signingEnabled: false,
+      custody: "none",
+      usage: {
+        used: 1,
+        recent: [{ operation: "shadow" }],
+      },
+    });
+  });
+
+  it("serves the authenticated MCP Streamable HTTP handshake", async () => {
+    const registration = await app.request("/v1/developer/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "MCP Project" }),
+    });
+    const created = await registration.json();
+    const response = await app.request("/mcp", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${created.apiKey}`,
+        accept: "application/json, text/event-stream",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: "2025-06-18",
+          capabilities: {},
+          clientInfo: { name: "ledgerguard-test", version: "0.1.0" },
+        },
+      }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      jsonrpc: "2.0",
+      id: 1,
+      result: {
+        serverInfo: { name: "ledgerguard-agent-firewall" },
+      },
+    });
+  });
+
   it("fails closed without durable storage or valid authorization", async () => {
     delete process.env.LEDGERGUARD_STORAGE_BACKEND;
     resetTenantStoreForTests();

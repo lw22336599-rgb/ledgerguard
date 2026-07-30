@@ -3,6 +3,7 @@ import {
   catalogHtml,
   demoHtml,
   demoJs,
+  developerConsoleHtml,
   developerDocsHtml,
   testerHtml,
 } from "../src/ui.js";
@@ -75,5 +76,14 @@ describe("browser demo experience", () => {
     const seller = "0xF1437D9cD304ae49F2Ec005AC967813b3a7C466C";
     expect(catalogHtml("1000", seller)).toContain(seller);
     expect(testerHtml("1000", seller)).toContain(seller);
+  });
+
+  it("offers a non-enforcing shadow action in the developer console", () => {
+    expect(
+      developerConsoleHtml({
+        storageReady: true,
+        registrationEnabled: true,
+      }),
+    ).toContain("Run non-enforcing shadow");
   });
 });

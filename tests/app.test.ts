@@ -87,6 +87,19 @@ describe("HTTP API", () => {
     const body = await catalog.json();
     expect(body.resources[0].paymentProtocol).toBe("x402-v2");
     expect(body.resources[0].network).toBe("eip155:5042002");
+    expect(body.resources[1]).toMatchObject({
+      id: "arc-strict-evidence",
+      method: "POST",
+      deliverable: "strict-evidence-receipt",
+    });
+    expect(body.mcp).toMatchObject({
+      transport: "streamable-http",
+      authentication: "bearer-api-key",
+    });
+    expect(body.commercialCandidate).toMatchObject({
+      network: "eip155:8453",
+      realFundsEnabled: false,
+    });
     expect(body.humanDocs).toBe(
       "https://ledgerguard-gules.vercel.app/docs",
     );

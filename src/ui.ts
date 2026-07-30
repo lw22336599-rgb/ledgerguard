@@ -209,6 +209,7 @@ export function developerConsoleHtml(input: {
         <p id="developer-summary">${available ? "Create a key or enter an existing key to continue." : "Self-service fails closed until the durable store is connected."}</p>
         <div id="developer-actions" class="links" hidden>
           <button id="developer-run" type="button">Run metered preflight</button>
+          <button id="developer-shadow" type="button" class="secondary">Run non-enforcing shadow</button>
           <button id="developer-rotate" type="button" class="secondary">Rotate API key</button>
           <button id="developer-copy" type="button" class="secondary">Copy current key</button>
         </div>

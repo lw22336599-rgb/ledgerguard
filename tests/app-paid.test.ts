@@ -7,6 +7,13 @@ const x402 = vi.hoisted(() => {
     settlePayment: vi.fn(),
   };
 });
+const evidence = vi.hoisted(() => {
+  class TransactionNotFoundError extends Error {}
+  return {
+    TransactionNotFoundError,
+    retrieveEvidence: vi.fn(),
+  };
+});
 
 vi.mock("../src/services/x402.js", () => ({
   encodePaymentRequired: vi.fn(() => "encoded-challenge"),
@@ -26,6 +33,10 @@ vi.mock("../src/services/x402.js", () => ({
   settlePayment: x402.settlePayment,
   x402Enabled: vi.fn(() => true),
 }));
+vi.mock("../src/services/evidence-retrieval.js", () => ({
+  TransactionNotFoundError: evidence.TransactionNotFoundError,
+  retrieveEvidence: evidence.retrieveEvidence,
+}));
 
 const { app } = await import("../src/app.js");
 const { resetTenantStoreForTests } = await import(
@@ -35,6 +46,19 @@ const { resetTenantStoreForTests } = await import(
 describe("paid HTTP delivery", () => {
   beforeEach(() => {
     x402.settlePayment.mockReset();
+    evidence.retrieveEvidence.mockReset();
+    evidence.retrieveEvidence.mockResolvedValue({
+      status: "VERIFIED",
+      network: "arcTestnet",
+      txHash: `0x${"aa".repeat(32)}`,
+      blockNumber: "42",
+      transactionTo: "0x3600000000000000000000000000000000000000",
+      nativeValueMicroUsdc: null,
+      transfers: [],
+      approvals: [],
+      findings: [],
+      evidenceHash: `0x${"bb".repeat(32)}`,
+    });
     delete process.env.OPERATIONS_WEBHOOK_URL;
     process.env.LEDGERGUARD_STORAGE_BACKEND = "memory";
     resetTenantStoreForTests();
@@ -105,5 +129,64 @@ describe("paid HTTP delivery", () => {
         })
       ).status,
     ).toBe(503);
+  });
+
+  it("challenges and then delivers strict evidence without charging a missing transaction", async () => {
+    const body = {
+      network: "arcTestnet",
+      txHash: `0x${"aa".repeat(32)}`,
+      intent: {
+        action: "transfer",
+        expectedDebitAddress: "0x1111111111111111111111111111111111111111",
+        expectedRecipient: "0x2222222222222222222222222222222222222222",
+        expectedAssetAddress: "0x3600000000000000000000000000000000000000",
+        expectedAmountMicroUsdc: "1000000",
+        purpose: "Paid evidence test",
+      },
+    };
+    const challenge = await app.request("/v1/paid/evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    expect(challenge.status).toBe(402);
+    expect(await challenge.json()).toMatchObject({
+      deliverable: "strict-evidence-receipt",
+    });
+
+    x402.settlePayment.mockResolvedValue({
+      success: true,
+      payer: "0x1111111111111111111111111111111111111111",
+      transaction: `0x${"cc".repeat(32)}`,
+      network: "eip155:5042002",
+    });
+    const delivered = await app.request("/v1/paid/evidence", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "payment-signature": "valid",
+      },
+      body: JSON.stringify(body),
+    });
+    expect(delivered.status).toBe(200);
+    expect(await delivered.json()).toMatchObject({
+      paid: true,
+      deliverable: "strict-evidence-receipt",
+      evidence: { status: "VERIFIED" },
+    });
+
+    evidence.retrieveEvidence.mockRejectedValueOnce(
+      new evidence.TransactionNotFoundError("missing"),
+    );
+    const missing = await app.request("/v1/paid/evidence", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "payment-signature": "valid",
+      },
+      body: JSON.stringify(body),
+    });
+    expect(missing.status).toBe(404);
+    expect(x402.settlePayment).toHaveBeenCalledTimes(1);
   });
 });

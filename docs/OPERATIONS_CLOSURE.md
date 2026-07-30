@@ -114,3 +114,26 @@ two-source verification, conformance tests, read-only shadow traffic, explicit
 human approval phrase, canary release, and a tested rollback. The Shadow is
 observation-only and cannot activate mainnet. Unknown or conflicting parameters
 fail closed.
+
+## Product loop implemented in the production candidate
+
+One deterministic core now has four entry points:
+
+1. the public Guard Link for ordinary users;
+2. the authenticated REST and TypeScript client path for developers;
+3. the authenticated, metered MCP endpoint for AI agents;
+4. x402 testnet purchases for network-risk and strict evidence receipts.
+
+The developer console supports registration, one-time key delivery, login,
+durable quota visibility, preflight, non-enforcing shadow evaluation, and key
+rotation. Paid testnet settlements are written to the durable payment ledger
+when the configured store is available.
+
+`GET /v1/commercial-candidate` publishes the future Base charging parameters
+and independent activation gates. The production settlement adapter remains
+hard closed until its real-funds implementation and controlled test are
+separately approved.
+
+This is a complete technical acquisition-to-delivery loop. It is not yet a
+verified commercial loop: the first independent external user, accepted paid
+value, attributable gross margin, and repeat behavior remain evidence gates.

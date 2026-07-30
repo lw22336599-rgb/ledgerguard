@@ -31,6 +31,10 @@ GitHub contact: **lw22336599-rgb**
 - `GET /v1/developer/account` - read the tenant and persistent monthly usage.
 - `POST /v1/developer/keys/rotate` - revoke the current key and receive a replacement once.
 - `POST /v1/developer/preflight` - authenticated, metered preflight.
+- `POST /v1/developer/shadow` - authenticated, metered, non-enforcing evaluation.
+- `POST /mcp` - authenticated Streamable HTTP MCP server for read-only tools.
+- `POST /v1/paid/evidence` - x402 testnet purchase of a strict evidence receipt.
+- `GET /v1/commercial-candidate` - fail-closed Base production-candidate gates.
 - `GET /openapi.json` - OpenAPI 3.1 machine discovery document.
 - `GET /.well-known/ledgerguard.json` - agent-readable service and price catalog.
 - `GET /llms.txt` - concise discovery instructions for AI agents.
@@ -115,6 +119,8 @@ tests, the production build, and production dependency vulnerabilities on every
 pull request and main-branch push.
 
 See [`docs/INTEGRATION.md`](docs/INTEGRATION.md) for developer onboarding and
+[`docs/SDK_MCP_QUICKSTART.md`](docs/SDK_MCP_QUICKSTART.md) for the five-minute
+HTTP, SDK, and MCP path,
 [`docs/DEVELOPER_SELF_SERVICE.md`](docs/DEVELOPER_SELF_SERVICE.md) for the
 tenant/API-key and durable-ledger operating boundary.
 [`docs/X402_BUYER_RUNBOOK.md`](docs/X402_BUYER_RUNBOOK.md) for the controlled

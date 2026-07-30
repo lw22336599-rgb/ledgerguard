@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
@@ -6,6 +7,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { getAddress, type Address, type Hex } from "viem";
 import { getNetworkRegistry, requireEnabledNetwork } from "./config/networks.js";
 import { getPublicBaseUrl } from "./config/public.js";
+import { getCommercialCandidate } from "./config/commercial.js";
 import { getArcMainnetShadowConfiguration } from "./config/shadow.js";
 import {
   createNetworkClient,
@@ -25,8 +27,13 @@ import {
   preflightSchema,
   type PreflightInput,
 } from "./schemas.js";
-import { buildEvidence } from "./services/evidence.js";
+import {
+  retrieveEvidence,
+  TransactionNotFoundError,
+} from "./services/evidence-retrieval.js";
+import { strictEvidenceDiscoveryExtension } from "./services/discovery.js";
 import { evaluatePreflight } from "./services/preflight.js";
+import { createLedgerGuardMcpServer } from "./mcp/server.js";
 import { getArcMainnetShadowStatus } from "./services/shadow.js";
 import {
   notifyPaymentSettlement,
@@ -61,6 +68,7 @@ import {
   statusHtml,
   testerHtml,
 } from "./ui.js";
+import { developerShadowJs } from "./ui-shadow.js";
 
 export const app = new Hono<AppEnvironment>();
 
@@ -69,12 +77,15 @@ app.use(
   "*",
   cors({
     origin: "*",
-    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
     allowHeaders: [
       "Authorization",
       "Content-Type",
       "Payment-Signature",
       "X-LedgerGuard-Client",
+      "Mcp-Session-Id",
+      "Mcp-Protocol-Version",
+      "Last-Event-ID",
     ],
     exposeHeaders: [
       "Payment-Required",
@@ -84,6 +95,8 @@ app.use(
       "RateLimit-Reset",
       "Retry-After",
       "X-LedgerGuard-Request-Id",
+      "Mcp-Session-Id",
+      "Mcp-Protocol-Version",
     ],
     maxAge: 86_400,
   }),
@@ -117,13 +130,15 @@ app.use("*", async (context, next) => {
   if (
     context.req.path.startsWith("/v1/") ||
     context.req.path === "/health" ||
-    context.req.path === "/ready"
+    context.req.path === "/ready" ||
+    context.req.path === "/mcp"
   ) {
     context.header("Cache-Control", "no-store");
   }
   await next();
 });
 app.use("/v1/*", rateLimit);
+app.use("/mcp", rateLimit);
 app.use("/ready", rateLimit);
 app.use("/status", rateLimit);
 app.use(
@@ -144,6 +159,14 @@ app.get("/developer", (context) =>
       registrationEnabled: selfServiceEnabled(),
     }),
   ),
+);
+app.use(
+  "/mcp",
+  bodyLimit({
+    maxSize: 64 * 1024,
+    onError: (context) =>
+      context.json({ error: "REQUEST_BODY_TOO_LARGE" }, 413),
+  }),
 );
 app.get("/docs/integration", (context) =>
   context.html(integrationBoundaryHtml),
@@ -207,7 +230,7 @@ app.get("/app.js", (context) =>
   context.body(demoJs, 200, { "Content-Type": "text/javascript; charset=utf-8" }),
 );
 app.get("/developer.js", (context) =>
-  context.body(developerConsoleJs, 200, {
+  context.body(`${developerConsoleJs}\n${developerShadowJs}`, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
   }),
 );
@@ -243,6 +266,12 @@ app.get("/.well-known/ledgerguard.json", (context) =>
     custody: "none",
     signing: "client-side-only",
     mainnet: "disabled",
+    mcp: {
+      endpoint: `${getPublicBaseUrl()}/mcp`,
+      transport: "streamable-http",
+      authentication: "bearer-api-key",
+    },
+    commercialCandidate: getCommercialCandidate(),
     resources: [
       {
         id: "arc-network-risk",
@@ -253,8 +282,21 @@ app.get("/.well-known/ledgerguard.json", (context) =>
         priceMicroUsdc: getConfiguredX402PriceMicroUsdc(),
         payTo: getConfiguredSellerAddress(),
       },
+      {
+        id: "arc-strict-evidence",
+        method: "POST",
+        path: "/v1/paid/evidence",
+        paymentProtocol: "x402-v2",
+        network: "eip155:5042002",
+        priceMicroUsdc: getConfiguredX402PriceMicroUsdc(),
+        payTo: getConfiguredSellerAddress(),
+        deliverable: "strict-evidence-receipt",
+      },
     ],
   }),
+);
+app.get("/v1/commercial-candidate", (context) =>
+  context.json(getCommercialCandidate()),
 );
 app.get("/v1/meta", (context) =>
   context.json({
@@ -271,6 +313,8 @@ app.get("/v1/meta", (context) =>
     catalog: "/.well-known/ledgerguard.json",
     testing: "/test",
     developerConsole: "/developer",
+    mcp: "/mcp",
+    commercialCandidate: "/v1/commercial-candidate",
     tenantApi:
       getTenantStore() && selfServiceEnabled() ? "enabled" : "disabled",
     support:
@@ -457,6 +501,102 @@ app.post("/v1/developer/preflight", async (context) => {
       503,
     );
   }
+});
+
+app.post("/v1/developer/shadow", async (context) => {
+  const auth = await authenticatedTenant(context.req.header("authorization"));
+  if (!auth.ok) return context.json({ error: auth.error }, auth.status);
+  const parsed = preflightSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+  const store = getTenantStore();
+  if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  const requestId = context.get("requestId") as string;
+  try {
+    const usage = await store.recordUsage(auth.tenant, "shadow", requestId);
+    const result = await runPreflight(parsed.data);
+    return context.json({
+      mode: "shadow" as const,
+      enforced: false as const,
+      wouldDecision: result.decision,
+      signingEnabled: false as const,
+      custody: "none" as const,
+      decoded: result.decoded,
+      simulation: result.simulation,
+      findings: result.findings,
+      usage,
+    });
+  } catch (error) {
+    if (error instanceof QuotaExceededError) {
+      return context.json(
+        { error: "QUOTA_EXCEEDED", usage: error.usage },
+        429,
+      );
+    }
+    if (
+      error instanceof Error &&
+      error.message.toLowerCase().includes("disabled")
+    ) {
+      return context.json(
+        { error: "NETWORK_DISABLED", message: error.message },
+        503,
+      );
+    }
+    return context.json(
+      {
+        error: "DEVELOPER_SHADOW_UNAVAILABLE",
+        message: "The shadow request could not be completed.",
+      },
+      503,
+    );
+  }
+});
+
+app.all("/mcp", async (context) => {
+  const auth = await authenticatedTenant(context.req.header("authorization"));
+  if (!auth.ok) return context.json({ error: auth.error }, auth.status);
+  const store = getTenantStore();
+  if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  const requestId = context.get("requestId") as string;
+  const metered = async (
+    operation: "mcp.preflight" | "mcp.shadow" | "mcp.evidence",
+  ) => store.recordUsage(auth.tenant, operation, `${requestId}:${operation}`);
+  const server = createLedgerGuardMcpServer({
+    preflight: async (input) => {
+      const usage = await metered("mcp.preflight");
+      return { ...(await runPreflight(input)), usage };
+    },
+    shadow: async (input) => {
+      const usage = await metered("mcp.shadow");
+      const result = await runPreflight(input);
+      return {
+        mode: "shadow",
+        enforced: false,
+        wouldDecision: result.decision,
+        signingEnabled: false,
+        custody: "none",
+        decoded: result.decoded,
+        simulation: result.simulation,
+        findings: result.findings,
+        usage,
+      };
+    },
+    evidence: async (input) => {
+      const usage = await metered("mcp.evidence");
+      return { ...(await retrieveEvidence(input)), usage };
+    },
+  });
+  const transport = new WebStandardStreamableHTTPServerTransport({
+    enableJsonResponse: true,
+  });
+  await server.connect(transport);
+  return transport.handleRequest(context.req.raw);
 });
 
 app.get("/health", (context) =>
@@ -681,6 +821,154 @@ app.get("/v1/paid/network-risk", async (context) => {
   }
 });
 
+app.post("/v1/paid/evidence", async (context) => {
+  if (!x402Enabled()) {
+    return context.json(
+      {
+        error: "X402_DISABLED",
+        message: "The paid testnet endpoint is not enabled.",
+      },
+      503,
+    );
+  }
+  const parsed = evidenceSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+
+  try {
+    const evidence = await retrieveEvidence(parsed.data);
+    const requirements = await getArcPaymentRequirements();
+    const signature = context.req.header("payment-signature");
+    if (!signature) {
+      context.header(
+        "PAYMENT-REQUIRED",
+        encodePaymentRequired(
+          `${getPublicBaseUrl()}/v1/paid/evidence`,
+          requirements,
+          {
+            description:
+              "Strict LedgerGuard payment evidence receipt for an Arc transaction",
+            extensions: {
+              ledgerguard: {
+                mode: "strict-evidence",
+                custody: "none",
+                signing: false,
+              },
+              ...strictEvidenceDiscoveryExtension(),
+            },
+          },
+        ),
+      );
+      return context.json(
+        {
+          error: "PAYMENT_REQUIRED",
+          priceMicroUsdc: requirements.amount,
+          network: requirements.network,
+          deliverable: "strict-evidence-receipt",
+        },
+        402,
+      );
+    }
+
+    const settlement = await settlePayment(signature, requirements);
+    if (!settlement.success) {
+      return context.json(
+        {
+          error: "PAYMENT_FAILED",
+          reason: "Settlement rejected by the facilitator.",
+        },
+        402,
+      );
+    }
+    context.header(
+      "PAYMENT-RESPONSE",
+      Buffer.from(JSON.stringify(settlement)).toString("base64"),
+    );
+    const receipt = paymentReceipt({
+      payer: settlement.payer ?? "unknown",
+      transaction: settlement.transaction,
+      amountMicroUsdc: requirements.amount,
+    });
+    const requestId = context.get("requestId") as string;
+    let ledgerStatus: "recorded" | "duplicate" | "unavailable" = "unavailable";
+    const tenantStore = getTenantStore();
+    if (tenantStore) {
+      try {
+        ledgerStatus = await tenantStore.recordPayment({
+          requestId,
+          payer: receipt.payer,
+          settlementTransaction: receipt.settlementTransaction,
+          amountMicroUsdc: receipt.amountMicroUsdc,
+          network: "arcTestnet",
+          recordedAt: new Date().toISOString(),
+        });
+      } catch {
+        console.error({
+          event: "payment.ledger_unavailable",
+          requestId,
+          settlementTransaction: receipt.settlementTransaction,
+        });
+      }
+    }
+    await notifyPaymentSettlement({
+      requestId,
+      payer: receipt.payer,
+      transaction: receipt.settlementTransaction,
+      amountMicroUsdc: receipt.amountMicroUsdc,
+    });
+    return context.json({
+      paid: true,
+      deliverable: "strict-evidence-receipt",
+      receipt,
+      ledgerStatus,
+      evidence,
+    });
+  } catch (error) {
+    if (error instanceof InvalidPaymentSignatureError) {
+      return context.json(
+        {
+          error: "PAYMENT_FAILED",
+          reason: "The payment signature is malformed or unsupported.",
+        },
+        402,
+      );
+    }
+    if (error instanceof TransactionNotFoundError) {
+      return context.json(
+        { error: "TRANSACTION_NOT_FOUND", message: error.message },
+        404,
+      );
+    }
+    if (
+      error instanceof Error &&
+      error.message.toLowerCase().includes("disabled")
+    ) {
+      return context.json(
+        { error: "NETWORK_DISABLED", message: error.message },
+        503,
+      );
+    }
+    console.error("Paid evidence request failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message:
+        error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+    });
+    return context.json(
+      {
+        error: "PAID_EVIDENCE_UNAVAILABLE",
+        message: "The paid evidence resource is temporarily unavailable.",
+      },
+      503,
+    );
+  }
+});
+
 app.get("/openapi.json", (context) => context.json(openApiDocument));
 
 app.post("/v1/preflight", async (context) => {
@@ -717,43 +1005,10 @@ app.post("/v1/evidence", async (context) => {
   }
 
   try {
-    requireEnabledNetwork(parsed.data.network);
-    const client = createNetworkClient(parsed.data.network);
-    const txHash = parsed.data.txHash as Hex;
-    const [transaction, receipt] = await withDeadline(
-      Promise.all([
-        client.getTransaction({ hash: txHash }),
-        client.getTransactionReceipt({ hash: txHash }),
-      ]),
-      12_000,
-    );
-    let recipientHasCode: boolean | undefined;
-    if (transaction.to !== null) {
-      try {
-        const bytecode = await withDeadline(
-          client.getBytecode({
-            address: transaction.to,
-            blockNumber: receipt.blockNumber,
-          }),
-          8_000,
-        );
-        recipientHasCode = Boolean(bytecode && bytecode !== "0x");
-      } catch (error) {
-        console.warn("Recipient bytecode lookup failed", {
-          name: error instanceof Error ? error.name : "UnknownError",
-          message:
-            error instanceof Error
-              ? error.message.slice(0, 500)
-              : "Unknown error",
-        });
-      }
-    }
-    return context.json(
-      buildEvidence(parsed.data, transaction, receipt, recipientHasCode),
-    );
+    return context.json(await retrieveEvidence(parsed.data));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    if (message.includes("could not be found") || message.includes("not found")) {
+    if (error instanceof TransactionNotFoundError) {
       return context.json(
         { error: "TRANSACTION_NOT_FOUND", message: "Transaction not found." },
         404,
