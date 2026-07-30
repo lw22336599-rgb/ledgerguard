@@ -14,6 +14,9 @@ const dualChainEyebrow = "USDC PAYMENT LINKS · BASE + ARC";
 const dualChainNetworkNoteHtml =
   "Guard Links run on <strong>Arc Testnet</strong>. <strong>Base Mainnet</strong> x402 USDC is live and operational at <a href=\"/canary\">/canary</a> — production gates passed, real USDC settlement.";
 const baseMainnetLinkLabel = "Base Mainnet x402";
+/** Legacy demo default; never a real contract — wallet connect replaces this. */
+export const guardRecipientDemoDefault =
+  "0x2222222222222222222222222222222222222222";
 
 const footer = `<footer class="site-footer">
   <div class="footer-primary">LedgerGuard &middot; BASE + ARC &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} at <a href="/canary">/canary</a></div>
@@ -195,7 +198,7 @@ export const guardBuilderHtml = `${pageHead(
       </div>
       <form id="guard-builder">
         <label>Your name (optional)<input id="guard-issuer" name="issuer" maxlength="80" placeholder="Example: Alex or your shop name"></label>
-        <label>Your receiving address<input id="guard-recipient" name="recipient" value="0x2222222222222222222222222222222222222222" required pattern="0x[0-9a-fA-F]{40}" autocomplete="off" aria-describedby="guard-recipient-help"><span id="guard-recipient-help" class="field-help">Connect your wallet above to auto-fill this address.</span></label>
+        <label>Your receiving address<input id="guard-recipient" name="recipient" value="" required pattern="0x[0-9a-fA-F]{40}" placeholder="Connect wallet above to auto-fill, or paste 0x…" autocomplete="off" aria-describedby="guard-recipient-help"><span id="guard-recipient-help" class="field-help">This is where USDC will be sent. Connect your wallet to fill it automatically.</span></label>
         <label>Amount to receive (USDC)<input id="guard-amount" name="amount" value="1.00" required inputmode="decimal" pattern="(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,6})?"></label>
         <label>What is this payment for?<input id="guard-purpose" name="purpose" value="Example invoice" required maxlength="120"></label>
         <details class="builder-advanced">

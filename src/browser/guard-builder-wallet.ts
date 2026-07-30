@@ -1,6 +1,8 @@
 import { getSharedWallet } from "./wallet-shared.js";
 import { ARC_TESTNET } from "./wallet-chains.js";
 
+const DEMO_RECIPIENT = "0x2222222222222222222222222222222222222222";
+
 const wallet = () => getSharedWallet();
 const button = document.querySelector<HTMLButtonElement>("#w-btn");
 const status = document.querySelector<HTMLElement>("#w-status");
@@ -47,8 +49,8 @@ function render(): void {
     }
     if (
       recipientInput &&
-      (!recipientInput.value ||
-        recipientInput.value === "0x2222222222222222222222222222222222222222")
+      (!recipientInput.value.trim() ||
+        recipientInput.value.toLowerCase() === DEMO_RECIPIENT.toLowerCase())
     ) {
       recipientInput.value = state.account;
     }
