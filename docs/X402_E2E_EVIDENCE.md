@@ -44,3 +44,21 @@ USDC. It does not prove production readiness, customer demand, or revenue.
 - The helper permits only a `0.01` test USDC deposit and a `0.001` test USDC
   payment.
 - Arc Mainnet remains disabled and requires the separate mainnet release gate.
+
+## Durable-ledger follow-up
+
+Verified at: `2026-07-30T06:42:31.109Z`
+
+After production developer self-service and Upstash Redis were enabled, the
+controlled buyer completed another `0.001` test USDC payment. The paid resource
+returned HTTP 200 and `ledgerStatus: recorded`, proving that the settlement was
+also written to the durable payment ledger.
+
+- Circle settlement identifier:
+  `0e2cef30-2e15-458e-945b-c179f9dd595a`
+- Gateway available balance: `0.008` test USDC before, `0.007` after
+- Recipient:
+  `0xf1437d9cd304ae49f2ec005ac967813b3a7c466c`
+
+This remains testnet technical evidence only. It is not revenue and does not
+prove an external customer.

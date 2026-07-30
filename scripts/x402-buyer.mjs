@@ -155,6 +155,9 @@ async function main() {
   if (paid.status !== 200) fail(`Paid request returned HTTP ${paid.status}.`);
   if (paid.formattedAmount !== "0.001") fail("Unexpected settled payment amount.");
   if (paid.data?.paid !== true) fail("Paid resource did not confirm payment.");
+  if (paid.data?.ledgerStatus !== "recorded") {
+    fail("Paid resource did not confirm a durable payment-ledger write.");
+  }
   const receipt = paid.data?.receipt;
   if (!sameAddress(receipt?.payer ?? paid.data?.payer, client.address)) {
     fail("Unexpected payer in response.");
@@ -180,6 +183,7 @@ async function main() {
     status: paid.status,
     transaction: paid.transaction,
     resourceConfirmedPaid: paid.data.paid,
+    ledgerStatus: paid.data.ledgerStatus,
     resourceSettlementTransaction:
       receipt?.settlementTransaction ?? paid.data.settlementTransaction,
     explorerUrl: receipt?.explorerUrl,
