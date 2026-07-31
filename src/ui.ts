@@ -893,7 +893,7 @@ body{
 main{width:min(1180px,calc(100% - 48px))}
 nav{min-height:80px;gap:24px;border-color:var(--line)}
 .brand{display:inline-flex;align-items:center;gap:12px;font-size:22px;color:var(--text);text-decoration:none;font-weight:800}
-.brand-mark{width:32px;height:32px;border-radius:9px;flex:none}
+.brand-mark{width:44px;height:44px;border-radius:10px;flex:none}
 .brand small{color:var(--accent);font:800 11px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
 .portal-nav-links,.nav-actions{display:flex;align-items:center;gap:24px}
 .portal-nav-links a,.nav-actions a{color:var(--muted);font-size:14px;text-decoration:none}
@@ -969,6 +969,9 @@ h1 span{background:linear-gradient(90deg,#2563eb,#7c3aed);-webkit-background-cli
 .flow-row span:last-child{border-right:0;color:var(--text);background:#eff6ff}
 .notice{border:1px solid #bfdbfe;background:#eff6ff;color:#1e3a8a;box-shadow:inset 3px 0 #2563eb;border-radius:12px;padding:16px 18px}
 .panel{border-radius:18px}
+.panel dl{display:grid;grid-template-columns:minmax(120px,34%) 1fr;gap:10px 14px;margin:0}
+.panel dl dt{font-weight:700;color:var(--muted);font-size:13px}
+.panel dl dd{margin:0;overflow-wrap:anywhere;word-break:break-word}
 input{background:var(--panel);border:1px solid #cbd5e1;border-radius:8px}
 input:focus{outline-color:#2563eb;box-shadow:0 0 0 4px #2563eb20}
 button{border-radius:10px}
@@ -1070,19 +1073,23 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 footer{border-color:var(--line);line-height:1.9}
 @media(max-width:900px){
   .portal-nav{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand menu" "panel panel" "actions actions";align-items:center;gap:10px 12px}
-  .portal-nav .brand{grid-area:brand;min-width:0}
+  .portal-nav .brand{grid-area:brand;min-width:0;font-size:19px;gap:10px}
   .portal-nav .nav-menu-toggle{grid-area:menu;justify-self:end;display:inline-flex}
   .portal-nav-links{display:none}
   .portal-nav .nav-mobile-panel{grid-area:panel;width:100%;padding:8px 0 2px;margin:0}
   .portal-nav .nav-mobile-panel:not(.open){display:none}
   .portal-nav .nav-mobile-panel.open{display:flex}
-  .portal-nav-actions{grid-area:actions;width:100%;margin-left:0;justify-content:space-between;gap:10px}
-  .portal-nav-actions .badge{flex:0 1 auto;min-width:0;max-width:55%;white-space:normal;text-align:center;line-height:1.25}
-  .portal-nav-actions .nav-wallet-btn{flex:0 1 auto;min-width:0;max-width:100%}
+  .portal-nav-actions{grid-area:actions;width:100%;margin-left:0;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .portal-nav-actions .badge{flex:1 1 auto;min-width:0;max-width:100%;white-space:normal;text-align:center;line-height:1.25}
+  .portal-nav-actions .nav-wallet-btn{flex:1 1 auto;min-width:0;max-width:100%}
   .portal-hero-grid{grid-template-columns:1fr;gap:28px}
   .portal-hero-visual{order:-1}
-  .portal-dual-cta a{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+  .portal-dual-cta{flex-direction:column;align-items:stretch;width:100%}
+  .portal-dual-cta a,.portal-primary-cta,.portal-secondary-cta{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
   .how-steps{grid-template-columns:1fr}
+  .subhero{padding:48px 0 32px}
+  .panel{padding:24px 20px;gap:24px}
+  .wallet-panel{padding:22px 18px;gap:20px}
   .route-grid{grid-template-columns:1fr}.route-evidence{grid-column:auto}.stage-row{grid-template-columns:1fr 1fr}
   .flow-row{grid-template-columns:1fr}
   .flow-row span{min-height:60px;border-right:0;border-bottom:1px solid var(--line)}
@@ -1090,24 +1097,51 @@ footer{border-color:var(--line);line-height:1.9}
 }
 @media(max-width:760px){
   html{overflow-x:clip}
+  body{overflow-x:clip}
   main{width:min(100% - 28px,1180px);max-width:100%}
   nav{min-height:72px}
-  .hero,.subhero{padding:54px 0 36px}
+  .hero,.subhero{padding:44px 0 28px}
+  .portal-hero{padding-bottom:48px}
   .product-map,.panel,.grid,.docs-grid{grid-template-columns:1fr}
   .wallet-panel,.builder-panel form{grid-template-columns:1fr}
   .builder-panel form label{grid-column:1/-1}
   .builder-advanced-grid{grid-template-columns:1fr}
   .product-map{padding-bottom:0}
-  .product-module{min-height:360px}
-  h1,h1.compact{font-size:clamp(43px,13vw,58px)}
-  .lead{font-size:17px}
-  .badge{font-size:9px}
-  .portal-primary-cta{width:100%;min-width:0}
+  .product-module{min-height:360px;padding:28px 22px}
+  h1,h1.compact{font-size:clamp(36px,11vw,54px);line-height:1.02}
+  h2{font-size:clamp(22px,6vw,28px)}
+  .lead{font-size:16px;line-height:1.6}
+  .badge{font-size:10px;padding:5px 8px}
+  .portal-primary-cta,.portal-secondary-cta{width:100%;min-width:0;font-size:16px;padding:15px 18px}
+  .panel{padding:20px 16px;gap:18px}
+  .doc-card,.code-card{padding:16px}
+  .code-card pre{font-size:12px;line-height:1.45}
+  .preflight-status-bar{padding:.85rem .9rem}
+  .site-footer{padding:22px 0 28px;gap:12px}
+  .footer-primary{font-size:13px;line-height:1.55}
+  .footer-links,.footer-partners{font-size:13px;line-height:1.65;overflow-wrap:anywhere;word-break:break-word}
+  .nav-wallet-display{display:none!important}
+  .wallet-buttons{gap:10px}
+  .wallet-buttons button{min-width:0}
+  .bottom-links{gap:14px 18px;margin:24px 0 40px}
+  .legal-prose{padding:22px 18px 30px;margin-bottom:48px}
 }
 @media(max-width:480px){
   main{width:min(100% - 20px,1180px)}
+  .portal-nav .brand{font-size:17px}
+  .portal-nav-actions{flex-direction:column;align-items:stretch}
+  .portal-nav-actions .nav-wallet-btn,.portal-nav-actions .badge{width:100%;max-width:100%;justify-content:center;text-align:center}
   .portal-actions a{width:100%;text-align:center;box-sizing:border-box}
   .how-step-card{padding:14px}
+  .panel dl{grid-template-columns:1fr;gap:4px}
+  .panel dl dt{margin-top:12px}
+  .panel dl dt:first-child{margin-top:0}
+  .wallet-buttons{flex-direction:column;align-items:stretch}
+  .wallet-buttons button,.wallet-buttons .button-link{width:100%;flex:none}
+  .guard-cta{padding:20px 16px;margin:20px 0}
+  .notice{padding:14px 16px;font-size:14px;line-height:1.55}
+  .subhero{padding:36px 0 24px}
+  .eyebrow,.step{font-size:11px;letter-spacing:.06em}
 }
 `;
 

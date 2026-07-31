@@ -18,7 +18,13 @@ import {
 
   integrationBoundaryHtml,
 
+  integrationsHtml,
+
+  integrationStackHtml,
+
   portalHtml,
+
+  siteCss,
 
   aboutHtml,
 
@@ -586,6 +592,8 @@ describe("browser demo experience", () => {
 
     }
 
+    expect(aboutHtml).toContain("payment intent safety");
+
     expect(aboutHtml).toContain("Arc-first");
 
     expect(aboutHtml).toContain("live and operational");
@@ -601,6 +609,68 @@ describe("browser demo experience", () => {
     expect(termsHtml).toContain("ALLOW");
 
     expect(termsHtml).toContain("primary product path");
+
+  });
+
+
+
+  it("ships responsive CSS and consistent mobile footer across human pages", () => {
+
+    expect(siteCss).toContain("@media(max-width:900px)");
+
+    expect(siteCss).toContain("@media(max-width:760px)");
+
+    expect(siteCss).toContain("@media(max-width:480px)");
+
+    expect(siteCss).toContain(".footer-partners");
+
+    expect(siteCss).toContain(".panel dl{");
+
+    expect(siteCss).toContain("overflow-x:clip");
+
+    expect(siteCss).toContain(".portal-dual-cta{flex-direction:column");
+
+    for (const html of [
+
+      portalHtml,
+
+      guardBuilderHtml,
+
+      payHtml,
+
+      paymentsHtml,
+
+      developerDocsHtml,
+
+      integrationsHtml,
+
+      integrationStackHtml,
+
+      aboutHtml,
+
+    ]) {
+
+      expect(html).toContain('name="viewport"');
+
+      expect(html).toContain("footer-partners");
+
+      expect(html).toContain("Payment intent safety");
+
+    }
+
+  });
+
+
+
+  it("uses payment intent safety and x402-compatible docs positioning", () => {
+
+    expect(portalHtml).toContain("Payment intent safety");
+
+    expect(developerDocsHtml).toContain("COMPATIBLE STANDARDS");
+
+    expect(developerDocsHtml).toContain("compatible oracle");
+
+    expect(integrationStackHtml).toContain("PREFLIGHT_RECORD_MAPPING.md");
 
   });
 
