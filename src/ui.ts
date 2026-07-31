@@ -20,7 +20,7 @@ export const guardRecipientDemoDefault =
 
 const footer = `<footer class="site-footer">
   <div class="footer-primary">LedgerGuard &middot; BASE + ARC &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} at <a href="/canary">/canary</a></div>
-  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
@@ -34,7 +34,7 @@ export function portalNavHtml(
 ): string {
   const badgeClass = options?.danger ? "badge danger" : "badge";
   return `<nav class="portal-nav">
-      <a class="brand" href="/">LedgerGuard</a>
+      <a class="brand" href="/"><img class="brand-mark" src="/favicon.svg" alt="" width="28" height="28" decoding="async">LedgerGuard</a>
       <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
       <div class="portal-nav-links">${portalNavLinks}</div>
       <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
@@ -780,7 +780,78 @@ export const receiptsHtml = `${pageHead(
 </body>
 </html>`;
 
-const siteBaseCss = `:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{margin:auto}nav{display:flex;align-items:center;justify-content:space-between}.subhero{padding:64px 0 38px;max-width:900px}h1{margin:20px 0 26px;letter-spacing:-.065em}h1.compact{font-size:clamp(44px,6vw,70px)}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}h3{margin:14px 0 4px}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;padding:13px;font:inherit;color:var(--text)}button{cursor:pointer;font-weight:800;padding:14px;border:0}button:disabled{opacity:.6}.developer-panel{margin-bottom:28px}.panel{display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:32px}.result{grid-column:1/-1;border-left:4px solid var(--success);border-radius:8px;padding:18px;min-height:96px}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;padding:16px;color:#334155}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{text-underline-offset:5px}footer{padding:26px 0 42px;color:var(--muted);font-size:13px}.badge.danger{color:var(--red);border-color:#fecaca;background:#fef2f2}`;
+function legalPageHtml(
+  title: string,
+  description: string,
+  bodyHtml: string,
+): string {
+  return `${pageHead(`LedgerGuard | ${title}`, description)}
+<body>
+  <main>
+    ${portalNavHtml("LEGAL")}
+    <section class="subhero legal-hero">
+      <p class="eyebrow">LEGAL</p>
+      <h1 class="compact">${title}</h1>
+      <p class="lead">Last updated: July 31, 2026. English is the authoritative version for the public product.</p>
+    </section>
+    <section class="legal-prose panel">
+      ${bodyHtml}
+    </section>
+    ${footer}
+  </main>${portalPageScripts()}
+</body>
+</html>`;
+}
+
+export const privacyHtml = legalPageHtml(
+  "Privacy Policy",
+  "How LedgerGuard handles wallet connections, server logs, and analytics on the public demo site.",
+  `<h2>Summary</h2>
+      <p>LedgerGuard is a non-custodial payment safety demo. We do not ask for, store, or process private keys, seed phrases, or wallet signing authority.</p>
+      <h2>What runs in your browser</h2>
+      <p>When you connect a wallet, the browser extension (for example MetaMask) holds your keys locally. LedgerGuard only receives the public address and network information needed to show status or prepare an unsigned transaction for you to review.</p>
+      <h2>What the service stores</h2>
+      <ul>
+        <li><strong>Developer API keys:</strong> if you register for the public developer console, a revocable test API key and usage counters may be stored in the configured durable store (for example Upstash Redis).</li>
+        <li><strong>Operational logs:</strong> standard request metadata (path, status, duration, request ID) may appear in hosting logs (for example Vercel) for reliability and abuse prevention.</li>
+        <li><strong>Onchain data:</strong> public blockchain transactions you choose to broadcast remain public by design.</li>
+      </ul>
+      <h2>Analytics</h2>
+      <p>Human-readable pages may load privacy-preserving production analytics from the hosting provider. We do not use those analytics to sell personal data.</p>
+      <h2>What we do not do</h2>
+      <ul>
+        <li>We do not sell personal data.</li>
+        <li>We do not custody user funds.</li>
+        <li>We do not verify merchant identity or KYC on Guard Links.</li>
+      </ul>
+      <h2>Contact</h2>
+      <p>Questions about this policy: <a href="mailto:lw22336599@gmail.com">lw22336599@gmail.com</a>. Source code: <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a>.</p>`,
+);
+
+export const termsHtml = legalPageHtml(
+  "Terms of Service",
+  "Non-custodial terms for the LedgerGuard public demo, Guard Links, and developer APIs.",
+  `<h2>Service description</h2>
+      <p>LedgerGuard provides pre-signing checks, Guard Link payment requests, evidence reconciliation, and developer APIs for USDC workflows on supported networks. The service is non-custodial: LedgerGuard never holds your keys and never signs transactions for you.</p>
+      <h2>No financial guarantees</h2>
+      <p>LedgerGuard is not a bank, broker, money transmitter, escrow agent, or investment adviser. An <strong>ALLOW</strong> result means implemented checks passed; it is not a guarantee of safety, profit, or merchant legitimacy. You remain responsible for reviewing every wallet prompt before signing.</p>
+      <h2>Networks and real funds</h2>
+      <ul>
+        <li><strong>Arc Testnet Guard Links</strong> use test assets with no financial value.</li>
+        <li><strong>Base Mainnet x402 at <a href="/canary">/canary</a></strong> can charge real USDC plus gas when you explicitly approve a wallet transaction.</li>
+        <li>Do not treat testnet activity as revenue, escrow, or production settlement unless a separate written agreement says otherwise.</li>
+      </ul>
+      <h2>Self-declared identity on Guard Links</h2>
+      <p>Issuer names shown on Guard Links are self-declared context only. LedgerGuard does not independently verify companies, domains, or individuals behind a link.</p>
+      <h2>Acceptable use</h2>
+      <p>You agree not to use the service for fraud, phishing, malware distribution, or attempts to bypass wallet security. Abuse may result in rate limits or blocking without notice.</p>
+      <h2>Availability</h2>
+      <p>The public demo is provided as-is without a commercial SLA unless separately agreed in writing. Features, networks, and limits may change as the project evolves.</p>
+      <h2>Contact</h2>
+      <p>Questions about these terms: <a href="mailto:lw22336599@gmail.com">lw22336599@gmail.com</a>.</p>`,
+);
+
+const siteBaseCss = `:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{margin:auto}nav{display:flex;align-items:center;justify-content:space-between}.subhero{padding:64px 0 38px;max-width:900px}h1{margin:20px 0 26px;letter-spacing:-.065em}h1.compact{font-size:clamp(44px,6vw,70px)}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}h3{margin:14px 0 4px}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;padding:13px;font:inherit;color:var(--text)}button{cursor:pointer;font-weight:800;padding:14px;border:0}button:disabled{opacity:.6}.developer-panel{margin-bottom:28px}.panel{display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:32px}.result{grid-column:1/-1;border-left:4px solid var(--success);border-radius:8px;padding:18px;min-height:96px}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;padding:16px;color:#334155}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{text-underline-offset:5px}footer{padding:26px 0 42px;color:var(--muted);font-size:13px}.badge.danger{color:var(--red);border-color:#fecaca;background:#fef2f2}.legal-hero{max-width:900px;padding-bottom:28px}.legal-prose{display:block;padding:28px 32px 36px;margin-bottom:64px;line-height:1.7}.legal-prose h2{font-size:20px;margin:26px 0 8px;color:var(--text)}.legal-prose h2:first-child{margin-top:0}.legal-prose p,.legal-prose li{color:var(--muted);margin:8px 0}.legal-prose ul{padding-left:22px}.legal-prose a{color:var(--link)}`;
 
 export const unifiedBrandCss = `
 :root{
@@ -812,8 +883,8 @@ body{
 }
 main{width:min(1180px,calc(100% - 48px))}
 nav{min-height:80px;gap:24px;border-color:var(--line)}
-.brand{display:inline-flex;align-items:center;gap:8px;font-size:21px;color:var(--text);text-decoration:none}
-.brand::before{content:"";width:11px;height:25px;border-radius:3px;background:linear-gradient(180deg,var(--brand),var(--accent));box-shadow:0 0 18px #2563eb33}
+.brand{display:inline-flex;align-items:center;gap:10px;font-size:21px;color:var(--text);text-decoration:none;font-weight:800}
+.brand-mark{width:28px;height:28px;border-radius:8px;flex:none;box-shadow:0 0 0 1px var(--line)}
 .brand small{color:var(--accent);font:800 11px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
 .portal-nav-links,.nav-actions{display:flex;align-items:center;gap:24px}
 .portal-nav-links a,.nav-actions a{color:var(--muted);font-size:14px;text-decoration:none}

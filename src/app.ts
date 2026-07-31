@@ -108,6 +108,8 @@ import {
   testnetHelpHtml,
   testnetHelpJs,
   mainnetCanaryHtml,
+  privacyHtml,
+  termsHtml,
   testerHtml,
 } from "./ui.js";
 import { guardLinkBundle } from "./generated/guard-link-bundle.js";
@@ -308,6 +310,8 @@ app.get("/guard", async (context) => {
   );
 });
 app.get("/docs", (context) => context.html(developerDocsHtml));
+app.get("/privacy", (context) => context.html(privacyHtml));
+app.get("/terms", (context) => context.html(termsHtml));
 app.get("/developer", (context) =>
   context.html(
     developerConsoleHtml({

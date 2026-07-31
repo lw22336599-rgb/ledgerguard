@@ -44,6 +44,8 @@ for (const [path, marker] of [
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
   ["/meter", "METER MODULE"],
   ["/receipts", "RECEIPTS"],
+  ["/privacy", "Privacy Policy"],
+  ["/terms", "Terms of Service"],
 ]) {
   const response = await fetch(`${baseUrl}${path}`, {
     signal: AbortSignal.timeout(20_000),

@@ -12,8 +12,10 @@ import {
   integrationBoundaryHtml,
   meterHtml,
   portalHtml,
+  privacyHtml,
   receiptsHtml,
   statusHtml,
+  termsHtml,
   testerHtml,
 } from "../src/ui.js";
 
@@ -36,6 +38,9 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/testnet-help"');
     expect(portalHtml).toContain('href="/routes"');
     expect(portalHtml).toContain('id="nav-connect"');
+    expect(portalHtml).toContain('href="/privacy"');
+    expect(portalHtml).toContain('href="/terms"');
+    expect(portalHtml).toContain('class="brand-mark"');
     expect(portalHtml).toContain('class="portal-nav-actions"');
     expect(portalHtml).toContain('id="nav-menu-toggle"');
     expect(portalHtml).toContain('id="nav-mobile-panel"');
@@ -260,5 +265,18 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain("Follow on X @HuiLibaa");
     expect(portalHtml).not.toContain('rel="me noreferrer">X @HuiLibaa</a></div>');
     expect(portalHtml).toContain('rel="me noreferrer"');
+  });
+
+  it("publishes legal pages and a branded nav logo", () => {
+    for (const html of [privacyHtml, termsHtml]) {
+      expect(html).toContain('class="portal-nav"');
+      expect(html).toContain('class="legal-prose panel"');
+      expect(html).toContain('class="brand-mark"');
+      expect(html).toContain('href="/privacy"');
+      expect(html).toContain('href="/terms"');
+    }
+    expect(privacyHtml).toContain("non-custodial");
+    expect(termsHtml).toContain("Terms of Service");
+    expect(termsHtml).toContain("ALLOW");
   });
 });
