@@ -30,11 +30,19 @@ import { paidEvidencePrecheck } from "./middleware/paid-evidence-precheck.js";
 import { openApiDocument } from "./openapi.js";
 import {
   cctpEvidenceSchema,
+  canSignSchema,
   developerRegistrationSchema,
+  developerWebhookSchema,
   evidenceSchema,
   preflightSchema,
   type PreflightInput,
 } from "./schemas.js";
+import { canSignToPreflight } from "./services/can-sign.js";
+import { listNetworkAdapters } from "./adapters/network-adapter.js";
+import {
+  deliverDeveloperWebhook,
+  type DeveloperWebhookEvent,
+} from "./services/developer-webhook.js";
 import { walletBundle } from "./generated/wallet-bundle.js";
 import { siteNavBundle } from "./generated/site-nav-bundle.js";
 import { guardBuilderWalletBundle } from "./generated/guard-builder-wallet-bundle.js";
@@ -101,6 +109,8 @@ import {
   testerHtml,
   paymentsHtml,
   payHtml,
+  integrationsHtml,
+  integrationStackHtml,
 } from "./ui.js";
 import { guardLinkBundle } from "./generated/guard-link-bundle.js";
 import {
@@ -157,6 +167,7 @@ app.use(
       connectSrc: [
         "'self'",
         "https://sepolia.base.org",
+        "https://mainnet.base.org",
         "https://rpc.testnet.arc.network",
         "https://iris-api-sandbox.circle.com",
       ],
@@ -322,6 +333,10 @@ app.get("/docs", (context) => context.html(developerDocsHtml));
 app.get("/privacy", (context) => context.html(privacyHtml));
 app.get("/terms", (context) => context.html(termsHtml));
 app.get("/about", (context) => context.html(aboutHtml));
+app.get("/integrations", (context) => context.html(integrationsHtml));
+app.get("/docs/integration-stack", (context) =>
+  context.html(integrationStackHtml),
+);
 app.get("/developer", (context) =>
   context.html(
     developerConsoleHtml({
@@ -648,6 +663,22 @@ async function runPreflight(input: PreflightInput) {
   return evaluatePreflight(input, simulation);
 }
 
+async function notifyDeveloperWebhook(
+  tenant: Tenant,
+  event: DeveloperWebhookEvent,
+): Promise<void> {
+  if (!tenant.webhookUrl) return;
+  void deliverDeveloperWebhook(tenant.webhookUrl, event).then((status) => {
+    if (status === "failed") {
+      console.warn("Developer webhook delivery failed", {
+        tenantId: tenant.id,
+        event: event.type,
+        requestId: event.requestId,
+      });
+    }
+  });
+}
+
 app.post("/v1/developer/register", async (context) => {
   if (!selfServiceEnabled()) {
     return context.json(
@@ -724,6 +755,32 @@ app.get("/v1/developer/account", async (context) => {
   }
 });
 
+app.put("/v1/developer/webhook", async (context) => {
+  const auth = await authenticatedTenant(context.req.header("authorization"));
+  if (!auth.ok) return context.json({ error: auth.error }, auth.status);
+  const parsed = developerWebhookSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+  const store = getTenantStore();
+  if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  try {
+    const tenant = await store.updateWebhook(auth.tenant, parsed.data.url);
+    return context.json({
+      tenant,
+      webhookNotice:
+        "LedgerGuard POSTs preflight.completed events to this HTTPS URL. Evidence webhooks require a future release.",
+    });
+  } catch {
+    return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  }
+});
+
 app.post("/v1/developer/keys/rotate", async (context) => {
   const auth = await authenticatedTenant(context.req.header("authorization"));
   if (!auth.ok) return context.json({ error: auth.error }, auth.status);
@@ -766,6 +823,15 @@ app.post("/v1/developer/preflight", async (context) => {
       requestId,
     );
     const result = await runPreflight(parsed.data);
+    void notifyDeveloperWebhook(auth.tenant, {
+      type: "preflight.completed",
+      requestId,
+      ...(context.req.header("x-ledgerguard-integration")
+        ? { integration: context.req.header("x-ledgerguard-integration")! }
+        : {}),
+      occurredAt: new Date().toISOString(),
+      result: result as unknown as Record<string, unknown>,
+    });
     return context.json({ ...result, usage });
   } catch (error) {
     if (error instanceof QuotaExceededError) {
@@ -1364,6 +1430,52 @@ app.post("/v1/preflight", async (context) => {
 
   return context.json(await runPreflight(parsed.data));
 });
+
+app.post("/v1/can-sign", async (context) => {
+  const parsed = canSignSchema.safeParse(await context.req.json().catch(() => null));
+  if (!parsed.success) {
+    return context.json(
+      { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+  try {
+    const preflightInput = canSignToPreflight(parsed.data);
+    const result = await runPreflight(preflightInput);
+    return context.json({
+      ...result,
+      canSign: result.decision === "ALLOW",
+    });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.toLowerCase().includes("disabled")
+    ) {
+      return context.json(
+        { error: "NETWORK_DISABLED", message: error.message },
+        503,
+      );
+    }
+    return context.json(
+      {
+        error: "CAN_SIGN_UNAVAILABLE",
+        message: "The can-sign request could not be completed.",
+      },
+      503,
+    );
+  }
+});
+
+app.get("/v1/network-adapters", (context) =>
+  context.json({
+    adapters: listNetworkAdapters().map(
+      ({ rpcUrls, ...adapter }) => ({
+        ...adapter,
+        rpcConfigured: rpcUrls.length > 0,
+      }),
+    ),
+  }),
+);
 
 app.post("/v1/cctp/evidence", async (context) => {
   const parsed = cctpEvidenceSchema.safeParse(

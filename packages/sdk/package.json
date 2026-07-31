@@ -1,0 +1,37 @@
+{
+  "name": "@ledgerguard/sdk",
+  "version": "0.1.0",
+  "description": "LedgerGuard stablecoin payment safety SDK — preflight before signing, evidence after settlement.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "ledgerguard",
+    "usdc",
+    "preflight",
+    "arc",
+    "x402",
+    "payment-safety"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lw22336599-rgb/ledgerguard.git",
+    "directory": "packages/sdk"
+  }
+}

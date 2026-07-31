@@ -266,6 +266,10 @@ describe("browser demo experience", () => {
 
     });
 
+    expect(html).toContain("preflight-status-bar");
+
+    expect(html).toContain("PREFLIGHT CHECK");
+
     expect(html).toContain("Payment request");
 
     expect(html).toContain("Invoice &amp; delivery");

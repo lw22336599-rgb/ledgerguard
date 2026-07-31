@@ -7,7 +7,7 @@ import {
   type Hex,
   type PublicClient,
 } from "viem";
-import { arcTestnet } from "viem/chains";
+import { arcTestnet, base } from "viem/chains";
 import {
   requireEnabledNetwork,
   type NetworkName,
@@ -18,7 +18,9 @@ export function createNetworkClient(name: NetworkName): PublicClient {
   const chain =
     name === "arcTestnet"
       ? arcTestnet
-      : defineChain({
+      : name === "baseMainnet"
+        ? base
+        : defineChain({
           id: network.chainId!,
           name: network.displayName,
           nativeCurrency: {
@@ -50,7 +52,7 @@ export function createNetworkClient(name: NetworkName): PublicClient {
       ),
       { rank: true },
     ),
-  });
+  }) as PublicClient;
 }
 
 export interface SimulationRequest {

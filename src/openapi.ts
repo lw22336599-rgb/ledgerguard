@@ -148,6 +148,43 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/can-sign": {
+      post: {
+        summary: "Wallet-oriented preflight alias with canSign boolean",
+        description:
+          "Maps recipient, amount, and purpose into a transfer intent before running the standard preflight engine.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CanSignRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Preflight decision plus canSign=true only for ALLOW",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CanSignResponse" },
+              },
+            },
+          },
+          "400": { description: "Invalid request" },
+          "503": { description: "Network disabled or RPC unavailable" },
+        },
+      },
+    },
+    "/v1/network-adapters": {
+      get: {
+        summary: "Enabled network adapters for preflight and evidence",
+        responses: {
+          "200": {
+            description: "Adapter metadata without exposing raw RPC URLs",
+          },
+        },
+      },
+    },
     "/v1/evidence": {
       post: {
         summary: "Reconcile a finalized transaction with its declared intent",
@@ -222,6 +259,37 @@ export const openApiDocument = {
         security: [{ bearerAuth: [] }],
         responses: {
           "200": { description: "Previous key revoked; replacement returned" },
+          "401": { description: "Missing, invalid, or revoked API key" },
+          "503": { description: "Shared durable storage unavailable" },
+        },
+      },
+    },
+    "/v1/developer/webhook": {
+      put: {
+        summary: "Register or clear an HTTPS preflight webhook URL",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["url"],
+                properties: {
+                  url: {
+                    type: "string",
+                    format: "uri",
+                    nullable: true,
+                    description: "HTTPS endpoint or null to disable",
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Updated tenant webhook configuration" },
+          "400": { description: "Invalid webhook URL" },
           "401": { description: "Missing, invalid, or revoked API key" },
           "503": { description: "Shared durable storage unavailable" },
         },
@@ -604,7 +672,7 @@ export const openApiDocument = {
         properties: {
           network: {
             type: "string",
-            enum: ["arcTestnet", "arcMainnet"],
+            enum: ["arcTestnet", "arcMainnet", "baseMainnet"],
             default: "arcTestnet",
           },
           from: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
@@ -631,7 +699,7 @@ export const openApiDocument = {
         properties: {
           network: {
             type: "string",
-            enum: ["arcTestnet", "arcMainnet"],
+            enum: ["arcTestnet", "arcMainnet", "baseMainnet"],
             default: "arcTestnet",
           },
           txHash: { type: "string", pattern: "^0x[0-9a-fA-F]{64}$" },
@@ -735,6 +803,40 @@ export const openApiDocument = {
             items: { $ref: "#/components/schemas/Finding" },
           },
         },
+      },
+      CanSignRequest: {
+        type: "object",
+        required: ["to", "recipient", "amountMicroUsdc", "purpose"],
+        properties: {
+          network: {
+            type: "string",
+            enum: ["arcTestnet", "arcMainnet", "baseMainnet"],
+            default: "arcTestnet",
+          },
+          from: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          to: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          data: { type: "string", pattern: "^0x[0-9a-fA-F]*$", default: "0x" },
+          valueWei: { type: "string", pattern: "^(0|[1-9][0-9]*)$", default: "0" },
+          recipient: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          amountMicroUsdc: { type: "string", pattern: "^(0|[1-9][0-9]*)$" },
+          purpose: { type: "string", minLength: 1, maxLength: 280 },
+          assetAddress: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          payer: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" },
+          maxAmountMicroUsdc: { type: "string" },
+          requireSimulation: { type: "boolean", default: true },
+        },
+      },
+      CanSignResponse: {
+        allOf: [
+          { $ref: "#/components/schemas/PreflightResponse" },
+          {
+            type: "object",
+            required: ["canSign"],
+            properties: {
+              canSign: { type: "boolean" },
+            },
+          },
+        ],
       },
       EvidenceResponse: {
         type: "object",

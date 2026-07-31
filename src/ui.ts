@@ -127,6 +127,12 @@ export function guardLinkHtml(input: {
       <h1 class="compact">Payment request</h1>
       <p class="lead">Check who gets paid, how much USDC moves, and why—before you approve.</p>
     </section>
+    <section class="preflight-status-bar result ${input.decision.toLowerCase()}" aria-live="polite">
+      <p class="step">PREFLIGHT CHECK</p>
+      <strong>${escapeHtml(decisionLabel)}</strong>
+      <p>${escapeHtml(decisionSummary)}</p>
+      <p class="muted">Fields checked against the declared payment request. Sender identity is <strong>not</strong> independently verified.</p>
+    </section>
     <section id="payment-complete" class="payment-complete" hidden aria-live="polite">
       <p class="step">PAYMENT COMPLETE</p>
       <h2 class="payment-complete-title">Payment complete</h2>
@@ -434,6 +440,74 @@ export const portalHtml = `${pageHead(
           <dt>Do I need to be a developer?</dt><dd>No. It works like a payment app.</dd>
         </dl>
       </section>
+    </section>
+    ${footer}
+  </main>${portalPageScripts()}
+</body>
+</html>`;
+
+export const integrationsHtml = `${pageHead(
+  "LedgerGuard | Integrations",
+  "Public integration registry and attribution guidance for LedgerGuard preflight and evidence APIs.",
+)}
+<body>
+  <main>
+    ${portalNavHtml("INTEGRATIONS")}
+    <section class="subhero">
+      <p class="eyebrow">ATTRIBUTION &middot; FREE TESTNET TIER</p>
+      <h1 class="compact">Integration registry</h1>
+      <p class="lead">LedgerGuard counts an integration only after a public project identity, reproducible request IDs, and completed API calls are submitted through our GitHub issue template.</p>
+    </section>
+    <section class="panel developer-panel">
+      <div>
+        <p class="step">HOW TO APPEAR HERE</p>
+        <h2>Register an integration id</h2>
+        <ol>
+          <li>Install <code>@ledgerguard/sdk</code> or call <code>POST /v1/can-sign</code>.</li>
+          <li>Send a non-secret <code>X-LedgerGuard-Integration</code> header, for example <code>acme-agent-testnet</code>.</li>
+          <li>Save response <code>X-LedgerGuard-Request-Id</code> values or public testnet transaction hashes.</li>
+          <li>Open the <code>Independent integration evidence</code> GitHub issue in the repository.</li>
+        </ol>
+        <p class="muted">Current public verified integrations: <strong>0</strong>. Testnet usage is free and has no financial value.</p>
+      </div>
+      <div>
+        <p class="step">RECOMMENDED STACK</p>
+        <h2>Where LedgerGuard fits</h2>
+        <ul>
+          <li>Optional CI gate tools scan payment code paths.</li>
+          <li>Optional x402 endpoint readiness checks run before agents pay URLs.</li>
+          <li><strong>LedgerGuard validates declared stablecoin intent against unsigned calldata.</strong></li>
+          <li>Payment rails such as x402 facilitators settle USDC.</li>
+          <li>LedgerGuard evidence reconciles the finalized transaction.</li>
+        </ul>
+        <a href="/docs/integration-stack">Read INTEGRATION_STACK.md</a>
+      </div>
+    </section>
+    ${footer}
+  </main>${portalPageScripts()}
+</body>
+</html>`;
+
+export const integrationStackHtml = `${pageHead(
+  "LedgerGuard | Integration stack",
+  "Recommended payment safety stack for Arc USDC, x402 sellers, and Guard Links.",
+)}
+<body>
+  <main>
+    ${portalNavHtml("INTEGRATION STACK")}
+    <section class="subhero">
+      <p class="eyebrow">DEVELOPER GUIDE</p>
+      <h1 class="compact">Integration stack</h1>
+      <p class="lead">LedgerGuard is the stablecoin intent and evidence layer. It complements payment apps and x402 facilitators; it does not replace them.</p>
+    </section>
+    <section class="panel">
+      <pre>CI / code gate (optional)
+  -&gt; x402 endpoint readiness (optional)
+  -&gt; LedgerGuard preflight / can-sign
+  -&gt; wallet signature or x402 settlement
+  -&gt; LedgerGuard evidence</pre>
+      <p class="muted">Install: <code>npm install @ledgerguard/sdk</code>. Free endpoints: <code>POST /v1/preflight</code>, <code>POST /v1/can-sign</code>, <code>POST /v1/evidence</code>.</p>
+      <p class="muted">Enabled networks are published at <a href="/v1/network-adapters">/v1/network-adapters</a>. Unsupported networks fail closed.</p>
     </section>
     ${footer}
   </main>${portalPageScripts()}
@@ -922,6 +996,11 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 .guard-cta-verified{border-color:var(--success);box-shadow:0 0 0 1px #34d399,var(--shadow);background:linear-gradient(145deg,#ecfdf5,#ffffff)}
 .guard-cta-verified .step{color:#047857}
 .guard-cta-verified h2{color:#065f46}
+.preflight-status-bar{margin:0 0 1.25rem;padding:1rem 1.1rem;border-radius:14px;border:1px solid var(--line)}
+.preflight-status-bar .step{margin-bottom:.35rem}
+.preflight-status-bar.allow{border-color:#34d399;background:linear-gradient(145deg,#ecfdf5,#ffffff)}
+.preflight-status-bar.review{border-color:#fbbf24;background:linear-gradient(145deg,#fffbeb,#ffffff)}
+.preflight-status-bar.block{border-color:#f87171;background:linear-gradient(145deg,#fef2f2,#ffffff)}
 .wallet-picker-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:#0f172a66;backdrop-filter:blur(4px)}
 .wallet-picker-dialog{width:min(420px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow-lg)}
 .wallet-picker-dialog h2{margin:0 0 8px;font-size:24px;color:var(--text)}

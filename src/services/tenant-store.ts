@@ -7,6 +7,7 @@ export type Tenant = {
   quotaPerMonth: number;
   createdAt: string;
   keyVersion: number;
+  webhookUrl?: string | null;
 };
 
 export type UsageEvent = {
@@ -50,6 +51,7 @@ export type TenantStore = {
   ): Promise<UsageSummary>;
   usage(tenant: Tenant): Promise<UsageSummary>;
   recordPayment(event: PaymentLedgerEvent): Promise<"recorded" | "duplicate">;
+  updateWebhook(tenant: Tenant, url: string | null): Promise<Tenant>;
 };
 
 export class QuotaExceededError extends Error {
@@ -346,6 +348,19 @@ class RedisTenantStore implements TenantStore {
     ]);
     return "recorded";
   }
+
+  async updateWebhook(tenant: Tenant, url: string | null): Promise<Tenant> {
+    const nextTenant: Tenant = {
+      ...tenant,
+      webhookUrl: url,
+    };
+    await this.redis.command([
+      "SET",
+      tenantKey(tenant.id),
+      JSON.stringify(nextTenant),
+    ]);
+    return nextTenant;
+  }
 }
 
 class MemoryTenantStore implements TenantStore {
@@ -438,6 +453,15 @@ class MemoryTenantStore implements TenantStore {
     if (this.payments.has(fingerprint)) return "duplicate";
     this.payments.add(fingerprint);
     return "recorded";
+  }
+
+  async updateWebhook(tenant: Tenant, url: string | null): Promise<Tenant> {
+    const nextTenant: Tenant = {
+      ...tenant,
+      webhookUrl: url,
+    };
+    this.tenants.set(tenant.id, nextTenant);
+    return nextTenant;
   }
 }
 

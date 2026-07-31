@@ -3,7 +3,23 @@ import type { EvidenceInput, PreflightInput } from "../schemas.js";
 export type LedgerGuardClientOptions = {
   baseUrl?: string;
   apiKey?: string;
+  integration?: string;
   fetcher?: typeof fetch;
+};
+
+export type CanSignRequest = {
+  network?: PreflightInput["network"];
+  from?: string;
+  to: string;
+  data?: string;
+  valueWei?: string;
+  recipient: string;
+  amountMicroUsdc: string;
+  purpose: string;
+  assetAddress?: string;
+  payer?: string;
+  maxAmountMicroUsdc?: string;
+  requireSimulation?: boolean;
 };
 
 export type PreflightResponse = {
@@ -59,12 +75,14 @@ export class LedgerGuardHttpError extends Error {
 export class LedgerGuardClient {
   private readonly baseUrl: string;
   private readonly apiKey: string | undefined;
+  private readonly integration: string | undefined;
   private readonly fetcher: typeof fetch;
 
   constructor(options: LedgerGuardClientOptions = {}) {
     this.baseUrl = (options.baseUrl ?? "https://ledgerguard-gules.vercel.app")
       .replace(/\/+$/, "");
     this.apiKey = options.apiKey;
+    this.integration = options.integration;
     this.fetcher = options.fetcher ?? fetch;
   }
 
@@ -73,6 +91,10 @@ export class LedgerGuardClient {
       this.apiKey ? "/v1/developer/preflight" : "/v1/preflight",
       input,
     );
+  }
+
+  canSign(input: CanSignRequest): Promise<PreflightResponse> {
+    return this.post<PreflightResponse>("/v1/can-sign", input);
   }
 
   shadow(input: PreflightInput): Promise<ShadowResponse> {
@@ -92,6 +114,9 @@ export class LedgerGuardClient {
       "x-ledgerguard-client": "ledgerguard-ts/0.1.0",
     };
     if (this.apiKey) headers.authorization = `Bearer ${this.apiKey}`;
+    if (this.integration) {
+      headers["x-ledgerguard-integration"] = this.integration;
+    }
     const response = await this.fetcher(`${this.baseUrl}${path}`, {
       method: "POST",
       headers,

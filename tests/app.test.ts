@@ -39,6 +39,8 @@ describe("HTTP API", () => {
     for (const path of [
       "/",
       "/docs",
+      "/integrations",
+      "/docs/integration-stack",
       "/test",
       "/guard/create",
       "/docs/integration",
@@ -134,6 +136,9 @@ describe("HTTP API", () => {
 
     const openapi = await (await app.request("/openapi.json")).json();
     expect(openapi.paths["/v1/cctp/evidence"]).toBeDefined();
+    expect(openapi.paths["/v1/can-sign"]).toBeDefined();
+    expect(openapi.paths["/v1/network-adapters"]).toBeDefined();
+    expect(openapi.paths["/v1/developer/webhook"]).toBeDefined();
   });
 
   it("creates a validated, time-bound Guard Link and renders its receipt", async () => {

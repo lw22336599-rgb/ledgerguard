@@ -13,7 +13,11 @@ const uintStringSchema = z
   .string()
   .regex(/^(0|[1-9][0-9]*)$/, "Expected an unsigned integer string");
 
-export const networkNameSchema = z.enum(["arcTestnet", "arcMainnet"]);
+export const networkNameSchema = z.enum([
+  "arcTestnet",
+  "arcMainnet",
+  "baseMainnet",
+]);
 
 const intentSchema = z
   .object({
@@ -94,3 +98,29 @@ export const developerRegistrationSchema = z.object({
       "Name contains unsupported characters",
     ),
 });
+
+export const developerWebhookSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .url("Webhook URL must be a valid HTTPS URL.")
+    .refine((value) => value.startsWith("https://"), "Webhook URL must use HTTPS.")
+    .nullable(),
+});
+
+export const canSignSchema = z.object({
+  network: networkNameSchema.default("arcTestnet"),
+  from: addressSchema.optional(),
+  to: addressSchema,
+  data: hexSchema.default("0x"),
+  valueWei: uintStringSchema.default("0"),
+  recipient: addressSchema,
+  amountMicroUsdc: uintStringSchema,
+  purpose: z.string().trim().min(1).max(280),
+  assetAddress: addressSchema.optional(),
+  payer: addressSchema.optional(),
+  maxAmountMicroUsdc: uintStringSchema.optional(),
+  requireSimulation: z.boolean().default(true),
+});
+
+export type CanSignInput = z.infer<typeof canSignSchema>;

@@ -1,11 +1,14 @@
 import { createHash } from "node:crypto";
 import { isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
+import { BASE_MAINNET_USDC } from "./commercial.js";
 
 export const ARC_TESTNET_USDC =
   "0x3600000000000000000000000000000000000000" as const;
 
-export type NetworkName = "arcTestnet" | "arcMainnet";
+export const BASE_MAINNET_CHAIN_ID = 8453;
+
+export type NetworkName = "arcTestnet" | "arcMainnet" | "baseMainnet";
 
 export interface NetworkRecord {
   name: NetworkName;
@@ -100,6 +103,44 @@ function parseMainnetConfiguration(): Omit<
   };
 }
 
+function parseBaseMainnetConfiguration(): Omit<
+  NetworkRecord,
+  "name" | "displayName" | "lifecycle"
+> {
+  const requested = process.env.BASE_PREFLIGHT_ENABLED === "true";
+  const rpcUrl =
+    process.env.BASE_MAINNET_RPC_URL?.trim() || "https://mainnet.base.org";
+  const explorerUrl =
+    process.env.BASE_MAINNET_EXPLORER_URL?.trim() ||
+    "https://basescan.org";
+  const rpcReady = rpcUrl.startsWith("https://");
+  const complete = requested && rpcReady;
+
+  if (!complete) {
+    return {
+      enabled: false,
+      officialParametersComplete: false,
+      chainId: null,
+      rpcUrls: [],
+      usdcAddress: null,
+      explorerUrl: null,
+      activation: "disabled",
+      configFingerprint: null,
+    };
+  }
+
+  return {
+    enabled: true,
+    officialParametersComplete: true,
+    chainId: BASE_MAINNET_CHAIN_ID,
+    rpcUrls: [rpcUrl],
+    usdcAddress: BASE_MAINNET_USDC,
+    explorerUrl,
+    activation: "manual-required",
+    configFingerprint: null,
+  };
+}
+
 export function getNetworkRegistry(): Record<NetworkName, NetworkRecord> {
   return {
     arcTestnet: {
@@ -120,6 +161,12 @@ export function getNetworkRegistry(): Record<NetworkName, NetworkRecord> {
       displayName: "Arc Mainnet",
       lifecycle: "mainnet",
       ...parseMainnetConfiguration(),
+    },
+    baseMainnet: {
+      name: "baseMainnet",
+      displayName: "Base Mainnet",
+      lifecycle: "mainnet",
+      ...parseBaseMainnetConfiguration(),
     },
   };
 }

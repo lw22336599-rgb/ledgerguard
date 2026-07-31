@@ -8,6 +8,7 @@ import {
   type Hex,
 } from "viem";
 import { ARC_TESTNET_USDC } from "../config/networks.js";
+import { resolveNetworkAdapter } from "../adapters/network-adapter.js";
 import type { PreflightInput } from "../schemas.js";
 import type { SimulationResult } from "../lib/rpc.js";
 
@@ -151,13 +152,30 @@ export function evaluatePreflight(
   const decoded = decodeAction(input);
   const findings: Finding[] = [];
   const valueWei = BigInt(input.valueWei);
+  const adapter = resolveNetworkAdapter(input.network);
 
-  if (valueWei % 1_000_000_000_000n !== 0n) {
+  if (
+    adapter.nativeUsdcGas &&
+    valueWei > 0n &&
+    valueWei % 1_000_000_000_000n !== 0n
+  ) {
     findings.push({
       code: "ARC_NATIVE_DECIMAL_REMAINDER",
       severity: "critical",
       message:
         "Native msg.value is not exactly representable in the 6-decimal USDC product view.",
+    });
+  }
+
+  if (
+    decoded.kind === "native_usdc_transfer" &&
+    !adapter.nativeUsdcGas
+  ) {
+    findings.push({
+      code: "NATIVE_STABLECOIN_UNSUPPORTED",
+      severity: "critical",
+      message:
+        "Native-value transfers are only supported on Arc networks with USDC gas. Use ERC-20 USDC calldata on this network.",
     });
   }
 
@@ -229,14 +247,13 @@ export function evaluatePreflight(
   }
 
   if (
-    input.network === "arcTestnet" &&
     decoded.assetAddress &&
-    !sameAddress(decoded.assetAddress, ARC_TESTNET_USDC)
+    !sameAddress(decoded.assetAddress, adapter.usdcAddress)
   ) {
     findings.push({
       code: "NON_USDC_ASSET",
       severity: "critical",
-      message: "The token call does not target the official Arc Testnet USDC contract.",
+      message: "The token call does not target the official USDC contract for this network.",
     });
   }
 
@@ -257,8 +274,9 @@ export function evaluatePreflight(
     findings.push({
       code: "UNEXPECTED_NATIVE_VALUE",
       severity: "critical",
-      message:
-        "A token or contract call must not also send undeclared native USDC value.",
+      message: adapter.nativeUsdcGas
+        ? "A token or contract call must not also send undeclared native USDC value."
+        : "A token or contract call must not send native chain currency alongside token calldata.",
     });
   }
 
