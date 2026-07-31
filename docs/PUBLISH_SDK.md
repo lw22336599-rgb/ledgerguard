@@ -18,6 +18,25 @@ npm org ls ledgerguard1
 
 Expected org owner: `ledgerguard`.
 
+### Windows PowerShell note
+
+If `npm` fails with *「禁止运行脚本」*, use **`npm.cmd`** instead:
+
+```powershell
+npm.cmd login --auth-type=web
+npm.cmd whoami
+npm.cmd run publish:sdk
+```
+
+Or from repo root: `scripts\npm-win.cmd login --auth-type=web`
+
+### 2FA required to publish
+
+npm rejects publish when account 2FA is disabled. Either:
+
+1. Enable **2FA** at https://www.npmjs.com/settings/ledgerguard/two-factor-auth → run `npm.cmd login` again → `npm.cmd run publish:sdk`, **or**
+2. Create a **Granular Access Token** (Publish, scope `@ledgerguard1`) → `$env:NPM_TOKEN="npm_..."` → `npm.cmd run publish:sdk`
+
 ## Pre-publish checks (run from repo root)
 
 ```bash

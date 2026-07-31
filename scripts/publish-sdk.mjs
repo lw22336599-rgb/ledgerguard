@@ -11,10 +11,11 @@ const sdkRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "packages", 
 const dryRun = process.argv.includes("--dry-run");
 
 function run(command, options = {}) {
-  return execSync(command, {
+  const inherit = options.inherit ?? options.stdio === "inherit";
+  const result = execSync(command, {
     cwd: sdkRoot,
     encoding: "utf8",
-    stdio: options.inherit ? "inherit" : "pipe",
+    stdio: inherit ? "inherit" : "pipe",
     env: {
       ...process.env,
       ...(process.env.NPM_TOKEN
@@ -22,7 +23,9 @@ function run(command, options = {}) {
         : {}),
     },
     ...options,
-  }).trim();
+  });
+  if (inherit || result == null) return "";
+  return String(result).trim();
 }
 
 function whoami() {

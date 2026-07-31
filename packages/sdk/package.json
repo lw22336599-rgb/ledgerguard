@@ -29,8 +29,7 @@
     "test:pack-install": "node scripts/test-pack-install.mjs"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "keywords": [
     "ledgerguard",
