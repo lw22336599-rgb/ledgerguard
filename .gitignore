@@ -9,3 +9,14 @@ tmp/
 *.log
 *.pem
 *.key
+*.tmp
+packages/sdk/*.tgz
+
+# Local ops / promo artifacts (keep out of git)
+artifacts/guard-link-e2e/
+artifacts/guard-link-promo/
+artifacts/ui-audit/
+artifacts/r1-promo/x-debug/
+artifacts/r1-promo/*.png
+artifacts/r1-promo/launch-status.json
+artifacts/r1-promo/payment-url.txt

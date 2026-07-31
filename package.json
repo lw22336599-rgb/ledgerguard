@@ -53,6 +53,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@ledgerguard1/sdk": "file:packages/sdk",
     "@types/node": "^24.10.0",
     "@types/qrcode": "^1.5.6",
     "@vitest/coverage-v8": "^4.1.10",
