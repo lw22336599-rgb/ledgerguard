@@ -10,17 +10,17 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
 
-const dualChainEyebrow = "USDC PAYMENT LINKS · BASE + ARC";
-const dualChainNetworkNoteHtml =
-  "Guard Links run on <strong>Arc Testnet</strong>. <strong>Base Mainnet</strong> x402 USDC is live and operational at <a href=\"/canary\">/canary</a> — production gates passed, real USDC settlement.";
+const arcPrimaryEyebrow = "USDC PAYMENT LINKS · ARC TESTNET";
+const arcPrimaryNetworkNoteHtml =
+  "Guard Links run on <strong>Arc Testnet</strong> — our primary product path. <strong>Base Mainnet</strong> hosts a bounded x402 capability demo at <a href=\"/canary\">/canary</a> (real USDC, not a Guard Link).";
 const baseMainnetLinkLabel = "Base Mainnet x402";
 /** Legacy demo default; never a real contract — wallet connect replaces this. */
 export const guardRecipientDemoDefault =
   "0x2222222222222222222222222222222222222222";
 
 const footer = `<footer class="site-footer">
-  <div class="footer-primary">LedgerGuard &middot; BASE + ARC &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} at <a href="/canary">/canary</a></div>
-  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-primary">LedgerGuard &middot; Arc-first &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} demo at <a href="/canary">/canary</a></div>
+  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
@@ -29,7 +29,7 @@ const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/docs">Deve
 export const meterAppOrigin = "https://arc-meter-xi.vercel.app";
 
 export function portalNavHtml(
-  badge = "BASE + ARC",
+  badge = "ARC TESTNET",
   options?: { danger?: boolean },
 ): string {
   const badgeClass = options?.danger ? "badge danger" : "badge";
@@ -171,16 +171,16 @@ export function guardLinkHtml(input: {
 
 export const guardBuilderHtml = `${pageHead(
   "LedgerGuard | Create a Guard Link",
-  "Create a Guard Link on Arc Testnet. BASE + ARC: Base Mainnet x402 USDC is live at /canary. Share the link or QR so the payer reviews before signing.",
+  "Create a Guard Link on Arc Testnet. Share the link or QR so the payer reviews before signing. Base Mainnet x402 demo at /canary.",
 )}
 <body>
   <main>
     ${portalNavHtml("GUARD LINK")}
     <section class="subhero">
-      <p class="eyebrow">${dualChainEyebrow}</p>
+      <p class="eyebrow">${arcPrimaryEyebrow}</p>
       <h1 class="compact">Create a USDC payment link.</h1>
       <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer reviews who receives how much before signing.</p>
-      <p class="portal-network-note">${dualChainNetworkNoteHtml}</p>
+      <p class="portal-network-note">${arcPrimaryNetworkNoteHtml}</p>
     </section>
     <section id="guard-verified-notice" class="notice" hidden><strong>Welcome back.</strong> Your receiving address is prefilled from your verified payment. Connect the same wallet or edit the address before creating a link.</section>
     <section class="panel builder-panel">
@@ -353,7 +353,7 @@ export const testnetHelpJs = `const BASE_SEPOLIA={chainId:"0x14a34",chainName:"B
 
 export const portalHtml = `${pageHead(
   "LedgerGuard | Send a USDC payment link",
-  "Create a Guard Link on Arc Testnet, share it in chat or as a QR code, and let the payer review the exact amount before signing. Base Mainnet x402 USDC is live at /canary.",
+  "Arc-first Guard Links on Arc Testnet. Share a payment link or QR code and let the payer review before signing. Base x402 demo at /canary.",
 )}
 <body>
   <main>
@@ -361,12 +361,12 @@ export const portalHtml = `${pageHead(
     <section class="hero portal-hero">
       <div class="portal-hero-grid">
         <div class="portal-hero-copy">
-          <p class="eyebrow">${dualChainEyebrow}</p>
+          <p class="eyebrow">${arcPrimaryEyebrow}</p>
           <h1>Send a USDC payment link.<br><span>Get paid without asking for an address first.</span></h1>
           <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer reviews who receives how much before signing.</p>
-          <p class="portal-network-note">${dualChainNetworkNoteHtml}</p>
+          <p class="portal-network-note">${arcPrimaryNetworkNoteHtml}</p>
           <div class="portal-actions"><a class="primary-action portal-primary-cta" href="/guard/create">Create a Guard Link</a></div>
-          <p class="portal-trust-list">No signup · Non-custodial · Arc Testnet + Base Mainnet x402</p>
+          <p class="portal-trust-list">No signup · Non-custodial · Arc Testnet Guard Links</p>
         </div>
         <figure class="portal-hero-visual">
           <img src="/marketing/hero-guard-builder.png" alt="Guard Link builder with QR code and shareable payment link" width="640" height="360" loading="eager">
@@ -404,7 +404,7 @@ export const portalHtml = `${pageHead(
       <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI</p>
       <div class="links"><a href="/docs">Read the docs</a><a href="/canary">${baseMainnetLinkLabel}</a><a href="/status">Live status</a></div>
     </section>
-    <section class="notice"><strong>Networks:</strong> Guard Links use Arc Testnet assets with no financial value. Base Mainnet x402 at <a href="/canary">/canary</a> settles real USDC (0.001 USDC + gas).</section>
+    <section class="notice"><strong>Networks:</strong> Guard Links use Arc Testnet assets with no financial value. Base Mainnet x402 at <a href="/canary">/canary</a> is a separate bounded demo (real USDC, not a Guard Link).</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
@@ -837,8 +837,8 @@ export const termsHtml = legalPageHtml(
       <p>LedgerGuard is not a bank, broker, money transmitter, escrow agent, or investment adviser. An <strong>ALLOW</strong> result means implemented checks passed; it is not a guarantee of safety, profit, or merchant legitimacy. You remain responsible for reviewing every wallet prompt before signing.</p>
       <h2>Networks and real funds</h2>
       <ul>
-        <li><strong>Arc Testnet Guard Links</strong> use test assets with no financial value.</li>
-        <li><strong>Base Mainnet x402 at <a href="/canary">/canary</a></strong> can charge real USDC plus gas when you explicitly approve a wallet transaction.</li>
+        <li><strong>Arc Testnet Guard Links</strong> are the primary product path and use test assets with no financial value.</li>
+        <li><strong>Base Mainnet x402 at <a href="/canary">/canary</a></strong> is a bounded capability demo that can charge real USDC plus gas when you explicitly approve a wallet transaction. It is not a Guard Link.</li>
         <li>Do not treat testnet activity as revenue, escrow, or production settlement unless a separate written agreement says otherwise.</li>
       </ul>
       <h2>Self-declared identity on Guard Links</h2>
@@ -849,6 +849,26 @@ export const termsHtml = legalPageHtml(
       <p>The public demo is provided as-is without a commercial SLA unless separately agreed in writing. Features, networks, and limits may change as the project evolves.</p>
       <h2>Contact</h2>
       <p>Questions about these terms: <a href="mailto:lw22336599@gmail.com">lw22336599@gmail.com</a>.</p>`,
+);
+
+export const aboutHtml = legalPageHtml(
+  "About",
+  "What LedgerGuard is, why it is Arc-first, and how Base fits in.",
+  `<h2>What we build</h2>
+      <p>LedgerGuard is a non-custodial payment safety project for USDC. Merchants create a <strong>Guard Link</strong>; payers review a clear payment request before their wallet asks them to sign. After settlement, evidence can be reconciled against the declared intent.</p>
+      <h2>Arc-first product path</h2>
+      <p>Our primary battlefield is <strong>Arc Testnet</strong> today. Guard Link creation, sharing, wallet review, and onchain verification all run on Arc. We align with Circle&apos;s Arc and USDC ecosystem rather than spreading effort across every chain at once.</p>
+      <h2>Where Base fits</h2>
+      <p><strong>Base Mainnet</strong> hosts a bounded x402 capability demo at <a href="/canary">/canary</a> — real USDC, production gates passed — but it is <em>not</em> a Base Guard Link product. We are not building Base Mainnet Guard Links until Arc has real usage and a credible mainnet path.</p>
+      <h2>Who we are</h2>
+      <p>LedgerGuard is an independent developer project, not a registered company. There is no token, no platform fee on Guard Link transfers, and no claim of paying customers until external evidence exists. Source code is public on <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a>.</p>
+      <h2>Contact</h2>
+      <ul>
+        <li>Email: <a href="mailto:lw22336599@gmail.com">lw22336599@gmail.com</a></li>
+        <li>X: <a href="https://x.com/HuiLibaa" rel="me noreferrer">@HuiLibaa</a></li>
+        <li>Demo: <a href="/guard/create">Create a Guard Link</a></li>
+      </ul>
+      <p>See also <a href="/privacy">Privacy</a> and <a href="/terms">Terms</a>.</p>`,
 );
 
 const siteBaseCss = `:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{margin:auto}nav{display:flex;align-items:center;justify-content:space-between}.subhero{padding:64px 0 38px;max-width:900px}h1{margin:20px 0 26px;letter-spacing:-.065em}h1.compact{font-size:clamp(44px,6vw,70px)}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}h3{margin:14px 0 4px}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;padding:13px;font:inherit;color:var(--text)}button{cursor:pointer;font-weight:800;padding:14px;border:0}button:disabled{opacity:.6}.developer-panel{margin-bottom:28px}.panel{display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:32px}.result{grid-column:1/-1;border-left:4px solid var(--success);border-radius:8px;padding:18px;min-height:96px}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;padding:16px;color:#334155}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{text-underline-offset:5px}footer{padding:26px 0 42px;color:var(--muted);font-size:13px}.badge.danger{color:var(--red);border-color:#fecaca;background:#fef2f2}.legal-hero{max-width:900px;padding-bottom:28px}.legal-prose{display:block;padding:28px 32px 36px;margin-bottom:64px;line-height:1.7}.legal-prose h2{font-size:20px;margin:26px 0 8px;color:var(--text)}.legal-prose h2:first-child{margin-top:0}.legal-prose p,.legal-prose li{color:var(--muted);margin:8px 0}.legal-prose ul{padding-left:22px}.legal-prose a{color:var(--link)}`;

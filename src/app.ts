@@ -108,6 +108,7 @@ import {
   testnetHelpHtml,
   testnetHelpJs,
   mainnetCanaryHtml,
+  aboutHtml,
   privacyHtml,
   termsHtml,
   testerHtml,
@@ -312,6 +313,7 @@ app.get("/guard", async (context) => {
 app.get("/docs", (context) => context.html(developerDocsHtml));
 app.get("/privacy", (context) => context.html(privacyHtml));
 app.get("/terms", (context) => context.html(termsHtml));
+app.get("/about", (context) => context.html(aboutHtml));
 app.get("/developer", (context) =>
   context.html(
     developerConsoleHtml({

@@ -12,6 +12,7 @@ import {
   integrationBoundaryHtml,
   meterHtml,
   portalHtml,
+  aboutHtml,
   privacyHtml,
   receiptsHtml,
   statusHtml,
@@ -40,6 +41,7 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('id="nav-connect"');
     expect(portalHtml).toContain('href="/privacy"');
     expect(portalHtml).toContain('href="/terms"');
+    expect(portalHtml).toContain('href="/about"');
     expect(portalHtml).toContain('class="brand-mark"');
     expect(portalHtml).toContain('class="portal-nav-actions"');
     expect(portalHtml).toContain('id="nav-menu-toggle"');
@@ -149,10 +151,10 @@ describe("browser demo experience", () => {
 
   it("creates and completes Guard Links without server-side signing", () => {
     expect(portalHtml).toContain('href="/guard/create"');
-    expect(guardBuilderHtml).toContain("USDC PAYMENT LINKS · BASE + ARC");
-    expect(guardBuilderHtml).toContain("Base Mainnet</strong> x402 USDC is live");
+    expect(guardBuilderHtml).toContain("USDC PAYMENT LINKS · ARC TESTNET");
+    expect(guardBuilderHtml).toContain("primary product path");
     expect(guardBuilderHtml).toContain('href="/canary"');
-    expect(guardBuilderHtml).not.toContain("USDC PAYMENT LINKS · ARC TESTNET");
+    expect(guardBuilderHtml).not.toContain("USDC PAYMENT LINKS · BASE + ARC");
     expect(guardBuilderHtml).toContain("/site-nav.js");
     expect(guardBuilderHtml).toContain("/guard-builder-wallet.js");
     expect(guardBuilderHtml).toContain("wallet-status-card");
@@ -252,10 +254,12 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain("Create a Guard Link");
     expect(portalHtml).toContain("HOW IT WORKS");
     expect(portalHtml).toContain("/marketing/hero-guard-builder.png");
-    expect(portalHtml).toContain("USDC PAYMENT LINKS · BASE + ARC");
-    expect(portalHtml).toContain("Base Mainnet</strong> x402 USDC is live");
-    expect(portalHtml).toContain("BASE + ARC &middot; Guard Links on Arc Testnet");
+    expect(portalHtml).toContain("USDC PAYMENT LINKS · ARC TESTNET");
+    expect(portalHtml).toContain("primary product path");
+    expect(portalHtml).toContain("Arc-first &middot; Guard Links on Arc Testnet");
     expect(portalHtml).toContain("Arc Testnet");
+    expect(portalHtml).not.toContain("USDC PAYMENT LINKS · BASE + ARC");
+    expect(portalHtml).not.toContain("BASE + ARC &middot; Guard Links on Arc Testnet");
     expect(portalHtml).not.toContain("Move USDC into Arc");
     expect(portalHtml).not.toContain("Protect &rarr; Meter &rarr; Receipts");
     expect(portalHtml).not.toContain("Open the Meter module");
@@ -268,15 +272,19 @@ describe("browser demo experience", () => {
   });
 
   it("publishes legal pages and a branded nav logo", () => {
-    for (const html of [privacyHtml, termsHtml]) {
+    for (const html of [aboutHtml, privacyHtml, termsHtml]) {
       expect(html).toContain('class="portal-nav"');
       expect(html).toContain('class="legal-prose panel"');
       expect(html).toContain('class="brand-mark"');
       expect(html).toContain('href="/privacy"');
       expect(html).toContain('href="/terms"');
     }
+    expect(aboutHtml).toContain("Arc-first");
+    expect(aboutHtml).toContain('href="/about"');
+    expect(aboutHtml).toContain("independent developer project");
     expect(privacyHtml).toContain("non-custodial");
     expect(termsHtml).toContain("Terms of Service");
     expect(termsHtml).toContain("ALLOW");
+    expect(termsHtml).toContain("primary product path");
   });
 });
