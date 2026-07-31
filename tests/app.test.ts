@@ -38,12 +38,9 @@ describe("HTTP API", () => {
   it("serves human-readable docs, catalog, and status pages", async () => {
     for (const path of [
       "/",
-      "/protect",
       "/docs",
-      "/catalog",
       "/test",
       "/guard/create",
-      "/routes",
       "/docs/integration",
     ]) {
       const response = await app.request(path);
@@ -53,6 +50,17 @@ describe("HTTP API", () => {
       expect(html).toContain('<html lang="en">');
       expect(html).not.toMatch(/\p{Script=Han}/u);
     }
+    for (const [path, location] of [
+      ["/protect", "/test"],
+      ["/meter", "/developer"],
+      ["/receipts", "/payments"],
+      ["/catalog", "/docs"],
+      ["/routes", "/docs/integration"],
+    ] as const) {
+      const response = await app.request(path, { redirect: "manual" });
+      expect(response.status).toBe(301);
+      expect(response.headers.get("location")).toBe(location);
+    }
     const developers = await app.request("/developers", { redirect: "manual" });
     expect(developers.status).toBe(301);
     expect(developers.headers.get("location")).toBe("/docs");
@@ -61,24 +69,17 @@ describe("HTTP API", () => {
     );
   });
 
-  it("uses LedgerGuard as the single public entry and routes to Meter", async () => {
-    const protect = await app.request("/protect");
-    expect(protect.status).toBe(200);
-    expect(await protect.text()).toContain("Let rules protect funds.");
+  it("uses LedgerGuard as the single public entry for Guard Links and payments", async () => {
+    const testPage = await app.request("/test");
+    expect(testPage.status).toBe(200);
+    expect(await testPage.text()).toContain("Complete the test flow end to end");
 
-    const meter = await app.request("/meter");
-    const meterHtml = await meter.text();
-    expect(meter.status).toBe(200);
-    expect(meterHtml).toContain("METER MODULE");
-    expect(meterHtml).toContain('class="portal-nav"');
-    expect(meterHtml).toContain("https://arc-meter-xi.vercel.app/");
-
-    const receipts = await app.request("/receipts");
-    const receiptsHtml = await receipts.text();
-    expect(receipts.status).toBe(200);
-    expect(receiptsHtml).toContain("RECEIPTS");
-    expect(receiptsHtml).toContain('class="portal-nav"');
-    expect(receiptsHtml).toContain("https://arc-meter-xi.vercel.app/#flow");
+    const payments = await app.request("/payments");
+    const paymentsHtml = await payments.text();
+    expect(payments.status).toBe(200);
+    expect(paymentsHtml).toContain("Check whether a payment arrived.");
+    expect(paymentsHtml).toContain('class="portal-nav"');
+    expect(paymentsHtml).toContain("/site-nav.js");
   });
 
   it("rejects malformed Guard Links and publishes protocol boundaries", async () => {
@@ -106,12 +107,7 @@ describe("HTTP API", () => {
     });
   });
 
-  it("publishes the protected route bundle and rejects out-of-limit CCTP evidence", async () => {
-    const bundle = await app.request("/routes.js");
-    expect(bundle.status).toBe(200);
-    expect(bundle.headers.get("content-type")).toContain("javascript");
-    expect(await bundle.text()).toContain("LedgerGuard Routes");
-
+  it("rejects out-of-limit CCTP evidence and keeps the API documented", async () => {
     for (const path of ["/wallet.js", "/site-nav.js", "/guard-builder-wallet.js"]) {
       const script = await app.request(path);
       expect(script.status).toBe(200);
@@ -119,12 +115,7 @@ describe("HTTP API", () => {
       expect((await script.text()).length).toBeGreaterThan(100);
     }
 
-    const routesPage = await app.request("/routes");
-    const routesHtml = await routesPage.text();
-    expect(routesPage.status).toBe(200);
-    expect(routesHtml).toContain('id="route-readiness"');
-    expect(routesHtml).toContain("/wallet.js");
-    expect(routesHtml).toContain('id="nav-menu-toggle"');
+    expect((await app.request("/routes.js")).status).toBe(404);
 
     const evidence = await app.request("/v1/cctp/evidence", {
       method: "POST",

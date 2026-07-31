@@ -35,12 +35,6 @@ import {
   preflightSchema,
   type PreflightInput,
 } from "./schemas.js";
-import {
-  getRouteFeeRecipient,
-  ROUTE_CUSTOM_FEE_USDC,
-  ROUTE_MAX_AMOUNT_USDC,
-} from "./config/routes.js";
-import { routesBundle } from "./generated/routes-bundle.js";
 import { walletBundle } from "./generated/wallet-bundle.js";
 import { siteNavBundle } from "./generated/site-nav-bundle.js";
 import { guardBuilderWalletBundle } from "./generated/guard-builder-wallet-bundle.js";
@@ -89,8 +83,6 @@ import {
   type Tenant,
 } from "./services/tenant-store.js";
 import {
-  catalogHtml,
-  demoHtml,
   demoJs,
   developerConsoleHtml,
   developerConsoleJs,
@@ -98,10 +90,7 @@ import {
   guardBuilderHtml,
   guardLinkHtml,
   integrationBoundaryHtml,
-  meterHtml,
   portalHtml,
-  receiptsHtml,
-  routesHtml,
   siteCss,
   statusHtml,
   testnetHelpHtml,
@@ -213,18 +202,15 @@ app.use(
 );
 
 app.get("/", (context) => context.html(portalHtml));
-app.get("/protect", (context) => context.html(demoHtml));
-app.get("/routes", (context) =>
-  context.html(
-    routesHtml({
-      maxAmountUsdc: ROUTE_MAX_AMOUNT_USDC,
-      customFeeUsdc: ROUTE_CUSTOM_FEE_USDC,
-      feeRecipient: getRouteFeeRecipient(),
-    }),
-  ),
-);
-app.get("/meter", (context) => context.html(meterHtml));
-app.get("/receipts", (context) => context.html(receiptsHtml));
+for (const [from, to] of [
+  ["/protect", "/test"],
+  ["/meter", "/developer"],
+  ["/receipts", "/payments"],
+  ["/catalog", "/docs"],
+  ["/routes", "/docs/integration"],
+] as const) {
+  app.get(from, (context) => context.redirect(to, 301));
+}
 app.get("/developers", (context) => context.redirect("/docs", 301));
 app.get("/guard/create", (context) => context.html(guardBuilderHtml));
 app.get("/canary", (context) => {
@@ -355,14 +341,6 @@ app.use(
 app.get("/docs/integration", (context) =>
   context.html(integrationBoundaryHtml),
 );
-app.get("/catalog", (context) =>
-  context.html(
-    catalogHtml(
-      getConfiguredX402PriceMicroUsdc(),
-      getConfiguredSellerAddress(),
-    ),
-  ),
-);
 app.get("/test", (context) =>
   context.html(
     testerHtml(
@@ -469,12 +447,6 @@ app.get("/guard-builder-wallet.js", (context) =>
     "Cache-Control": "public, max-age=300",
   }),
 );
-app.get("/routes.js", (context) =>
-  context.body(routesBundle, 200, {
-    "Content-Type": "text/javascript; charset=utf-8",
-    "Cache-Control": "public, max-age=300",
-  }),
-);
 app.get("/mainnet-canary.js", (context) =>
   context.body(mainnetCanaryBundle, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
@@ -501,7 +473,6 @@ Service catalog: https://ledgerguard-gules.vercel.app/.well-known/ledgerguard.js
 Public testing: https://ledgerguard-gules.vercel.app/test
 Create a human Guard Link: https://ledgerguard-gules.vercel.app/guard/create
 Prefilled human receipt: GET /guard
-Protected crosschain route: GET /routes
 Crosschain CCTP evidence: POST /v1/cctp/evidence
 Free Arc transaction preflight: POST /v1/preflight
 Paid Arc Testnet x402 resource: GET /v1/paid/network-risk
@@ -522,7 +493,7 @@ app.get("/.well-known/ledgerguard.json", (context) => {
     guardLinkBuilder: `${getPublicBaseUrl()}/guard/create`,
     guardLinkApi: `${getPublicBaseUrl()}/v1/guard-links`,
     guardLinkTemplate: `${getPublicBaseUrl()}/guard?issuer={urlEncodedName}&recipient={publicAddress}&amount={decimalUsdc}&limit={decimalUsdc}&purpose={urlEncodedPurpose}&expires={isoTimestamp}`,
-    protectedRoute: `${getPublicBaseUrl()}/routes`,
+    integrationBoundary: `${getPublicBaseUrl()}/docs/integration`,
     protocolAdapters: `${getPublicBaseUrl()}/v1/adapters`,
     social: {
       x: "https://x.com/HuiLibaa",

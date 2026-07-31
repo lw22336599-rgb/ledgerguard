@@ -36,7 +36,6 @@ if (!home.headers.get("content-security-policy")?.includes("default-src 'self'")
 
 for (const [path, marker] of [
   ["/docs", "API documentation"],
-  ["/catalog", "SERVICE CATALOG"],
   ["/test", "Complete the test flow end to end"],
   ["/status", "LIVE STATUS"],
   ["/developer", "Developer Console"],
@@ -44,10 +43,7 @@ for (const [path, marker] of [
   ["/pay", "Pay with USDC"],
   ["/payments", "Check whether a payment arrived."],
   ["/testnet-help", "Set up your wallet for LedgerGuard."],
-  ["/routes", "route-readiness"],
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
-  ["/meter", "METER MODULE"],
-  ["/receipts", "RECEIPTS"],
   ["/privacy", "Privacy Policy"],
   ["/terms", "Terms of Service"],
 ]) {
@@ -64,6 +60,22 @@ for (const [path, marker] of [
     /\p{Script=Han}/u.test(html)
   ) {
     throw new Error(`${path}: human-readable page is unavailable`);
+  }
+}
+
+for (const [path, location] of [
+  ["/protect", "/test"],
+  ["/meter", "/developer"],
+  ["/receipts", "/payments"],
+  ["/catalog", "/docs"],
+  ["/routes", "/docs/integration"],
+]) {
+  const response = await fetch(`${baseUrl}${path}`, {
+    redirect: "manual",
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (response.status !== 301 || response.headers.get("location") !== location) {
+    throw new Error(`${path}: expected 301 redirect to ${location}`);
   }
 }
 

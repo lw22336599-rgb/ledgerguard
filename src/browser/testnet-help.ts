@@ -1,4 +1,4 @@
-import { ARC_TESTNET, ARC_TESTNET_USDC, BASE_SEPOLIA, BASE_SEPOLIA_USDC } from "./wallet-chains.js";
+import { ARC_TESTNET, ARC_TESTNET_USDC } from "./wallet-chains.js";
 
 const connect = document.querySelector<HTMLButtonElement>("#fund-connect");
 const copy = document.querySelector<HTMLButtonElement>("#fund-copy");
@@ -7,7 +7,6 @@ const status = document.querySelector<HTMLElement>("#fund-status");
 const dot = document.querySelector<HTMLElement>("#fund-dot");
 const address = document.querySelector<HTMLElement>("#fund-address");
 const arcBalances = document.querySelector<HTMLElement>("#fund-arc-balances");
-const baseBalances = document.querySelector<HTMLElement>("#fund-base-balances");
 
 const wallet = () => window.LedgerGuardWallet;
 
@@ -22,20 +21,6 @@ function fmtUsdc(micro: bigint): string {
       .padStart(6, "0")
       .replace(/0+$/, "")
       .replace(/\.$/, ".0")
-  );
-}
-
-function fmtEth(wei: bigint): string {
-  const whole = wei / 1_000_000_000_000_000_000n;
-  const fraction = wei % 1_000_000_000_000_000_000n;
-  return (
-    whole.toString() +
-    "." +
-    fraction
-      .toString()
-      .padStart(18, "0")
-      .slice(0, 6)
-      .replace(/0+$/, "")
   );
 }
 
@@ -68,51 +53,6 @@ async function renderArcBalances(): Promise<void> {
   }
 }
 
-async function renderBaseBalances(): Promise<void> {
-  if (!baseBalances || !wallet()?.getState().connected) {
-    if (baseBalances) {
-      baseBalances.className = "route-readiness neutral";
-      baseBalances.innerHTML =
-        "<strong>Base Sepolia balances</strong><p>Connect a wallet to read test ETH and test USDC.</p>";
-    }
-    return;
-  }
-
-  try {
-    await wallet()!.ensureChain(BASE_SEPOLIA);
-    const rawProvider = wallet()!.getProvider() as {
-      request: (input: { method: string; params?: unknown[] }) => Promise<unknown>;
-    };
-    const ethRaw = BigInt(
-      String(
-        await rawProvider.request({
-          method: "eth_getBalance",
-          params: [wallet()!.getState().account, "latest"],
-        }),
-      ),
-    );
-    const usdcRaw = await wallet()!.readErc20Balance(BASE_SEPOLIA_USDC);
-    const eth = fmtEth(ethRaw);
-    const usdc = fmtUsdc(usdcRaw);
-    const ready = ethRaw > 0n && usdcRaw > 0n;
-    baseBalances.className = `route-readiness ${ready ? "allow" : "review"}`;
-    baseBalances.innerHTML = `<strong>Base Sepolia balances</strong><p>ETH: <strong>${eth}</strong> · USDC: <strong>${usdc}</strong></p><p>${
-      ready
-        ? "You can open the protected crosschain route at /routes."
-        : "You still need test ETH and/or test USDC from the faucets below."
-    }</p>`;
-  } catch (error) {
-    baseBalances.className = "route-readiness review";
-    baseBalances.innerHTML = `<strong>Could not read Base Sepolia balances</strong><p>${
-      error instanceof Error ? error.message : "Unknown error"
-    }</p>`;
-  }
-}
-
-async function renderBalances(): Promise<void> {
-  await Promise.all([renderArcBalances(), renderBaseBalances()]);
-}
-
 function renderWallet(): void {
   if (!wallet()) return;
   const state = wallet()!.getState();
@@ -134,7 +74,7 @@ function renderWallet(): void {
     if (refresh) refresh.disabled = true;
     if (connect) connect.textContent = "Connect Wallet";
   }
-  void renderBalances();
+  void renderArcBalances();
 }
 
 if (wallet()) {
@@ -170,11 +110,11 @@ copy?.addEventListener("click", async () => {
 });
 
 refresh?.addEventListener("click", () => {
-  void renderBalances();
+  void renderArcBalances();
 });
 
-const hash = location.hash.replace("#", "");
-if (hash === "arc" || hash === "base") {
-  const target = document.getElementById(`guide-${hash}`);
-  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+if (location.hash.replace("#", "") === "arc") {
+  document
+    .getElementById("guide-arc")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }

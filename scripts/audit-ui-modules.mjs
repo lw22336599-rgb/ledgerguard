@@ -15,16 +15,11 @@ const pages = [
   { path: "/guard/create", name: "guard-create", marker: "Create a payment link." },
   { path: "/pay", name: "pay", marker: "Pay with USDC" },
   { path: "/canary", name: "canary", marker: "Pay with Base Mainnet USDC." },
-  { path: "/protect", name: "protect", marker: "Run preflight" },
   { path: "/docs", name: "docs", marker: "API documentation" },
   { path: "/developer", name: "developer", marker: "Developer Console" },
   { path: "/status", name: "status", marker: "LIVE STATUS" },
   { path: "/payments", name: "payments", marker: "Check whether a payment arrived." },
   { path: "/testnet-help", name: "testnet-help", marker: "Set up your wallet" },
-  { path: "/routes", name: "routes", marker: "route-readiness" },
-  { path: "/meter", name: "meter", marker: "METER MODULE" },
-  { path: "/receipts", name: "receipts", marker: "RECEIPTS" },
-  { path: "/catalog", name: "catalog", marker: "SERVICE CATALOG" },
   { path: "/test", name: "test", marker: "Complete the test flow" },
   { path: "/docs/integration", name: "integration", marker: "INTEGRATION SAFETY" },
   { path: "/privacy", name: "privacy", marker: "Privacy Policy" },
@@ -41,7 +36,6 @@ const assets = [
   "/guard-builder-wallet.js",
   "/pay.js",
   "/mainnet-canary.js",
-  "/routes.js",
   "/favicon.svg",
   "/marketing/hero-guard-builder.png",
   "/marketing/step-create.png",
@@ -275,11 +269,6 @@ if (homeHtml.includes("bounded canary") || builderHtml.includes("bounded canary"
 }
 if (homeHtml.includes("Guard Link on Base Mainnet today")) {
   issue("high", "copy", "Overclaim: Guard Link on Base Mainnet today");
-}
-
-const meterHtml = await (await fetch(`${baseUrl}/meter`)).text();
-if (meterHtml.includes("fail-closed until release gates pass")) {
-  issue("medium", "meter", "Meter page still says mainnet fail-closed (contradicts /canary live copy)");
 }
 
 await writeFile(

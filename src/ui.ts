@@ -34,8 +34,6 @@ const footer = `<footer class="site-footer">
 
 const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/pay">Pay a link</a>`;
 
-export const meterAppOrigin = "https://arc-meter-xi.vercel.app";
-
 export function portalNavHtml(
   badge = "ARC TESTNET",
   options?: { danger?: boolean },
@@ -257,74 +255,9 @@ export const guardBuilderHtml = `${pageHead(
 </body>
 </html>`;
 
-export function routesHtml(input: {
-  maxAmountUsdc: string;
-  customFeeUsdc: string;
-  feeRecipient: string | null;
-}): string {
-  const effectiveFee = input.feeRecipient ? input.customFeeUsdc : "0";
-  return `${pageHead(
-    "LedgerGuard Routes | Protected CCTP transfer",
-    "Quote and execute a capped Base Sepolia to Arc Testnet USDC transfer with browser wallet approval and CCTP evidence.",
-  )}
-<body>
-  <main>
-    ${portalNavHtml("CAPPED TEST ROUTE")}
-    <section class="subhero route-hero">
-      <p class="eyebrow">BASE SEPOLIA &rarr; ARC TESTNET &middot; CCTP STANDARD</p>
-      <h1 class="compact">Quote first. Sign second. Verify the mint.</h1>
-      <p class="lead">Circle App Kit executes the bridge. LedgerGuard limits the route, shows the fee before signing, and independently reconciles burn, attestation, mint and final delivery.</p>
-    </section>
-    <section id="route-app" class="route-grid"
-      data-max-amount="${escapeHtml(input.maxAmountUsdc)}"
-      data-custom-fee="${escapeHtml(effectiveFee)}"
-      data-fee-recipient="${escapeHtml(input.feeRecipient ?? "")}">
-      <article class="route-card">
-        <p class="step">1 &middot; DECLARE</p>
-        <h2>Protected test route</h2>
-        <dl>
-          <dt>From</dt><dd>Base Sepolia</dd>
-          <dt>To</dt><dd>Arc Testnet</dd>
-          <dt>Asset</dt><dd>Test USDC</dd>
-          <dt>Maximum bridge</dt><dd>${escapeHtml(input.maxAmountUsdc)} USDC</dd>
-          <dt>LedgerGuard fee</dt><dd>${escapeHtml(effectiveFee)} test USDC</dd>
-          <dt>Custody</dt><dd>None</dd>
-        </dl>
-        <label>Amount (test USDC)<input id="route-amount" value="${escapeHtml(input.maxAmountUsdc)}" inputmode="decimal"></label>
-        <label>Destination recipient<input id="route-recipient" placeholder="0x..." autocomplete="off"></label>
-      </article>
-      <article class="route-card">
-        <p class="step">2 &middot; CONNECT + QUOTE</p>
-        <h2>Wallet: <span id="route-wallet">not connected</span></h2>
-        <p id="route-status" class="muted">The quote is read-only. Execution requires explicit browser-wallet signatures.</p>
-        <section id="route-readiness" class="route-readiness neutral" aria-live="polite"></section>
-        <div class="wallet-buttons">
-          <button id="route-connect" type="button" class="secondary">Connect wallet</button>
-          <button id="route-quote" type="button" disabled>Get protected quote</button>
-          <button id="route-execute" type="button" disabled>Review and execute</button>
-        </div>
-        <section id="route-quote-output" class="result neutral" hidden aria-live="polite"></section>
-      </article>
-      <article class="route-card route-evidence">
-        <p class="step">3 &middot; VERIFY</p>
-        <h2>Four-stage evidence</h2>
-        <div class="stage-row"><span>Burn</span><span>Circle attestation</span><span>Mint</span><span>Final USDC delivery</span></div>
-        <section id="route-progress-output" class="result neutral" hidden aria-live="polite"></section>
-      </article>
-    </section>
-    <section class="notice"><strong>Safety boundary:</strong> this page cannot initiate Arc Mainnet or Base Mainnet transfers. It never receives a seed phrase or private key. Changing the amount after a quote invalidates execution.</section>
-    ${footer}
-  </main>
-  <script src="/wallet.js" defer></script>
-  <script src="/routes.js" defer></script>
-  <script src="/site-nav.js" defer></script>
-</body>
-</html>`;
-}
-
 export const testnetHelpHtml = `${pageHead(
   "LedgerGuard | Wallet setup guide",
-  "Install a wallet, fund Arc Testnet USDC for Guard Links, and optionally fund Base Sepolia for the crosschain demo.",
+  "Install a wallet and fund Arc Testnet USDC for Guard Links.",
 )}
 <body>
   <main>
@@ -332,7 +265,7 @@ export const testnetHelpHtml = `${pageHead(
     <section class="subhero">
       <p class="eyebrow">NO REAL FUNDS &middot; TESTNET ONLY</p>
       <h1 class="compact">Set up your wallet for LedgerGuard.</h1>
-      <p class="lead">Guard Links run on Arc Testnet. Install an EVM wallet, request test USDC, then create or pay a link. The crosschain demo uses Base Sepolia separately.</p>
+      <p class="lead">Guard Links run on Arc Testnet. Install an EVM wallet, request test USDC, then create or pay a link.</p>
     </section>
     <section class="panel builder-panel">
       <div id="fund-wallet-panel" class="wallet-status-card">
@@ -359,20 +292,6 @@ export const testnetHelpHtml = `${pageHead(
           <article class="doc-card"><span>STEP 1</span><h2>Install MetaMask</h2><p>LedgerGuard connects through your browser wallet. We never receive your private key.</p><a href="https://metamask.io/download/" rel="noreferrer" target="_blank">Download MetaMask</a></article>
           <article class="doc-card"><span>STEP 2</span><h2>Get test USDC</h2><p>Circle sends test USDC on Arc Testnet. Select <strong>Arc Testnet</strong> in the faucet.</p><a href="https://faucet.circle.com/" rel="noreferrer" target="_blank">Circle testnet faucet</a></article>
           <article class="doc-card"><span>STEP 3</span><h2>Create a Guard Link</h2><p>Connect the funded wallet, enter the amount, and share the link or QR code.</p><a href="/guard/create">Create a Guard Link</a></article>
-        </section>
-      </section>
-      <section id="guide-base" class="guide-track">
-        <p class="step">OPTIONAL &middot; BASE SEPOLIA</p>
-        <h2>Fund the crosschain demo</h2>
-        <p class="muted">Only needed for the protected Base Sepolia to Arc Testnet route at <a href="/routes">/routes</a>.</p>
-        <section id="fund-base-balances" class="route-readiness neutral" aria-live="polite">
-          <strong>Base Sepolia balances</strong>
-          <p>Connect a wallet to read test ETH and test USDC.</p>
-        </section>
-        <section class="docs-grid">
-          <article class="doc-card"><span>STEP 1</span><h2>Get test ETH</h2><p>You need a little Base Sepolia ETH to pay gas before USDC can move.</p><a href="https://www.alchemy.com/faucets/base-sepolia" rel="noreferrer" target="_blank">Alchemy Base Sepolia faucet</a></article>
-          <article class="doc-card"><span>STEP 2</span><h2>Get test USDC</h2><p>Circle sends up to 20 test USDC on Base Sepolia every 2 hours per wallet.</p><a href="https://faucet.circle.com/" rel="noreferrer" target="_blank">Circle testnet faucet</a></article>
-          <article class="doc-card"><span>STEP 3</span><h2>Return to Routes</h2><p>Switch to Base Sepolia, refresh balances above, then open the protected route.</p><a href="/routes">Open protected route</a></article>
         </section>
       </section>
     </section>
@@ -518,50 +437,6 @@ export const portalHtml = `${pageHead(
 </body>
 </html>`;
 
-export const demoHtml = `${pageHead(
-  "LedgerGuard | Arc Payment Safety Check",
-  "LedgerGuard checks Arc USDC payment intent before signing without accessing private keys or signing for users.",
-)}
-<body>
-  <main>
-    ${portalNavHtml("PROTECT")}
-    <section class="hero">
-      <p class="eyebrow">NON-CUSTODIAL PAYMENT FIREWALL</p>
-      <h1>Let agents pay.<br><span>Let rules protect funds.</span></h1>
-      <p class="lead">Check Arc USDC recipients, amounts, assets, and policy before a wallet signs. Enter public addresses only. Never enter a private key or recovery phrase.</p>
-      <div class="links"><a href="/test">Join testing</a><a href="/developer">Developer console</a><a href="/docs">Developer docs</a><a href="/catalog">Service catalog</a><a href="/status">Live status</a><a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">Source code</a></div>
-    </section>
-    <section class="notice" role="note"><strong>Testnet notice:</strong> This page uses Arc test assets with no financial value. LedgerGuard does not connect a wallet, initiate a transaction, or request a signature.</section>
-    <section class="panel">
-      <div>
-        <p class="step">PUBLIC LIVE DEMO</p>
-        <h2>Check a USDC payment intent</h2>
-        <p class="muted">Without a payer address, the demo performs policy checks and returns REVIEW. Adding a public payer address enables read-only simulation and may produce ALLOW. ALLOW means only that the implemented checks passed; it is not a guarantee of safety or profit.</p>
-      </div>
-      <form id="preflight">
-        <label>Recipient public address<input id="recipient" value="0x2222222222222222222222222222222222222222" required pattern="0x[0-9a-fA-F]{40}" autocomplete="off"></label>
-        <label>Amount (USDC)<input id="amount" value="1.00" required inputmode="decimal" pattern="\\d+(\\.\\d{1,6})?" autocomplete="off"></label>
-        <label>Per-transaction policy limit (USDC)<input id="limit" value="10.00" required inputmode="decimal" pattern="\\d+(\\.\\d{1,6})?" autocomplete="off"></label>
-        <label>Payer public address (optional)<input id="payer" placeholder="0x… (never enter a private key)" pattern="0x[0-9a-fA-F]{40}" autocomplete="off"></label>
-        <button type="submit">Run preflight</button>
-      </form>
-      <section id="result" class="result neutral" aria-live="polite" aria-atomic="true">
-        <strong id="result-title">Ready to check</strong>
-        <p id="result-summary">No wallet connection is required and no transaction will be sent.</p>
-        <ul id="result-findings"></ul>
-        <details id="result-details" hidden><summary>View technical details</summary><pre id="result-json"></pre></details>
-      </section>
-    </section>
-    <section class="grid">
-      <article><span>01</span><h3>Declare intent</h3><p>Specify the payer, recipient, asset, amount, and spending limit.</p></article>
-      <article><span>02</span><h3>Simulate read-only</h3><p>Simulate through Arc RPC without holding keys or signing.</p></article>
-      <article><span>03</span><h3>Reconcile onchain</h3><p>After settlement, match actual asset flows against the original intent.</p></article>
-    </section>
-    ${footer}
-  </main>${portalPageScripts("/app.js")}
-</body>
-</html>`;
-
 export const developerDocsHtml = `${pageHead(
   "LedgerGuard | Developer Documentation",
   "Human-readable documentation for the LedgerGuard API.",
@@ -609,34 +484,6 @@ export const developerDocsHtml = `${pageHead(
   </main>${portalPageScripts()}
 </body>
 </html>`;
-
-export function catalogHtml(
-  priceMicroUsdc: string,
-  sellerAddress?: string | null,
-): string {
-  return `${pageHead(
-    "LedgerGuard | Service Catalog",
-    "LedgerGuard service entry points for people, developers, and AI agents.",
-  )}
-<body>
-  <main>
-    ${portalNavHtml("SERVICE CATALOG")}
-    <section class="subhero">
-      <p class="eyebrow">SERVICE CATALOG</p>
-      <h1 class="compact">Three entry points. One safety core.</h1>
-      <p class="lead">People use the web checker, developers call the API, and AI agents read the machine catalog and purchase resources through x402.</p>
-    </section>
-    <section class="docs-grid">
-      <article class="doc-card"><span>FREE</span><h2>Guard Link</h2><p>Open a prefilled payment intent without connecting a wallet. Designed to make transaction risk understandable.</p><a href="/guard?recipient=0x2222222222222222222222222222222222222222&amp;amount=1.00&amp;limit=2.00&amp;purpose=Example%20invoice">Open sample receipt</a></article>
-      <article class="doc-card"><span>FREE API</span><h2>Preflight + Evidence</h2><p>Pre-signing checks and post-settlement reconciliation for wallets, agents, and payment applications.</p><a href="/docs">Read the docs</a></article>
-      <article class="doc-card"><span>X402 TESTNET</span><h2>Network Risk</h2><p>Currently priced at ${priceMicroUsdc} micro-USDC in test assets to validate automated discovery, payment, and delivery.</p><a href="/.well-known/ledgerguard.json">Machine catalog</a></article>
-    </section>
-    <section class="notice"><strong>Commercial status:</strong> The testnet payment flow has been technically validated, but test assets have no financial value. LedgerGuard does not currently claim paying customers, recurring revenue, or a mainnet SLA.${sellerAddress ? ` Public test recipient: <code>${sellerAddress}</code>.` : ""}</section>
-    ${footer}
-  </main>${portalPageScripts()}
-</body>
-</html>`;
-}
 
 export const mainnetCanaryHtml = `${pageHead(
   "LedgerGuard | Base Mainnet x402",
@@ -818,71 +665,6 @@ export const integrationBoundaryHtml = `${pageHead(
       <article class="doc-card"><span>FAIL CLOSED</span><h2>Unknown means no ALLOW</h2><p>Unknown calls, failed simulation, network mismatch, or unapproved mainnet configuration never produce a conclusion that is safe to sign.</p></article>
     </section>
     <section class="notice"><strong>Important:</strong> LedgerGuard is an additional safety layer. It does not replace wallet confirmation, contract audits, organizational approval, or the user's final judgment.</section>
-    ${footer}
-  </main>${portalPageScripts()}
-</body>
-</html>`;
-
-export const meterHtml = `${pageHead(
-  "LedgerGuard | Meter module",
-  "Issue x402 quotes, verify settlement, deliver protected resources, and persist linked receipts on Arc Testnet.",
-)}
-<body>
-  <main>
-    ${portalNavHtml("METER MODULE")}
-    <section class="subhero">
-      <p class="eyebrow">SETTLE BEFORE DELIVERY &middot; X402 TESTNET</p>
-      <h1 class="compact">Meter turns payment into delivery.</h1>
-      <p class="lead">The Meter module issues an x402 quote, verifies settlement, delivers the protected resource, and writes linked receipts. It runs as a companion app while LedgerGuard keeps Protect, Guard Links, and developer APIs on this site.</p>
-    </section>
-    <section class="panel builder-panel">
-      <div>
-        <p class="step">OPEN METER</p>
-        <h2>Continue in the Meter app</h2>
-        <p class="muted">Meter UI, receipt explorer, and tenant-linked usage events live in the dedicated Meter deployment. LedgerGuard links here so navigation stays consistent without breaking the existing Meter workflow.</p>
-      </div>
-      <div class="wallet-buttons">
-        <a class="button-link" href="${meterAppOrigin}/" rel="noreferrer">Open Meter app</a>
-        <a class="secondary-action" href="/test">Join public x402 testing</a>
-        <a class="secondary-action" href="/docs">Read developer docs</a>
-      </div>
-    </section>
-    <section class="docs-grid">
-      <article class="doc-card"><span>WHAT IT DOES</span><h2>402 quote to delivery</h2><p>Buyers receive a standard payment challenge, settle in test USDC, then receive the protected HTTP or MCP resource automatically.</p></article>
-      <article class="doc-card"><span>WHAT STAYS HERE</span><h2>Protect + Guard Links</h2><p>Preflight checks, Guard Link creation, and evidence reconciliation remain on LedgerGuard. Meter handles settlement-linked delivery.</p><a href="/guard/create">Create a Guard Link</a></article>
-      <article class="doc-card"><span>RECEIPTS</span><h2>Dual receipt trail</h2><p>Settlement and delivery receipts are linked for audit. Open the receipt explorer from the Meter app or the Receipts page here.</p><a href="/receipts">Open receipt explorer</a></article>
-    </section>
-    <section class="notice"><strong>Networks:</strong> Meter delivery uses Arc Testnet assets with no financial value. Base Mainnet x402 USDC is live at <a href="/canary">/canary</a>; Meter UI and receipts stay on Arc Testnet.</section>
-    ${footer}
-  </main>${portalPageScripts()}
-</body>
-</html>`;
-
-export const receiptsHtml = `${pageHead(
-  "LedgerGuard | Receipt explorer",
-  "Review settlement and delivery receipts linked to Meter-protected resources on Arc Testnet.",
-)}
-<body>
-  <main>
-    ${portalNavHtml("RECEIPTS")}
-    <section class="subhero">
-      <p class="eyebrow">SETTLEMENT + DELIVERY &middot; LINKED EVIDENCE</p>
-      <h1 class="compact">Inspect the receipt trail.</h1>
-      <p class="lead">Receipts connect an x402 settlement to the protected resource that was delivered afterward. The interactive explorer runs in the Meter app; this page keeps the same navigation and explains what you are opening.</p>
-    </section>
-    <section class="panel builder-panel">
-      <div>
-        <p class="step">OPEN EXPLORER</p>
-        <h2>Continue to receipt flow</h2>
-        <p class="muted">The Meter deployment hosts the live receipt explorer and end-to-end acceptance flow. LedgerGuard routes you there without dropping the site navigation context first.</p>
-      </div>
-      <div class="wallet-buttons">
-        <a class="button-link" href="${meterAppOrigin}/#flow" rel="noreferrer">Open receipt explorer</a>
-        <a class="secondary-action" href="/meter">Back to Meter overview</a>
-        <a class="secondary-action" href="/status">Live status</a>
-      </div>
-    </section>
-    <section class="notice"><strong>Non-custodial:</strong> Receipts summarize onchain settlement and delivery events. They do not replace wallet confirmation or your own approval process.</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>

@@ -84,6 +84,15 @@ for (const m of home.matchAll(/href="\/guard\/create"[^>]*>([^<]*)/g)) {
   console.log(i, m[1].trim());
 }
 
-console.log("\n=== NAV DUPLICATION (mobile panel doubles nav links) ===");
-console.log("portal-nav-links Get paid", count(home, /portal-nav-links[\s\S]*?href="\/guard\/create"/g));
-console.log("nav-mobile-panel Get paid", count(home, /nav-mobile-panel[\s\S]*?href="\/guard\/create"/g));
+console.log("\n=== LEGACY REDIRECTS (301) ===");
+for (const [path, location] of [
+  ["/protect", "/test"],
+  ["/meter", "/developer"],
+  ["/receipts", "/payments"],
+  ["/catalog", "/docs"],
+  ["/routes", "/docs/integration"],
+]) {
+  const r = await fetch(`${base}${path}`, { redirect: "manual" });
+  const ok = r.status === 301 && r.headers.get("location") === location;
+  console.log(ok ? "OK" : "NO", path, "->", r.status, r.headers.get("location"));
+}
