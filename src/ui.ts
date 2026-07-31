@@ -5,9 +5,9 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="${description}">
   <title>${title}</title>
-  <link rel="icon" href="/favicon.png" type="image/png">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/favicon.png">
+  <link rel="icon" href="/favicon.png?v=2" type="image/png">
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/favicon.png?v=2">
   <link rel="stylesheet" href="/styles.css">
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
@@ -36,7 +36,7 @@ export function portalNavHtml(
 ): string {
   const badgeClass = options?.danger ? "badge danger" : "badge";
   return `<nav class="portal-nav">
-      <a class="brand" href="/"><img class="brand-mark" src="/favicon.png" alt="" width="28" height="28" decoding="async">LedgerGuard</a>
+      <a class="brand" href="/"><img class="brand-mark" src="/favicon.png?v=2" alt="" width="32" height="32" decoding="async">LedgerGuard</a>
       <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
       <div class="portal-nav-links">${portalNavLinks}</div>
       <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
@@ -962,7 +962,7 @@ body{
 main{width:min(1180px,calc(100% - 48px))}
 nav{min-height:80px;gap:24px;border-color:var(--line)}
 .brand{display:inline-flex;align-items:center;gap:10px;font-size:21px;color:var(--text);text-decoration:none;font-weight:800}
-.brand-mark{width:28px;height:28px;border-radius:8px;flex:none}
+.brand-mark{width:32px;height:32px;border-radius:9px;flex:none}
 .brand small{color:var(--accent);font:800 11px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
 .portal-nav-links,.nav-actions{display:flex;align-items:center;gap:24px}
 .portal-nav-links a,.nav-actions a{color:var(--muted);font-size:14px;text-decoration:none}

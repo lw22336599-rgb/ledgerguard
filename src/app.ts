@@ -113,6 +113,11 @@ import {
   paymentsHtml,
 } from "./ui.js";
 import { guardLinkBundle } from "./generated/guard-link-bundle.js";
+import {
+  faviconIcoBase64,
+  faviconPngBase64,
+  faviconSvg as generatedFaviconSvg,
+} from "./generated/brand-assets.js";
 import { testnetHelpBundle } from "./generated/testnet-help-bundle.js";
 import { paymentsCheckBundle } from "./generated/payments-check-bundle.js";
 import { developerShadowJs } from "./ui-shadow.js";
@@ -467,21 +472,17 @@ app.get("/mainnet-canary.js", (context) =>
     "Cache-Control": "public, max-age=300",
   }),
 );
-for (const [route, fileName, contentType] of [
-  ["/favicon.svg", "favicon.svg", "image/svg+xml; charset=utf-8"],
-  ["/favicon.png", "favicon.png", "image/png"],
-  ["/favicon.ico", "favicon.ico", "image/png"],
+for (const [route, body, contentType] of [
+  ["/favicon.svg", generatedFaviconSvg, "image/svg+xml; charset=utf-8"],
+  ["/favicon.png", Buffer.from(faviconPngBase64, "base64"), "image/png"],
+  ["/favicon.ico", Buffer.from(faviconIcoBase64, "base64"), "image/png"],
 ] as const) {
-  app.get(route, (context) => {
-    const filePath = join(process.cwd(), "public", fileName);
-    if (!existsSync(filePath)) {
-      return context.text("Not found", 404);
-    }
-    return context.body(readFileSync(filePath), 200, {
+  app.get(route, (context) =>
+    context.body(body, 200, {
       "Content-Type": contentType,
       "Cache-Control": "public, max-age=86400",
-    });
-  });
+    }),
+  );
 }
 app.get("/llms.txt", (context) =>
   context.text(`LedgerGuard

@@ -47,7 +47,7 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/terms"');
     expect(portalHtml).toContain('href="/about"');
     expect(portalHtml).toContain('class="brand-mark"');
-    expect(portalHtml).toContain('src="/favicon.png"');
+    expect(portalHtml).toContain('src="/favicon.png?v=2"');
     expect(portalHtml).toContain('class="portal-nav-actions"');
     expect(portalHtml).toContain('id="nav-menu-toggle"');
     expect(portalHtml).toContain('id="nav-mobile-panel"');
@@ -98,8 +98,8 @@ describe("browser demo experience", () => {
       guardBuilderHtml,
     ]) {
       expect(html).toContain('src="/_vercel/insights/script.js"');
-      expect(html).toContain('href="/favicon.svg"');
-      expect(html).toContain('href="/favicon.png"');
+      expect(html).toContain('href="/favicon.svg?v=2"');
+      expect(html).toContain('href="/favicon.png?v=2"');
     }
   });
 
