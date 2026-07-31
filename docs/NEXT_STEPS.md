@@ -5,8 +5,8 @@ Last updated: 2026-07-31
 ## Phase A — Remediation package (repository)
 
 - [x] P0+P1 product scope shipped and deployed  
-- [x] `@ledgerguard1/sdk@0.1.1` published on npm (hosted-API client; see OPEN_SOURCE_POLICY)  
-- [x] 148 automated tests passing  
+- [x] `@ledgerguard1/sdk@0.1.1` code ready on main (hosted-API client; see OPEN_SOURCE_POLICY) — **npm publish pending 2FA**  
+- [x] **150** automated tests passing  
 - [x] `/integrations`, `/v1/can-sign`, webhooks, integration docs live  
 - [x] `examples/quickstart.mjs` uses `@ledgerguard1/sdk`  
 - [x] `docs/PREFLIGHT_RECORD_MAPPING.md` (x402 draft compatibility)  
@@ -20,7 +20,8 @@ Last updated: 2026-07-31
 ## Phase B — You must do manually (security + traffic)
 
 - [ ] Revoke exposed npm tokens; regenerate 2FA recovery codes — see `docs/SECURITY_CREDENTIAL_ROTATION.md`  
-- [ ] Submit Circle Grant on Questbook — https://circle.questbook.app/ — follow `docs/QUESTBOOK_SUBMIT_WALKTHROUGH.md`, paste from `docs/GRANT_APPLICATION_COPYPASTE.md`  
+- [ ] Publish `@ledgerguard1/sdk@0.1.1` — `node scripts/publish-sdk.mjs` (needs npm 2FA OTP in browser, or granular `NPM_TOKEN`)  
+- [ ] Submit Circle Grant — **Cohort 2 Open** — direct URL in `docs/QUESTBOOK_GRANT_URL.md` (wallet connect + onchain sign required)  
 - [ ] Post outreach — copy from `docs/outreach/`  
 
 ## Phase C — Primary goal: first external integration

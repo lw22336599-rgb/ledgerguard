@@ -1,10 +1,10 @@
-Shipped @ledgerguard1/sdk on npm — non-custodial USDC preflight for Arc Testnet.
+Shipped @ledgerguard1/sdk@0.1.1 on npm — non-custodial USDC payment intent safety for Arc Testnet.
 
-Before your wallet signs: match intent ↔ calldata (ALLOW / REVIEW / BLOCK).
+Before your wallet signs: match intent ↔ calldata ↔ policy (ALLOW / REVIEW / BLOCK).
 
 npm install @ledgerguard1/sdk
 https://ledgerguard-gules.vercel.app
 
-Arc Testnet · no custody · free API
+Arc Testnet · no custody · free API · hosted oracle
 
 Looking for 1 design partner — DM or GitHub integration issue.

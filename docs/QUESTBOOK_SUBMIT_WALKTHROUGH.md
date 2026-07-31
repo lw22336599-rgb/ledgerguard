@@ -4,7 +4,8 @@
 
 | Step | URL |
 | --- | --- |
-| Submit proposals | https://circle.questbook.app/ |
+| Submit proposals | https://circle.questbook.app/dashboard/?grantId=6992785dfb7e884efacadb1e&chainId=10&role=community |
+| Cohort | **Circle 2026 Cohort 2** (Open) |
 | Program overview | https://www.circle.com/grant |
 | Copy-paste source | `docs/GRANT_APPLICATION_COPYPASTE.md` |
 
