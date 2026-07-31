@@ -18,6 +18,8 @@ import {
   statusHtml,
   termsHtml,
   testerHtml,
+  paymentsHtml,
+  testnetHelpHtml,
 } from "../src/ui.js";
 
 describe("browser demo experience", () => {
@@ -37,6 +39,8 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/status"');
     expect(portalHtml).toContain('href="/docs"');
     expect(portalHtml).toContain('href="/testnet-help"');
+    expect(portalHtml).toContain('href="/payments"');
+    expect(portalHtml).toContain("ArcScan");
     expect(portalHtml).toContain('href="/routes"');
     expect(portalHtml).toContain('id="nav-connect"');
     expect(portalHtml).toContain('href="/privacy"');
@@ -175,7 +179,8 @@ describe("browser demo experience", () => {
     expect(guardBuilderHtml).toContain("Advanced options");
     expect(guardBuilderHtml).toContain("guard-verified-notice");
     expect(guardBuilderHtml).toContain("Your receiving address");
-    expect(guardBuilderHtml).toContain("Identity boundary");
+    expect(guardBuilderHtml).toContain("Need Arc Testnet USDC?");
+    expect(guardBuilderHtml).toContain('href="/payments"');
     expect(guardBuilderBundle).toContain('fetch("/v1/guard-links"');
     expect(guardBuilderBundle).toContain("guard-qr-canvas");
     expect(guardLinkBundle).toContain("eth_sendTransaction");
@@ -269,6 +274,17 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain("Follow on X @HuiLibaa");
     expect(portalHtml).not.toContain('rel="me noreferrer">X @HuiLibaa</a></div>');
     expect(portalHtml).toContain('rel="me noreferrer"');
+  });
+
+  it("publishes wallet setup and payment check pages", () => {
+    expect(testnetHelpHtml).toContain("Fund Arc Testnet USDC");
+    expect(testnetHelpHtml).toContain('id="guide-arc"');
+    expect(testnetHelpHtml).toContain('id="guide-base"');
+    expect(testnetHelpHtml).toContain("/testnet-help.js");
+    expect(paymentsHtml).toContain("Verify a Guard Link payment");
+    expect(paymentsHtml).toContain('id="payments-verify-form"');
+    expect(paymentsHtml).toContain("/payments.js");
+    expect(paymentsHtml).toContain("NON-CUSTODIAL");
   });
 
   it("publishes legal pages and a branded nav logo", () => {

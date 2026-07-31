@@ -40,6 +40,8 @@ for (const [path, marker] of [
   ["/status", "LIVE STATUS"],
   ["/developer", "Developer Console"],
   ["/guard/create", "Create a USDC payment link."],
+  ["/payments", "Check whether a payment arrived."],
+  ["/testnet-help", "Set up your wallet for LedgerGuard."],
   ["/routes", "route-readiness"],
   ["/docs/integration", "INTEGRATION SAFETY BOUNDARY"],
   ["/meter", "METER MODULE"],

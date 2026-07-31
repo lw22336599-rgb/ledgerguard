@@ -1,4 +1,5 @@
 import { ARC_TESTNET, ARC_TESTNET_USDC } from "./wallet-chains.js";
+import { handleWalletConnectError } from "./wallet-help.js";
 
 const root = document.querySelector<HTMLElement>("#guard-wallet");
 const connect = document.querySelector<HTMLButtonElement>("#connect-wallet");
@@ -100,6 +101,7 @@ connect?.addEventListener("click", async () => {
       "error",
       error instanceof Error ? error.message : "Wallet connection failed.",
     );
+    await handleWalletConnectError(error);
   } finally {
     connect.disabled = false;
   }
@@ -204,6 +206,16 @@ verify?.addEventListener("click", async () => {
     );
     if (body.status === "VERIFIED" && account) {
       activateVerifiedCta(account);
+      const check = document.createElement("a");
+      const url = new URL("/payments", location.origin);
+      url.searchParams.set("tx", txHash);
+      url.searchParams.set("recipient", root?.dataset.recipient ?? "");
+      url.searchParams.set("amount", root?.dataset.amount ?? "");
+      url.searchParams.set("payer", account);
+      url.searchParams.set("purpose", root?.dataset.purpose ?? "Payment verification");
+      check.href = url.toString();
+      check.textContent = "Save this verification on the check payments page";
+      output?.append(check);
     }
     const pre = document.createElement("pre");
     pre.textContent = JSON.stringify(body, null, 2);

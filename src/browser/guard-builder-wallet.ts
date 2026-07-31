@@ -1,5 +1,6 @@
 import { getSharedWallet } from "./wallet-shared.js";
 import { ARC_TESTNET } from "./wallet-chains.js";
+import { handleWalletConnectError, isNoWalletError } from "./wallet-help.js";
 
 const DEMO_RECIPIENT = "0x2222222222222222222222222222222222222222";
 
@@ -83,9 +84,13 @@ button?.addEventListener("click", async () => {
     }
   } catch (error) {
     if (status) {
-      status.textContent =
-        error instanceof Error ? error.message : "Connection cancelled";
+      status.textContent = isNoWalletError(error)
+        ? "No wallet detected — see setup guide"
+        : error instanceof Error
+          ? error.message
+          : "Connection cancelled";
     }
+    await handleWalletConnectError(error);
   } finally {
     button.disabled = false;
   }

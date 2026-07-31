@@ -28,6 +28,8 @@ const [
   guardBuilderBundle,
   guardLinkBundle,
   mainnetCanaryBundle,
+  testnetHelpBundle,
+  paymentsCheckBundle,
 ] = await Promise.all([
   bundle("src/browser/routes.ts", "routes"),
   bundle("src/browser/wallet.ts", "wallet"),
@@ -36,6 +38,8 @@ const [
   bundle("src/browser/guard-builder.ts", "guard-builder"),
   bundle("src/browser/guard-link.ts", "guard-link"),
   bundle("src/browser/mainnet-canary.ts", "mainnet-canary"),
+  bundle("src/browser/testnet-help.ts", "testnet-help"),
+  bundle("src/browser/payments-check.ts", "payments-check"),
 ]);
 
 await mkdir("src/generated", { recursive: true });
@@ -77,6 +81,16 @@ await Promise.all([
   writeFile(
     "src/generated/mainnet-canary-bundle.ts",
     `${header}export const mainnetCanaryBundle = ${JSON.stringify(mainnetCanaryBundle)};\n`,
+    "utf8",
+  ),
+  writeFile(
+    "src/generated/testnet-help-bundle.ts",
+    `${header}export const testnetHelpBundle = ${JSON.stringify(testnetHelpBundle)};\n`,
+    "utf8",
+  ),
+  writeFile(
+    "src/generated/payments-check-bundle.ts",
+    `${header}export const paymentsCheckBundle = ${JSON.stringify(paymentsCheckBundle)};\n`,
     "utf8",
   ),
 ]);

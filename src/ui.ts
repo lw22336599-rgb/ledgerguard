@@ -20,7 +20,7 @@ export const guardRecipientDemoDefault =
 
 const footer = `<footer class="site-footer">
   <div class="footer-primary">LedgerGuard &middot; Arc-first &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} live at <a href="/canary">/canary</a></div>
-  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/payments">Check payments</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Wallet setup</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="https://testnet.arcscan.app" rel="noreferrer">ArcScan</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
@@ -162,7 +162,7 @@ export function guardLinkHtml(input: {
       <a id="guard-cta-link" class="button-link" href="/guard/create">Create your Guard Link</a>
     </section>
     <section class="notice"><strong>Testnet only:</strong> Arc Testnet assets have no financial value. No mainnet transaction can be initiated from this page. A self-declared sender name is context, not verified identity.</section>
-    <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/protect">Open advanced checker</a><a href="/docs">Developer docs</a><a href="/test">Join testing</a></div>
+    <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/payments">Check payments</a><a href="/protect">Open advanced checker</a><a href="/docs">Developer docs</a><a href="/test">Join testing</a></div>
     ${footer}
   </main>${portalPageScripts("/guard.js")}
 </body>
@@ -197,6 +197,7 @@ export const guardBuilderHtml = `${pageHead(
           <button id="w-btn" type="button" class="nav-wallet-btn">Connect Wallet</button>
         </div>
         <div id="w-detail" class="wallet-status-detail" hidden></div>
+        <p class="field-help"><a href="/testnet-help#arc">Need Arc Testnet USDC?</a> &middot; <a href="/payments">Check incoming payments</a></p>
       </div>
       <form id="guard-builder">
         <label>Your name (optional)<input id="guard-issuer" name="issuer" maxlength="80" placeholder="Example: Alex or your shop name"></label>
@@ -316,16 +317,16 @@ export function routesHtml(input: {
 }
 
 export const testnetHelpHtml = `${pageHead(
-  "LedgerGuard | Testnet funding guide",
-  "Step-by-step guide to fund a wallet on Base Sepolia for the protected crosschain test route.",
+  "LedgerGuard | Wallet setup guide",
+  "Install a wallet, fund Arc Testnet USDC for Guard Links, and optionally fund Base Sepolia for the crosschain demo.",
 )}
 <body>
   <main>
-    ${portalNavHtml("TESTNET FUNDING")}
+    ${portalNavHtml("WALLET SETUP")}
     <section class="subhero">
-      <p class="eyebrow">BASE SEPOLIA ONLY &middot; NO REAL FUNDS</p>
-      <h1 class="compact">Fund your wallet for the crosschain demo.</h1>
-      <p class="lead">The protected route needs a small amount of Base Sepolia test ETH (gas) and test USDC. LedgerGuard cannot claim faucet tokens for you because every faucet requires your browser to pass anti-abuse checks.</p>
+      <p class="eyebrow">NO REAL FUNDS &middot; TESTNET ONLY</p>
+      <h1 class="compact">Set up your wallet for LedgerGuard.</h1>
+      <p class="lead">Guard Links run on Arc Testnet. Install an EVM wallet, request test USDC, then create or pay a link. The crosschain demo uses Base Sepolia separately.</p>
     </section>
     <section class="panel builder-panel">
       <div id="fund-wallet-panel" class="wallet-status-card">
@@ -339,18 +340,37 @@ export const testnetHelpHtml = `${pageHead(
           <button id="fund-copy" type="button" class="secondary" disabled>Copy address</button>
           <button id="fund-refresh" type="button" class="secondary" disabled>Refresh balances</button>
         </div>
-        <section id="fund-balances" class="route-readiness neutral" aria-live="polite">
-          <strong>Balances on Base Sepolia</strong>
-          <p>Connect a wallet to read test ETH and test USDC balances.</p>
-        </section>
       </div>
-      <section class="docs-grid">
-        <article class="doc-card"><span>STEP 1</span><h2>Get test ETH</h2><p>You need a little Base Sepolia ETH to pay gas before USDC can move.</p><a href="https://www.alchemy.com/faucets/base-sepolia" rel="noreferrer" target="_blank">Alchemy Base Sepolia faucet</a></article>
-        <article class="doc-card"><span>STEP 2</span><h2>Get test USDC</h2><p>Circle sends up to 20 test USDC on Base Sepolia every 2 hours per wallet.</p><a href="https://faucet.circle.com/" rel="noreferrer" target="_blank">Circle testnet faucet</a></article>
-        <article class="doc-card"><span>STEP 3</span><h2>Return to Routes</h2><p>Switch to Base Sepolia, refresh balances here, then open the protected route.</p><a href="/routes">Open protected route</a></article>
+      <section id="guide-arc" class="guide-track">
+        <p class="step">GUARD LINKS &middot; ARC TESTNET</p>
+        <h2>Fund Arc Testnet USDC</h2>
+        <p class="muted">This is the primary path for creating and paying Guard Links.</p>
+        <section id="fund-arc-balances" class="route-readiness neutral" aria-live="polite">
+          <strong>Arc Testnet USDC</strong>
+          <p>Connect a wallet to read your Arc Testnet balance.</p>
+        </section>
+        <section class="docs-grid">
+          <article class="doc-card"><span>STEP 1</span><h2>Install MetaMask</h2><p>LedgerGuard connects through your browser wallet. We never receive your private key.</p><a href="https://metamask.io/download/" rel="noreferrer" target="_blank">Download MetaMask</a></article>
+          <article class="doc-card"><span>STEP 2</span><h2>Get test USDC</h2><p>Circle sends test USDC on Arc Testnet. Select <strong>Arc Testnet</strong> in the faucet.</p><a href="https://faucet.circle.com/" rel="noreferrer" target="_blank">Circle testnet faucet</a></article>
+          <article class="doc-card"><span>STEP 3</span><h2>Create a Guard Link</h2><p>Connect the funded wallet, enter the amount, and share the link or QR code.</p><a href="/guard/create">Create a Guard Link</a></article>
+        </section>
+      </section>
+      <section id="guide-base" class="guide-track">
+        <p class="step">OPTIONAL &middot; BASE SEPOLIA</p>
+        <h2>Fund the crosschain demo</h2>
+        <p class="muted">Only needed for the protected Base Sepolia to Arc Testnet route at <a href="/routes">/routes</a>.</p>
+        <section id="fund-base-balances" class="route-readiness neutral" aria-live="polite">
+          <strong>Base Sepolia balances</strong>
+          <p>Connect a wallet to read test ETH and test USDC.</p>
+        </section>
+        <section class="docs-grid">
+          <article class="doc-card"><span>STEP 1</span><h2>Get test ETH</h2><p>You need a little Base Sepolia ETH to pay gas before USDC can move.</p><a href="https://www.alchemy.com/faucets/base-sepolia" rel="noreferrer" target="_blank">Alchemy Base Sepolia faucet</a></article>
+          <article class="doc-card"><span>STEP 2</span><h2>Get test USDC</h2><p>Circle sends up to 20 test USDC on Base Sepolia every 2 hours per wallet.</p><a href="https://faucet.circle.com/" rel="noreferrer" target="_blank">Circle testnet faucet</a></article>
+          <article class="doc-card"><span>STEP 3</span><h2>Return to Routes</h2><p>Switch to Base Sepolia, refresh balances above, then open the protected route.</p><a href="/routes">Open protected route</a></article>
+        </section>
       </section>
     </section>
-    <section class="notice"><strong>Why faucets fail:</strong> Coinbase and Alchemy often require mainnet activity, verified accounts, or regional eligibility. If Circle shows “Limit Exceeded”, wait 2 hours or try another wallet. If you are still blocked, email <a href="mailto:lw22336599@gmail.com">lw22336599@gmail.com</a> with your public address and we can review manual testnet support options.</section>
+    <section class="notice"><strong>Why faucets fail:</strong> Faucets often require mainnet activity, verified accounts, or regional eligibility. If Circle shows “Limit Exceeded”, wait 2 hours or try another wallet. Email <a href="mailto:lw22336599@gmail.com">lw22336599@gmail.com</a> with your public address if you are blocked during testing.</section>
     ${footer}
   </main>
   <script src="/wallet.js" defer></script>
@@ -359,7 +379,50 @@ export const testnetHelpHtml = `${pageHead(
 </body>
 </html>`;
 
-export const testnetHelpJs = `const BASE_SEPOLIA={chainId:"0x14a34",chainName:"Base Sepolia",nativeCurrency:{name:"Ether",symbol:"ETH",decimals:18},rpcUrls:["https://sepolia.base.org"],blockExplorerUrls:["https://sepolia.basescan.org"]};const USDC="0x036CbD53842c5426634c792Dc1eC00166AEAcF62";const connect=document.querySelector("#fund-connect");const copy=document.querySelector("#fund-copy");const refresh=document.querySelector("#fund-refresh");const status=document.querySelector("#fund-status");const dot=document.querySelector("#fund-dot");const address=document.querySelector("#fund-address");const balances=document.querySelector("#fund-balances");const wallet=()=>window.LedgerGuardWallet;const fmtUsdc=(micro)=>{const whole=micro/1000000n;const fraction=micro%1000000n;return whole+"."+fraction.toString().padStart(6,"0").replace(/0+$/,"").replace(/\\.$/,".0")};const fmtEth=(wei)=>{const whole=wei/1000000000000000000n;const fraction=wei%1000000000000000000n;return whole+"."+fraction.toString().padStart(18,"0").slice(0,6).replace(/0+$/,"")};async function renderBalances(){if(!wallet()||!wallet().getState().connected){balances.className="route-readiness neutral";balances.innerHTML="<strong>Balances on Base Sepolia</strong><p>Connect a wallet to read test ETH and test USDC balances.</p>";return}try{await wallet().ensureChain(BASE_SEPOLIA);const ethRaw=await wallet().getProvider().request({method:"eth_getBalance",params:[wallet().getState().account,"latest"]});const usdcRaw=await wallet().readErc20Balance(USDC);const eth=fmtEth(BigInt(ethRaw));const usdc=fmtUsdc(usdcRaw);const ready=BigInt(ethRaw)>0n&&usdcRaw>0n;balances.className="route-readiness "+(ready?"allow":"review");balances.innerHTML="<strong>Balances on Base Sepolia</strong><p>ETH: <strong>"+eth+"</strong> · USDC: <strong>"+usdc+"</strong></p><p>"+(ready?"You can return to /routes and request a quote.":"You still need test ETH and/or test USDC. Use the faucet links above.")+"</p>"}catch(error){balances.className="route-readiness review";balances.innerHTML="<strong>Could not read balances</strong><p>"+(error instanceof Error?error.message:"Unknown error")+"</p>"}}function renderWallet(){if(!wallet())return;const state=wallet().getState();if(state.connected){status.textContent="Connected";dot.style.background="#4ade80";address.hidden=false;address.textContent=state.account;copy.disabled=false;refresh.disabled=false;connect.textContent="Disconnect"}else{status.textContent="Wallet not connected";dot.style.background="#555";address.hidden=true;copy.disabled=true;refresh.disabled=true;connect.textContent="Connect Wallet"}void renderBalances()}if(wallet()){wallet().subscribe(()=>renderWallet());void wallet().restore().finally(renderWallet)}connect?.addEventListener("click",async()=>{connect.disabled=true;try{if(wallet().getState().connected)wallet().disconnect();else{await wallet().connect();try{await wallet().ensureChain(BASE_SEPOLIA)}catch{}}}finally{connect.disabled=false}});copy?.addEventListener("click",async()=>{const value=wallet()?.getState().account;if(!value)return;try{await navigator.clipboard.writeText(value);status.textContent="Address copied"}catch{status.textContent="Copy the address manually"}});refresh?.addEventListener("click",()=>{void renderBalances()});`;
+export const paymentsHtml = `${pageHead(
+  "LedgerGuard | Check payments",
+  "View Arc Testnet payment history onchain or verify a Guard Link transaction hash without storing funds on LedgerGuard.",
+)}
+<body>
+  <main>
+    ${portalNavHtml("CHECK PAYMENTS")}
+    <section class="subhero">
+      <p class="eyebrow">NON-CUSTODIAL &middot; ONCHAIN PROOF</p>
+      <h1 class="compact">Check whether a payment arrived.</h1>
+      <p class="lead">LedgerGuard does not hold your funds or keep a private payment ledger. Use your public address on ArcScan, or verify a transaction hash against the declared Guard Link details.</p>
+    </section>
+    <section class="panel developer-panel">
+      <div>
+        <p class="step">RECEIVING ADDRESS</p>
+        <h2>View onchain history</h2>
+        <p class="muted">Open ArcScan for any Arc Testnet address to see incoming USDC transfers.</p>
+        <form id="payments-address-form">
+          <label>Your receiving address<input id="payments-address" required pattern="0x[0-9a-fA-F]{40}" placeholder="0x…" autocomplete="off"></label>
+          <button type="submit">Open ArcScan history</button>
+        </form>
+        <section id="payments-address-result" class="result neutral" hidden aria-live="polite"></section>
+      </div>
+      <div>
+        <p class="step">TRANSACTION HASH</p>
+        <h2>Verify a Guard Link payment</h2>
+        <p class="muted">Paste the transaction hash and the payment details from the Guard Link you shared or received.</p>
+        <form id="payments-verify-form">
+          <label>Transaction hash<input id="payments-tx" required pattern="0x[0-9a-fA-F]{64}" placeholder="0x…" autocomplete="off" spellcheck="false"></label>
+          <label>Recipient address<input id="payments-recipient" required pattern="0x[0-9a-fA-F]{40}" placeholder="0x…" autocomplete="off"></label>
+          <label>Amount (USDC)<input id="payments-amount" required inputmode="decimal" pattern="(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,6})?" placeholder="1.00"></label>
+          <label>Payer address (optional)<input id="payments-payer" pattern="0x[0-9a-fA-F]{40}" placeholder="0x…" autocomplete="off"></label>
+          <label>Purpose (optional)<input id="payments-purpose" maxlength="120" placeholder="Example invoice"></label>
+          <button type="submit">Verify onchain result</button>
+        </form>
+        <section id="payments-verify-result" class="result neutral" hidden aria-live="polite"></section>
+      </div>
+    </section>
+    <section class="notice"><strong>Privacy:</strong> Verification uses public Arc Testnet data only. LedgerGuard stores neither your address history nor wallet balances on this page.</section>
+    <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/testnet-help#arc">Wallet setup</a><a href="https://testnet.arcscan.app" rel="noreferrer">Open ArcScan</a></div>
+    ${footer}
+  </main>${portalPageScripts("/payments.js")}
+</body>
+</html>`;
 
 export const portalHtml = `${pageHead(
   "LedgerGuard | Send a USDC payment link",
@@ -1028,6 +1091,11 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 .wallet-picker-dialog{width:min(420px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow-lg)}
 .wallet-picker-dialog h2{margin:0 0 8px;font-size:24px;color:var(--text)}
 .wallet-picker-lead{margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.55}
+.wallet-help-steps{margin:0 0 20px;padding-left:20px;color:var(--muted);line-height:1.7}
+.wallet-help-steps a{color:var(--link)}
+.guide-track{display:grid;gap:18px;padding-top:28px;margin-top:28px;border-top:1px solid var(--line)}
+.field-help{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.6}
+.field-help a{color:var(--link);text-decoration:none}
 .wallet-picker-list{display:grid;gap:10px;margin-bottom:16px}
 .wallet-picker-option{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-muted);color:var(--text);cursor:pointer;text-align:left}
 .wallet-picker-option:hover{border-color:#93c5fd;box-shadow:0 0 0 1px #93c5fd44}

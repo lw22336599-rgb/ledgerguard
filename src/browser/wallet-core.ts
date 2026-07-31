@@ -16,6 +16,15 @@ export type ChainDefinition = {
 
 const STORAGE_KEY = "ledgerguard.wallet.session";
 
+export class WalletNotFoundError extends Error {
+  readonly code = "WALLET_NOT_FOUND" as const;
+
+  constructor() {
+    super("No browser wallet detected.");
+    this.name = "WalletNotFoundError";
+  }
+}
+
 type WalletSession = {
   account: string;
   chainId: string;
@@ -112,9 +121,7 @@ export class WalletCore {
       this.activeUuid = null;
       return window.ethereum;
     }
-    throw new Error(
-      "No wallet found. Install MetaMask (or another EVM wallet), refresh this page, then click Connect again.",
-    );
+    throw new WalletNotFoundError();
   }
 
   async connect(preferredUuid?: string | null): Promise<WalletState> {

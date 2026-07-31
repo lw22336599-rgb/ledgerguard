@@ -106,14 +106,16 @@ import {
   siteCss,
   statusHtml,
   testnetHelpHtml,
-  testnetHelpJs,
   mainnetCanaryHtml,
   aboutHtml,
   privacyHtml,
   termsHtml,
   testerHtml,
+  paymentsHtml,
 } from "./ui.js";
 import { guardLinkBundle } from "./generated/guard-link-bundle.js";
+import { testnetHelpBundle } from "./generated/testnet-help-bundle.js";
+import { paymentsCheckBundle } from "./generated/payments-check-bundle.js";
 import { developerShadowJs } from "./ui-shadow.js";
 
 export const app = new Hono<AppEnvironment>();
@@ -235,8 +237,15 @@ app.get("/canary", (context) => {
   return context.html(mainnetCanaryHtml);
 });
 app.get("/testnet-help", (context) => context.html(testnetHelpHtml));
+app.get("/payments", (context) => context.html(paymentsHtml));
 app.get("/testnet-help.js", (context) =>
-  context.body(testnetHelpJs, 200, {
+  context.body(testnetHelpBundle, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  }),
+);
+app.get("/payments.js", (context) =>
+  context.body(paymentsCheckBundle, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
     "Cache-Control": "public, max-age=300",
   }),

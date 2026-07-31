@@ -1,4 +1,5 @@
 import { BASE_SEPOLIA } from "./wallet-chains.js";
+import { handleWalletConnectError } from "./wallet-help.js";
 
 function bindNavWallet(): void {
   const button = document.querySelector<HTMLButtonElement>("#nav-connect");
@@ -44,9 +45,7 @@ function bindNavWallet(): void {
         }
       }
     } catch (error) {
-      window.alert(
-        error instanceof Error ? error.message : "Wallet connection failed.",
-      );
+      await handleWalletConnectError(error);
     } finally {
       button.disabled = false;
     }
