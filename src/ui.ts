@@ -26,7 +26,7 @@ export const guardRecipientDemoDefault =
 
 const footer = `<footer class="site-footer">
   <div class="footer-primary">LedgerGuard &middot; Arc-first &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} live at <a href="/canary">/canary</a></div>
-  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/payments">Check payments</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Wallet setup</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="https://testnet.arcscan.app" rel="noreferrer">ArcScan</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/pay">Pay a link</a> &middot; <a href="/payments">Check payments</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Wallet setup</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="https://testnet.arcscan.app" rel="noreferrer">ArcScan</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
@@ -40,7 +40,7 @@ export function portalNavHtml(
 ): string {
   const badgeClass = options?.danger ? "badge danger" : "badge";
   return `<nav class="portal-nav">
-      <a class="brand" href="/"><img class="brand-mark" src="${brandMarkSrc}" alt="" width="32" height="32" decoding="async">LedgerGuard</a>
+      <a class="brand" href="/"><img class="brand-mark" src="${brandMarkSrc}" alt="" width="44" height="44" decoding="async">LedgerGuard</a>
       <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
       <div class="portal-nav-links">${portalNavLinks}</div>
       <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
@@ -111,53 +111,61 @@ export function guardLinkHtml(input: {
         : "Review required";
   const decisionSummary =
     input.decision === "ALLOW"
-      ? "The deterministic checks and read-only simulation passed. Review the exact wallet transaction before signing."
+      ? "The checks passed. Review the exact wallet transaction before signing."
       : input.decision === "BLOCK"
-        ? "A defined policy risk was detected. Do not sign or send this payment."
-        : "The payer or another required condition is incomplete. Connect a test wallet or inspect the evidence before proceeding.";
+        ? "A policy risk was detected. Do not sign or send this payment."
+        : "Connect your wallet or review the details before paying.";
   return `${pageHead(
-    "LedgerGuard | Payment Request",
-    "Review a prefilled Arc Testnet USDC payment request before approving it in your wallet.",
+    "LedgerGuard | Payment request",
+    "Review a USDC payment request on Arc Testnet before approving it in your wallet.",
   )}
 <body>
   <main>
-    ${portalNavHtml("PAYMENT REQUEST")}
+    ${portalNavHtml("PAY REQUEST")}
     <section class="subhero">
-      <p class="eyebrow">NO CUSTODY &middot; EXPLICIT WALLET APPROVAL</p>
+      <p class="eyebrow">NO CUSTODY &middot; YOU APPROVE IN YOUR WALLET</p>
       <h1 class="compact">Payment request</h1>
-      <p class="lead">Review who receives the payment, how much USDC can move, and why—before your wallet asks you to sign.</p>
+      <p class="lead">Check who gets paid, how much USDC moves, and why—before you approve.</p>
+    </section>
+    <section id="payment-complete" class="payment-complete" hidden aria-live="polite">
+      <p class="step">PAYMENT COMPLETE</p>
+      <h2 class="payment-complete-title">Payment complete</h2>
+      <p class="payment-complete-line">You paid <strong id="complete-amount">0 USDC</strong></p>
+      <p class="payment-complete-line">To <strong id="complete-recipient">recipient</strong></p>
+      <p class="payment-complete-line">Transaction <a id="complete-tx" href="#" rel="noreferrer" target="_blank">View on ArcScan</a></p>
     </section>
     <section class="panel">
       <div>
-        <p class="step">DECLARED INTENT</p>
+        <p class="step">PAYMENT DETAILS</p>
         <dl>${fields.map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`).join("")}</dl>
       </div>
       <section class="result ${input.decision.toLowerCase()}">
-        <span class="decision-code">${escapeHtml(input.decision)}</span>
         <strong>${escapeHtml(decisionLabel)}</strong>
         <p>${escapeHtml(decisionSummary)}</p>
-        <details><summary>View evidence</summary>
+        <details><summary>Payment receipt details</summary>
+          <p class="muted">Technical status: <code>${escapeHtml(input.decision)}</code></p>
           <ul>${input.findings.map((finding) => `<li><strong>${escapeHtml(finding.code)}</strong>: ${escapeHtml(finding.message)}</li>`).join("")}</ul>
-          <p>Request ID: <code>${escapeHtml(input.requestId)}</code></p>
+          <p>Reference: <code>${escapeHtml(input.requestId)}</code></p>
         </details>
       </section>
     </section>
     <section id="guard-wallet"
       class="wallet-panel"
       data-decision="${escapeHtml(input.decision)}"
+      data-issuer="${escapeHtml(input.issuer ?? "")}"
       data-payer="${escapeHtml(input.payer === "Not declared" ? "" : input.payer)}"
       data-recipient="${escapeHtml(input.recipient)}"
       data-amount="${escapeHtml(input.amount)}"
       data-purpose="${escapeHtml(input.purpose)}">
       <div>
-        <p class="step">OPTIONAL TESTNET COMPLETION</p>
-        <h2>Continue in your wallet</h2>
-        <p id="wallet-status" class="muted">LedgerGuard never receives your private key. Your wallet shows the exact transaction and asks for final approval.</p>
+        <p class="step">APPROVE PAYMENT</p>
+        <h2>Pay in your wallet</h2>
+        <p id="wallet-status" class="muted">LedgerGuard never sees your private key. Your wallet shows the exact transaction before you approve.</p>
       </div>
       <div class="wallet-buttons">
-        <button id="connect-wallet" type="button" class="secondary">Connect test wallet</button>
-        <button id="send-payment" type="button" disabled>Review test payment in wallet</button>
-        <button id="verify-evidence" type="button" class="secondary" hidden>Verify onchain result</button>
+        <button id="connect-wallet" type="button" class="secondary">Connect wallet</button>
+        <button id="send-payment" type="button" disabled>Approve payment</button>
+        <button id="verify-evidence" type="button" class="secondary" hidden>Confirm payment complete</button>
       </div>
       <section id="wallet-result" class="result neutral" hidden aria-live="polite"></section>
     </section>
@@ -165,10 +173,10 @@ export function guardLinkHtml(input: {
       <p class="step">POWERED BY LEDGERGUARD</p>
       <h2>Get paid with USDC too</h2>
       <p id="guard-cta-summary" class="muted">Create your own payment link in under a minute. No account required.</p>
-      <a id="guard-cta-link" class="button-link" href="/guard/create">Create your Guard Link</a>
+      <a id="guard-cta-link" class="button-link" href="/guard/create">Create your payment link</a>
     </section>
-    <section class="notice"><strong>Testnet only:</strong> Arc Testnet assets have no financial value. No mainnet transaction can be initiated from this page. A self-declared sender name is context, not verified identity.</section>
-    <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/payments">Check payments</a><a href="/protect">Open advanced checker</a><a href="/docs">Developer docs</a><a href="/test">Join testing</a></div>
+    <section class="notice"><strong>Testnet only:</strong> Arc Testnet assets have no financial value. A sender name is self-declared context, not verified identity.</section>
+    <div class="links bottom-links"><a href="/guard/create">Get paid</a><a href="/pay">Pay a link</a><a href="/payments">Check payments</a><a href="/testnet-help#arc">Wallet setup</a></div>
     ${footer}
   </main>${portalPageScripts("/guard.js")}
 </body>
@@ -176,23 +184,23 @@ export function guardLinkHtml(input: {
 }
 
 export const guardBuilderHtml = `${pageHead(
-  "LedgerGuard | Create a Guard Link",
-  "Create a Guard Link on Arc Testnet. Share the link or QR so the payer reviews before signing. Base Mainnet x402 demo at /canary.",
+  "LedgerGuard | Create a payment link",
+  "Create a USDC payment link on Arc Testnet. Share the link or QR so the payer reviews before approving.",
 )}
 <body>
   <main>
-    ${portalNavHtml("GUARD LINK")}
+    ${portalNavHtml("GET PAID")}
     <section class="subhero">
       <p class="eyebrow">${arcPrimaryEyebrow}</p>
-      <h1 class="compact">Create a USDC payment link.</h1>
-      <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer reviews who receives how much before signing.</p>
+      <h1 class="compact">Create a payment link.</h1>
+      <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. They review who gets paid before approving.</p>
       <p class="portal-network-note">${arcPrimaryNetworkNoteHtml}</p>
     </section>
     <section id="guard-verified-notice" class="notice" hidden><strong>Welcome back.</strong> Your receiving address is prefilled from your verified payment. Connect the same wallet or edit the address before creating a link.</section>
     <section class="panel builder-panel">
       <div class="chain-selector-row">
         <div class="chain-network-active">
-          <span class="chain-network-label">Active network for Guard Links</span>
+          <span class="chain-network-label">Network</span>
           <strong id="guard-chain-label">Arc Testnet</strong>
         </div>
       </div>
@@ -203,7 +211,14 @@ export const guardBuilderHtml = `${pageHead(
           <button id="w-btn" type="button" class="nav-wallet-btn">Connect Wallet</button>
         </div>
         <div id="w-detail" class="wallet-status-detail" hidden></div>
-        <p class="field-help"><a href="/testnet-help#arc">Need Arc Testnet USDC?</a> &middot; <a href="/payments">Check incoming payments</a></p>
+        <p class="field-help">No wallet yet? <a href="/testnet-help#arc">5-minute setup guide</a> &middot; <a href="/payments">Check incoming payments</a></p>
+      </div>
+      <p class="step">QUICK START</p>
+      <div class="template-chips" role="group" aria-label="Payment templates">
+        <button type="button" class="template-chip" data-amount="50.00" data-purpose="Freelance invoice">Freelance invoice</button>
+        <button type="button" class="template-chip" data-amount="19.99" data-purpose="Product sale">Product sale</button>
+        <button type="button" class="template-chip" data-amount="1200.00" data-purpose="Rent share">Rent share</button>
+        <button type="button" class="template-chip" data-amount="5.00" data-purpose="Tip or thanks">Tip or thanks</button>
       </div>
       <form id="guard-builder">
         <label>Your name (optional)<input id="guard-issuer" name="issuer" maxlength="80" placeholder="Example: Alex or your shop name"></label>
@@ -407,15 +422,41 @@ export const paymentsHtml = `${pageHead(
       </div>
     </section>
     <section class="notice"><strong>Privacy:</strong> Verification uses public Arc Testnet data only. LedgerGuard stores neither your address history nor wallet balances on this page.</section>
-    <div class="links bottom-links"><a href="/guard/create">Create a Guard Link</a><a href="/testnet-help#arc">Wallet setup</a><a href="https://testnet.arcscan.app" rel="noreferrer">Open ArcScan</a></div>
+    <div class="links bottom-links"><a href="/guard/create">Get paid</a><a href="/pay">Pay a link</a><a href="/testnet-help#arc">Wallet setup</a><a href="https://testnet.arcscan.app" rel="noreferrer">Open ArcScan</a></div>
     ${footer}
   </main>${portalPageScripts("/payments.js")}
 </body>
 </html>`;
 
+export const payHtml = `${pageHead(
+  "LedgerGuard | Pay with USDC",
+  "Open a payment link you received. Review amount and recipient before approving in your wallet.",
+)}
+<body>
+  <main>
+    ${portalNavHtml("PAY")}
+    <section class="subhero">
+      <p class="eyebrow">PAY A LINK · ARC TESTNET</p>
+      <h1 class="compact">Pay with USDC</h1>
+      <p class="lead">Paste the payment link someone sent you. You will review who gets paid and how much before approving.</p>
+    </section>
+    <section class="panel">
+      <form id="pay-form">
+        <label>Payment link<input id="pay-url" name="url" required placeholder="https://…/guard?…" autocomplete="off" spellcheck="false"></label>
+        <button type="submit">Open payment</button>
+      </form>
+      <section id="pay-result" class="result neutral" hidden aria-live="polite"></section>
+    </section>
+    <section class="notice"><strong>Testnet:</strong> Arc Testnet USDC has no real money value.</section>
+    <div class="links bottom-links"><a href="/guard/create">Get paid</a><a href="/testnet-help#arc">Wallet setup</a></div>
+    ${footer}
+  </main>${portalPageScripts("/pay.js")}
+</body>
+</html>`;
+
 export const portalHtml = `${pageHead(
-  "LedgerGuard | Send a USDC payment link",
-  "Arc-first Guard Links on Arc Testnet. Share a payment link or QR code and let the payer review before signing. Base x402 demo at /canary.",
+  "LedgerGuard | Send and receive USDC",
+  "Send and receive USDC with a simple payment link on Arc Testnet. No signup. Non-custodial.",
 )}
 <body>
   <main>
@@ -424,49 +465,63 @@ export const portalHtml = `${pageHead(
       <div class="portal-hero-grid">
         <div class="portal-hero-copy">
           <p class="eyebrow">${arcPrimaryEyebrow}</p>
-          <h1>Send a USDC payment link.<br><span>Get paid without asking for an address first.</span></h1>
-          <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. The payer reviews who receives how much before signing.</p>
+          <h1>Send and receive USDC<br><span>with a simple link.</span></h1>
+          <p class="lead">Check who gets paid and how much before you approve. No signup. No technical setup.</p>
           <p class="portal-network-note">${arcPrimaryNetworkNoteHtml}</p>
-          <div class="portal-actions"><a class="primary-action portal-primary-cta" href="/guard/create">Create a Guard Link</a></div>
-          <p class="portal-trust-list">No signup · Non-custodial · Arc Testnet Guard Links</p>
+          <div class="portal-actions portal-dual-cta">
+            <a class="primary-action portal-primary-cta" href="/guard/create">Get paid</a>
+            <a class="secondary-action portal-secondary-cta" href="/pay">Pay a link</a>
+          </div>
+          <p class="portal-trust-list"><a href="#how-it-works">New here? How it works</a> &middot; <a href="/testnet-help#arc">No wallet yet?</a> &middot; <a href="/docs">Developers</a></p>
         </div>
         <figure class="portal-hero-visual">
-          <img src="/marketing/hero-guard-builder.png" alt="Guard Link builder with QR code and shareable payment link" width="640" height="360" loading="eager">
+          <img src="/marketing/hero-guard-builder.png" alt="Payment link builder with QR code" width="640" height="360" loading="eager">
         </figure>
       </div>
     </section>
-    <section class="how-it-works" aria-label="How it works">
+    <section id="how-it-works" class="how-it-works" aria-label="How it works">
       <p class="eyebrow">HOW IT WORKS</p>
-      <h2 class="compact">Three steps to get paid.</h2>
+      <h2 class="compact">Three steps — about 30 seconds.</h2>
       <div class="how-steps">
         <article class="how-step-card">
-          <img src="/marketing/step-create.png" alt="Create a Guard Link with amount and recipient" width="400" height="250" loading="lazy">
+          <img src="/marketing/step-create.png" alt="Connect wallet and enter amount" width="400" height="250" loading="lazy">
           <p class="step">STEP 1</p>
-          <h3>Create</h3>
-          <p class="muted">Connect your wallet and enter the amount.</p>
+          <h3>Connect wallet</h3>
+          <p class="muted">Use MetaMask or another wallet. Takes about two minutes the first time.</p>
         </article>
         <article class="how-step-card">
-          <img src="/marketing/step-payment.png" alt="Payment request page showing amount and recipient" width="400" height="250" loading="lazy">
+          <img src="/marketing/step-payment.png" alt="Share payment link" width="400" height="250" loading="lazy">
           <p class="step">STEP 2</p>
-          <h3>Share</h3>
-          <p class="muted">Send the link or QR code in chat.</p>
+          <h3>Enter amount</h3>
+          <p class="muted">Set how much USDC you want to receive and what it is for.</p>
         </article>
         <article class="how-step-card">
-          <img src="/marketing/step-verified.png" alt="Verified payment with option to create your own Guard Link" width="400" height="250" loading="lazy">
+          <img src="/marketing/step-verified.png" alt="Payment complete" width="400" height="250" loading="lazy">
           <p class="step">STEP 3</p>
-          <h3>Get paid</h3>
-          <p class="muted">They review and sign in their wallet, then verify onchain.</p>
+          <h3>Share the link</h3>
+          <p class="muted">Send the link or QR code. They pay, you receive USDC onchain.</p>
         </article>
       </div>
-      <div class="portal-actions how-cta"><a class="primary-action portal-primary-cta" href="/guard/create">Create a Guard Link</a></div>
+      <section class="faq-panel">
+        <h3>Common questions</h3>
+        <dl class="faq-list">
+          <dt>What is USDC?</dt><dd>A digital dollar stablecoin. On Arc Testnet it has no real money value.</dd>
+          <dt>What is a wallet?</dt><dd>Your account for crypto — like a login for payments.</dd>
+          <dt>Do I need to be a developer?</dt><dd>No. It works like a payment app.</dd>
+        </dl>
+      </section>
+      <div class="portal-actions how-cta portal-dual-cta">
+        <a class="primary-action portal-primary-cta" href="/guard/create">Get paid</a>
+        <a class="secondary-action portal-secondary-cta" href="/pay">Pay a link</a>
+      </div>
     </section>
     <section class="portal-developers">
       <p class="eyebrow">FOR DEVELOPERS</p>
-      <h2 class="compact">Built for agents and developers too.</h2>
-      <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI</p>
-      <div class="links"><a href="/docs">Read the docs</a><a href="/canary">${baseMainnetLinkLabel}</a><a href="/status">Live status</a></div>
+      <h2 class="compact">APIs, agents, and automation</h2>
+      <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI — same safety core, developer docs inside.</p>
+      <div class="links"><a href="/docs">Developer center</a><a href="/canary">${baseMainnetLinkLabel}</a><a href="/status">Live status</a></div>
     </section>
-    <section class="notice"><strong>Networks:</strong> Guard Links use Arc Testnet assets with no financial value. Base Mainnet x402 at <a href="/canary">/canary</a> is live and operational (real USDC settlement; not a Guard Link).</section>
+    <section class="notice"><strong>Testnet:</strong> Guard Links use Arc Testnet USDC (no real money). Base Mainnet x402 at <a href="/canary">/canary</a> is a separate live demo.</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
@@ -984,6 +1039,19 @@ nav{min-height:80px;gap:24px;border-color:var(--line)}
 .portal-trust-list{margin:16px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
 .portal-primary-cta{display:inline-flex;align-items:center;justify-content:center;min-width:240px;padding:16px 24px;font-size:17px;font-weight:800;text-decoration:none;background:var(--brand);color:#fff;box-shadow:0 12px 32px #2563eb33;border-radius:10px}
 .portal-primary-cta:hover{filter:brightness(1.05)}
+.portal-dual-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.portal-secondary-cta{display:inline-flex;align-items:center;justify-content:center;min-width:200px;padding:16px 24px;font-size:17px;font-weight:800;text-decoration:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;box-shadow:var(--shadow)}
+.payment-complete{padding:32px;border:1px solid #86efac;background:#f0fdf4;border-radius:16px;margin-bottom:24px}
+.payment-complete[hidden]{display:none!important}
+.payment-complete-title{margin:8px 0 16px;font-size:28px}
+.payment-complete-line{margin:6px 0;color:var(--muted)}
+.template-chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px}
+.template-chip{padding:10px 16px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);font-weight:600;font-size:14px;cursor:pointer}
+.template-chip.active{border-color:var(--brand);background:#eff6ff;color:var(--brand)}
+.faq-panel{margin-top:36px;padding:24px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.faq-list{margin:0}
+.faq-list dt{font-weight:700;margin-top:16px}
+.faq-list dd{margin:6px 0 0;color:var(--muted)}
 .how-it-works{padding:20px 0 72px;border-top:1px solid var(--line)}
 .how-it-works h2.compact{font-size:clamp(34px,5vw,56px);margin:12px 0 28px;color:var(--text)}
 .how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}

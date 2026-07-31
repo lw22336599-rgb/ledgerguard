@@ -111,6 +111,7 @@ import {
   termsHtml,
   testerHtml,
   paymentsHtml,
+  payHtml,
 } from "./ui.js";
 import { guardLinkBundle } from "./generated/guard-link-bundle.js";
 import {
@@ -120,6 +121,7 @@ import {
 } from "./generated/brand-assets.js";
 import { testnetHelpBundle } from "./generated/testnet-help-bundle.js";
 import { paymentsCheckBundle } from "./generated/payments-check-bundle.js";
+import { payOpenBundle } from "./generated/pay-open-bundle.js";
 import { developerShadowJs } from "./ui-shadow.js";
 
 export const app = new Hono<AppEnvironment>();
@@ -242,6 +244,7 @@ app.get("/canary", (context) => {
 });
 app.get("/testnet-help", (context) => context.html(testnetHelpHtml));
 app.get("/payments", (context) => context.html(paymentsHtml));
+app.get("/pay", (context) => context.html(payHtml));
 app.get("/testnet-help.js", (context) =>
   context.body(testnetHelpBundle, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
@@ -250,6 +253,12 @@ app.get("/testnet-help.js", (context) =>
 );
 app.get("/payments.js", (context) =>
   context.body(paymentsCheckBundle, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  }),
+);
+app.get("/pay.js", (context) =>
+  context.body(payOpenBundle, 200, {
     "Content-Type": "text/javascript; charset=utf-8",
     "Cache-Control": "public, max-age=300",
   }),
