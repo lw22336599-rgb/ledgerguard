@@ -96,3 +96,14 @@ for (const [path, location] of [
   const ok = r.status === 301 && r.headers.get("location") === location;
   console.log(ok ? "OK" : "NO", path, "->", r.status, r.headers.get("location"));
 }
+
+console.log("\n=== LOAD / BRAND WEIGHT ===");
+const t0 = performance.now();
+await fetch(`${base}/`);
+const homeMs = performance.now() - t0;
+const logo64 = await fetch(`${base}/brand/logo-64.png?v=5`);
+const fav = await fetch(`${base}/favicon.png?v=5`);
+console.log("home fetch ms", homeMs.toFixed(0));
+console.log("logo-64 KB", ((await logo64.arrayBuffer()).byteLength / 1024).toFixed(1));
+console.log("favicon.png KB", ((await fav.arrayBuffer()).byteLength / 1024).toFixed(1));
+console.log(homeMs <= 1200 ? "OK" : "WARN", "home fetch under 1.2s");

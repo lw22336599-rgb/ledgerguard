@@ -1,5 +1,5 @@
-const brandAssetVersion = "4";
-const brandMarkSrc = `/favicon.png?v=${brandAssetVersion}`;
+const brandAssetVersion = "5";
+const brandMarkSrc = `/brand/logo-64.png?v=${brandAssetVersion}`;
 
 const pageHead = (title: string, description: string) => `<!doctype html>
 <html lang="en">
@@ -11,7 +11,7 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <link rel="icon" href="/favicon.png?v=${brandAssetVersion}" type="image/png">
   <link rel="icon" href="/favicon.svg?v=${brandAssetVersion}" type="image/svg+xml">
   <link rel="shortcut icon" href="/favicon.ico?v=${brandAssetVersion}" type="image/png">
-  <link rel="apple-touch-icon" href="/favicon.png?v=${brandAssetVersion}">
+  <link rel="apple-touch-icon" href="/brand/logo-192.png?v=${brandAssetVersion}">
   <link rel="stylesheet" href="/styles.css">
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
@@ -194,7 +194,7 @@ export const guardBuilderHtml = `${pageHead(
       <p class="eyebrow">${arcPrimaryEyebrow}</p>
       <h1 class="compact">Create a payment link.</h1>
       <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. They review who gets paid before approving.</p>
-      <p class="portal-network-note">${arcPrimaryNetworkNoteHtml}</p>
+      <p class="portal-network-note">${portalHeroNetworkNoteHtml} Need the Base Mainnet x402 demo? See <a href="/canary">${baseMainnetLinkLabel}</a>.</p>
     </section>
     <section id="guard-verified-notice" class="notice" hidden><strong>Welcome back.</strong> Your receiving address is prefilled from your verified payment. Connect the same wallet or edit the address before creating a link.</section>
     <section class="panel builder-panel">
@@ -366,6 +366,9 @@ export const payHtml = `${pageHead(
         <label>Payment link<input id="pay-url" name="url" required placeholder="https://…/guard?…" autocomplete="off" spellcheck="false"></label>
         <button type="submit">Open payment</button>
       </form>
+      <div id="pay-recent-wrap" class="pay-recent-wrap" hidden>
+        <button id="pay-recent" type="button" class="secondary">Open last payment link</button>
+      </div>
       <section id="pay-result" class="result neutral" hidden aria-live="polite"></section>
     </section>
     <section class="notice"><strong>Testnet:</strong> Arc Testnet USDC has no real money value.</section>
@@ -814,6 +817,8 @@ nav{min-height:80px;gap:24px;border-color:var(--line)}
 .portal-primary-cta:hover{filter:brightness(1.05)}
 .portal-dual-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
 .portal-secondary-cta{display:inline-flex;align-items:center;justify-content:center;min-width:200px;padding:16px 24px;font-size:17px;font-weight:800;text-decoration:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;box-shadow:var(--shadow)}
+.pay-recent-wrap{margin-top:14px}
+.pay-recent-wrap button.secondary{width:100%;max-width:420px}
 .payment-complete{padding:32px;border:1px solid #86efac;background:#f0fdf4;border-radius:16px;margin-bottom:24px}
 .payment-complete[hidden]{display:none!important}
 .payment-complete-title{margin:8px 0 16px;font-size:28px}
@@ -974,6 +979,7 @@ footer{border-color:var(--line);line-height:1.9}
   .portal-nav-actions .nav-wallet-btn{flex:0 1 auto;min-width:0;max-width:100%}
   .portal-hero-grid{grid-template-columns:1fr;gap:28px}
   .portal-hero-visual{order:-1}
+  .portal-dual-cta a{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
   .how-steps{grid-template-columns:1fr}
   .route-grid{grid-template-columns:1fr}.route-evidence{grid-column:auto}.stage-row{grid-template-columns:1fr 1fr}
   .flow-row{grid-template-columns:1fr}

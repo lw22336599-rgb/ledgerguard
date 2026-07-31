@@ -95,20 +95,20 @@ for (const size of [512, 192, 64, 32]) {
 }
 
 const faviconPng = await sharp(brandCanvas)
-  .resize(512, 512, {
+  .resize(192, 192, {
     fit: "contain",
     background: { r: 255, g: 255, b: 255, alpha: 1 },
   })
-  .png()
+  .png({ compressionLevel: 9, palette: true })
   .toBuffer();
 const faviconIco = await sharp(brandCanvas)
   .resize(32, 32, {
     fit: "contain",
     background: { r: 255, g: 255, b: 255, alpha: 1 },
   })
-  .png()
+  .png({ compressionLevel: 9, palette: true })
   .toBuffer();
-const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LedgerGuard"><image href="data:image/png;base64,${faviconPng.toString("base64")}" width="512" height="512"/></svg>`;
+const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="LedgerGuard"><image href="/brand/logo-192.png" width="192" height="192"/></svg>`;
 
 await writeFile(join(root, "favicon.png"), faviconPng);
 await writeFile(join(root, "favicon.ico"), faviconIco);

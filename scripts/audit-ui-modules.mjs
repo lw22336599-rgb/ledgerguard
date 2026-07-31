@@ -208,6 +208,11 @@ async function auditViewport(label, viewport, isMobile) {
 await auditViewport("desktop", { viewport: { width: 1280, height: 800 } }, false);
 await auditViewport("mobile", devices["iPhone 13"], true);
 
+const breakpointWidths = [899, 759, 479];
+for (const width of breakpointWidths) {
+  await auditViewport(`bp-${width}`, { viewport: { width, height: 844 } }, width <= 900);
+}
+
 await browser.close();
 
 for (const err of report.consoleErrors) {
