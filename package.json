@@ -52,6 +52,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "@x402/fetch": "^2.20.0",
     "esbuild": "^0.28.1",
+    "playwright": "^1.62.1",
     "sharp": "^0.35.3",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",

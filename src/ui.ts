@@ -6,6 +6,7 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <meta name="description" content="${description}">
   <title>${title}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/favicon.svg">
   <link rel="stylesheet" href="/styles.css">
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
@@ -236,19 +237,14 @@ export const guardBuilderHtml = `${pageHead(
 
 export const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LedgerGuard">
   <defs>
-    <linearGradient id="lg-shield" x1="14" y1="12" x2="50" y2="52" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2563eb"/>
+    <linearGradient id="lg-shield" x1="32" y1="11" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b82f6"/>
       <stop offset="1" stop-color="#7c3aed"/>
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="16" fill="#ffffff"/>
-  <path d="M32 11 49 18.5v11.5c0 10.5-6.5 18-17 21.5-10.5-3.5-17-11-17-21.5V18.5L32 11Z" fill="url(#lg-shield)" stroke="#ffffff" stroke-width="1.25"/>
-  <g fill="none" stroke="#ffffff" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M23.5 25.5V37.5"/>
-    <path d="M23.5 37.5H29.5"/>
-    <path d="M39.2 29.8a5.6 5.6 0 1 0-1.2 10.2"/>
-    <path d="M39.2 32H35.6"/>
-  </g>
+  <path d="M32 11 49 18.5v11.5c0 10.5-6.5 18-17 21.5-10.5-3.5-17-11-17-21.5V18.5L32 11Z" fill="url(#lg-shield)"/>
+  <path fill="#ffffff" d="M20.8 22.6h6.4v13.1h12.6v4.3H20.8V22.6zm14.2 0h8.6c4.8 0 8.7 3.9 8.7 8.7s-3.9 8.7-8.7 8.7h-4.1v-4.2h3.7c2.4 0 4.3-1.9 4.3-4.3s-1.9-4.3-4.3-4.3h-3.7V22.6z"/>
 </svg>`;
 
 export function routesHtml(input: {
@@ -977,7 +973,7 @@ body{
 main{width:min(1180px,calc(100% - 48px))}
 nav{min-height:80px;gap:24px;border-color:var(--line)}
 .brand{display:inline-flex;align-items:center;gap:10px;font-size:21px;color:var(--text);text-decoration:none;font-weight:800}
-.brand-mark{width:28px;height:28px;border-radius:8px;flex:none;box-shadow:0 0 0 1px var(--line)}
+.brand-mark{width:28px;height:28px;border-radius:8px;flex:none}
 .brand small{color:var(--accent);font:800 11px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
 .portal-nav-links,.nav-actions{display:flex;align-items:center;gap:24px}
 .portal-nav-links a,.nav-actions a{color:var(--muted);font-size:14px;text-decoration:none}
