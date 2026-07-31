@@ -1,6 +1,6 @@
 {
   "name": "@ledgerguard1/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "LedgerGuard stablecoin payment safety SDK — preflight before signing, evidence after settlement.",
   "type": "module",
   "license": "MIT",

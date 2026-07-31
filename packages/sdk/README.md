@@ -54,3 +54,5 @@ await withPreflight(
 ```
 
 See `docs/INTEGRATION_STACK.md` in the main repository for the recommended stack with x402 sellers and Arc Guard Links.
+
+**Production:** use the **hosted API** (this package is an HTTP client only). Do not self-host the server rules engine for security decisions. See [OPEN_SOURCE_POLICY.md](https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/OPEN_SOURCE_POLICY.md).

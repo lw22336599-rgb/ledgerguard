@@ -53,7 +53,7 @@ Verified on 2026-07-29:
 
 - Repository working tree was clean before this application draft was added.
 - `npm test`: 148 tests passed.
-- `@ledgerguard1/sdk@0.1.0` published on npm.
+- `@ledgerguard1/sdk@0.1.1` published on npm.
 - `npm run typecheck`: passed.
 - Public `/health`: HTTP 200.
 - Public `/ready`: HTTP 200 and Arc Testnet chain ID `5042002`.

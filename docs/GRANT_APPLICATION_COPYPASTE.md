@@ -21,7 +21,7 @@
 
 ## Short description (≈280 characters)
 
-Non-custodial Arc USDC payment safety: Guard Links for human-readable payment requests, preflight API (ALLOW/REVIEW/BLOCK), post-settlement evidence, and x402 testnet resources — no custody, no private keys.
+Non-custodial Arc USDC **payment intent safety**: Guard Links, preflight API (ALLOW/REVIEW/BLOCK), post-settlement evidence, npm SDK, x402-compatible mapping — no custody, no private keys.
 
 ---
 
@@ -51,7 +51,7 @@ https://github.com/lw22336599-rgb/ledgerguard
 
 ## Long description (paste into “tell us about your project”)
 
-LedgerGuard is a non-custodial payment safety layer for USDC on **Arc Testnet**. It helps humans and autonomous agents answer one question before signing: *does this transaction match what we intended?*
+LedgerGuard is a non-custodial **stablecoin payment intent safety** layer for USDC on **Arc Testnet**. It helps humans and autonomous agents answer one question before signing: *does this transaction match what we intended?*
 
 **Product (live today on Arc Testnet):**
 
@@ -60,14 +60,15 @@ LedgerGuard is a non-custodial payment safety layer for USDC on **Arc Testnet**.
 3. **Evidence API** — after settlement, reconciles onchain transfers against the original intent.
 4. **npm SDK** — `@ledgerguard1/sdk` on npm (preflight, can-sign, withPreflight guard)
 5. **x402** — Arc Testnet paid resource at `GET /v1/paid/network-risk`; Base Mainnet x402 live at `/canary` (0.001 USDC; separate capability demo, not a Guard Link product).
+6. **Specifications** — Guard Link format, network adapter slot, open-source policy, draft x402 Preflight Record **compatibility mapping** (we do not claim authorship of the x402 spec).
 
 LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It does not custody funds, replace wallets, or claim paying customers today.
 
-**Verified evidence (2026-07-31):**
+**Verified evidence (2026-08-01):**
 
 - Public deployment + OpenAPI 3.1
-- 148 automated tests; production smoke PASS
-- `@ledgerguard1/sdk@0.1.0` published on npm
+- **150** automated tests; production smoke PASS
+- `@ledgerguard1/sdk@0.1.1` on npm (client for hosted API)
 - Arc Testnet readiness (`/ready` chain 5042002)
 - Guard Link E2E on Arc Testnet
 - Circle Gateway x402 challenge on Arc Testnet (402 → settle → deliver)
@@ -95,7 +96,7 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 | Paying customers | 0 |
 | Revenue | USD 0 |
 | Public demo & docs | Live |
-| Open source | Yes |
+| Open source | Yes — SDK + specs open; **hosted oracle** for production (see OPEN_SOURCE_POLICY.md) |
 
 **Credible path:** recruit 1–3 design partners on Arc Testnet; publish reproducible integration evidence (request IDs + public repos); repeat use on 2+ days.
 
@@ -151,7 +152,7 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 **Location:** Singapore  
 **Entity:** Independent developer project (open source); no token; no platform fee on Guard Links  
 
-**Background:** Solo founder of LedgerGuard. Built and shipped the public Arc Testnet demo end-to-end: Guard Links, preflight/evidence APIs, `@ledgerguard1/sdk` on npm, Circle Gateway x402 integration, MCP/OpenAPI surfaces, 148 automated tests, and production smoke checks. Arc-first strategy — Base Mainnet x402 at `/canary` is a separate live demo, not the Guard Link product. Seeking Circle design partners and milestone funding to harden production controls and recruit independent testnet integrations.
+**Background:** Solo founder of LedgerGuard. Built and shipped the public Arc Testnet demo end-to-end: Guard Links, preflight/evidence APIs, `@ledgerguard1/sdk` on npm, Circle Gateway x402 integration, MCP/OpenAPI surfaces, **150** automated tests, specification docs (x402 Preflight Record compatibility mapping, open-source policy), and production smoke checks. Arc-first strategy — Base Mainnet x402 at `/canary` is a separate live demo, not the Guard Link product. Seeking Circle design partners and milestone funding to harden production controls and recruit independent testnet integrations.
 
 **Contact:** lw22336599@gmail.com · X @HuiLibaa · GitHub lw22336599-rgb  
 
@@ -166,7 +167,9 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 | OpenAPI | https://ledgerguard-gules.vercel.app/openapi.json |
 | Integration guide | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/DEVELOPER_INTEGRATION_INVITE.md |
 | npm SDK | https://www.npmjs.com/package/@ledgerguard1/sdk |
-| x402 evidence doc | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/X402_E2E_EVIDENCE.md |
+| Open source policy | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/OPEN_SOURCE_POLICY.md |
+| x402 mapping | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/PREFLIGHT_RECORD_MAPPING.md |
+| Questbook walkthrough | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/QUESTBOOK_SUBMIT_WALKTHROUGH.md |
 | About | https://ledgerguard-gules.vercel.app/about |
 
 ---

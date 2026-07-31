@@ -60,7 +60,7 @@ We are **not** building Base Mainnet Guard Links until Arc shows external usage 
 
 - Public demo: https://ledgerguard-gules.vercel.app/guard/create
 - Guard Link E2E on Arc Testnet (create → pay → verify)
-- `@ledgerguard1/sdk@0.1.0` on npm; `POST /v1/can-sign`, webhooks, `/integrations`
+- `@ledgerguard1/sdk@0.1.1` on npm; `POST /v1/can-sign`, webhooks, `/integrations`
 - 148 automated tests, production smoke PASS
 - OpenAPI, MCP, `.well-known/ledgerguard.json`, developer self-service API keys
 - Specification docs: Preflight Record mapping, Guard Link format, network adapters, open-source policy

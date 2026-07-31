@@ -1,3 +1,7 @@
+/**
+ * Hosted-oracle evidence rules — production must use the public API, not a self-hosted fork.
+ * @see docs/OPEN_SOURCE_POLICY.md and src/services/README.md
+ */
 import { createHash } from "node:crypto";
 import {
   decodeEventLog,

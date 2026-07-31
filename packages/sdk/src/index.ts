@@ -94,7 +94,7 @@ export class LedgerGuardClient {
       .replace(/\/+$/, "");
     this.apiKey = options.apiKey;
     this.integration = options.integration;
-    this.clientVersion = options.clientVersion ?? "ledgerguard-sdk/0.1.0";
+    this.clientVersion = options.clientVersion ?? "ledgerguard-sdk/0.1.1";
     this.fetcher = options.fetcher ?? fetch;
   }
 
