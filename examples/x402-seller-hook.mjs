@@ -7,7 +7,8 @@
  *   node --import tsx examples/x402-seller-hook.mjs
  */
 
-import { LedgerGuardClient, preflightFetch } from "../src/sdk/middleware.js";
+import { LedgerGuardClient } from "../src/sdk/client.js";
+import { preflightFetch } from "../src/sdk/middleware.js";
 
 const baseUrl =
   process.env.LEDGERGUARD_URL ?? "https://ledgerguard-gules.vercel.app";
