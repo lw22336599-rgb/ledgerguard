@@ -7,7 +7,7 @@ evidence after settlement.
 Current status: **testnet MVP / Base Mainnet adapter deployed fail-closed /
 Arc Mainnet unavailable**.
 
-Public demo: **https://ledgerguard-gules.vercel.app**
+Public demo: **https://ledgerguard-gules.vercel.app** (target custom domain: **https://ledgerguard.app** — see [`docs/CUSTOM_DOMAIN.md`](docs/CUSTOM_DOMAIN.md))
 
 Public contact: **lw22336599@gmail.com**
 

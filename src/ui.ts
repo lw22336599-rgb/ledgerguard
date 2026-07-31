@@ -234,10 +234,20 @@ export const guardBuilderHtml = `${pageHead(
 </html>`;
 
 export const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LedgerGuard">
-  <defs><linearGradient id="g" x1="12" y1="8" x2="52" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+  <defs>
+    <linearGradient id="lg-shield" x1="14" y1="12" x2="50" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
   <rect width="64" height="64" rx="16" fill="#ffffff"/>
-  <path d="M32 10 51 18v13c0 12-7.5 20.5-19 24-11.5-3.5-19-12-19-24V18l19-8Z" fill="url(#g)"/>
-  <path d="M32 18v28c7.2-3 11-8.2 11-15.5v-7L32 18Z" fill="#f4f6ff" fill-opacity=".92"/>
+  <path d="M32 11 49 18.5v11.5c0 10.5-6.5 18-17 21.5-10.5-3.5-17-11-17-21.5V18.5L32 11Z" fill="url(#lg-shield)" stroke="#ffffff" stroke-width="1.25"/>
+  <g fill="none" stroke="#ffffff" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23.5 25.5V37.5"/>
+    <path d="M23.5 37.5H29.5"/>
+    <path d="M39.2 29.8a5.6 5.6 0 1 0-1.2 10.2"/>
+    <path d="M39.2 32H35.6"/>
+  </g>
 </svg>`;
 
 export function routesHtml(input: {

@@ -1,3 +1,6 @@
+/** Set on Vercel after DNS is live — see docs/CUSTOM_DOMAIN.md */
+export const PREFERRED_PUBLIC_ORIGIN = "https://ledgerguard.app";
+
 const DEFAULT_PUBLIC_BASE_URL = "https://ledgerguard-gules.vercel.app";
 
 export function getPublicBaseUrl(): string {
