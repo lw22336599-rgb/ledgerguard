@@ -280,7 +280,8 @@ describe("browser demo experience", () => {
       expect(html).toContain('href="/terms"');
     }
     expect(aboutHtml).toContain("Arc-first");
-    expect(aboutHtml).toContain('href="/about"');
+    expect(aboutHtml).toContain("live and operational");
+    expect(aboutHtml).not.toContain("bounded x402 capability demo");
     expect(aboutHtml).toContain("independent developer project");
     expect(privacyHtml).toContain("non-custodial");
     expect(termsHtml).toContain("Terms of Service");

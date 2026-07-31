@@ -12,14 +12,14 @@ const pageHead = (title: string, description: string) => `<!doctype html>
 
 const arcPrimaryEyebrow = "USDC PAYMENT LINKS · ARC TESTNET";
 const arcPrimaryNetworkNoteHtml =
-  "Guard Links run on <strong>Arc Testnet</strong> — our primary product path. <strong>Base Mainnet</strong> hosts a bounded x402 capability demo at <a href=\"/canary\">/canary</a> (real USDC, not a Guard Link).";
+  "Guard Links run on <strong>Arc Testnet</strong> — our primary product path. <strong>Base Mainnet</strong> x402 USDC is live and operational at <a href=\"/canary\">/canary</a> (production gates passed; real USDC, not a Guard Link).";
 const baseMainnetLinkLabel = "Base Mainnet x402";
 /** Legacy demo default; never a real contract — wallet connect replaces this. */
 export const guardRecipientDemoDefault =
   "0x2222222222222222222222222222222222222222";
 
 const footer = `<footer class="site-footer">
-  <div class="footer-primary">LedgerGuard &middot; Arc-first &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} demo at <a href="/canary">/canary</a></div>
+  <div class="footer-primary">LedgerGuard &middot; Arc-first &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} live at <a href="/canary">/canary</a></div>
   <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Testnet funding</a> &middot; <a href="/routes">Crosschain demo</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
@@ -404,7 +404,7 @@ export const portalHtml = `${pageHead(
       <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI</p>
       <div class="links"><a href="/docs">Read the docs</a><a href="/canary">${baseMainnetLinkLabel}</a><a href="/status">Live status</a></div>
     </section>
-    <section class="notice"><strong>Networks:</strong> Guard Links use Arc Testnet assets with no financial value. Base Mainnet x402 at <a href="/canary">/canary</a> is a separate bounded demo (real USDC, not a Guard Link).</section>
+    <section class="notice"><strong>Networks:</strong> Guard Links use Arc Testnet assets with no financial value. Base Mainnet x402 at <a href="/canary">/canary</a> is live and operational (real USDC settlement; not a Guard Link).</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
@@ -838,7 +838,7 @@ export const termsHtml = legalPageHtml(
       <h2>Networks and real funds</h2>
       <ul>
         <li><strong>Arc Testnet Guard Links</strong> are the primary product path and use test assets with no financial value.</li>
-        <li><strong>Base Mainnet x402 at <a href="/canary">/canary</a></strong> is a bounded capability demo that can charge real USDC plus gas when you explicitly approve a wallet transaction. It is not a Guard Link.</li>
+        <li><strong>Base Mainnet x402 at <a href="/canary">/canary</a></strong> is live and operational (production gates passed) and can charge real USDC plus gas when you explicitly approve a wallet transaction. It is not a Guard Link.</li>
         <li>Do not treat testnet activity as revenue, escrow, or production settlement unless a separate written agreement says otherwise.</li>
       </ul>
       <h2>Self-declared identity on Guard Links</h2>
@@ -859,7 +859,7 @@ export const aboutHtml = legalPageHtml(
       <h2>Arc-first product path</h2>
       <p>Our primary battlefield is <strong>Arc Testnet</strong> today. Guard Link creation, sharing, wallet review, and onchain verification all run on Arc. We align with Circle&apos;s Arc and USDC ecosystem rather than spreading effort across every chain at once.</p>
       <h2>Where Base fits</h2>
-      <p><strong>Base Mainnet</strong> hosts a bounded x402 capability demo at <a href="/canary">/canary</a> — real USDC, production gates passed — but it is <em>not</em> a Base Guard Link product. We are not building Base Mainnet Guard Links until Arc has real usage and a credible mainnet path.</p>
+      <p><strong>Base Mainnet</strong> x402 USDC is <strong>live and operational</strong> at <a href="/canary">/canary</a> (production gates passed, real USDC settlement). That path is an x402 capability demo, <em>not</em> a Base Guard Link product. We are not building Base Mainnet Guard Links until Arc has real usage and a credible mainnet path.</p>
       <h2>Who we are</h2>
       <p>LedgerGuard is an independent developer project, not a registered company. There is no token, no platform fee on Guard Link transfers, and no claim of paying customers until external evidence exists. Source code is public on <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a>.</p>
       <h2>Contact</h2>

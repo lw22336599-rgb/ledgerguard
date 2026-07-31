@@ -14,8 +14,8 @@ production infrastructure or pivoting to another chain.
 The current program explicitly prioritizes teams building on Arc and the Circle
 Developer Platform, and offers milestone-based USDC funding, technical guidance,
 co-marketing, and ecosystem access. LedgerGuard already has an Arc Testnet
-deployment, Circle Gateway x402 integration, a public demo, automated tests, and
-a fail-closed mainnet plan.
+deployment, Circle Gateway x402 integration, a public demo, automated tests, live
+Base Mainnet x402 at `/canary`, and fail-closed Arc mainnet Guard Link gates.
 
 ## Project summary
 
@@ -60,7 +60,7 @@ Verified on 2026-07-29:
 - Public `/v1/paid/network-risk`: HTTP 402 with price `0.001 USDC` on
   `eip155:5042002`.
 - Public production smoke test: PASS for Arc readiness, deterministic preflight,
-  mainnet fail-closed behavior, and x402 challenge.
+  Base Mainnet x402 live at `/canary`, and Arc Testnet x402 challenge.
 
 No paying customer, production mainnet volume, or recurring revenue is claimed.
 
@@ -104,13 +104,14 @@ No paying customer, production mainnet volume, or recurring revenue is claimed.
 - Monitoring, alerting, and a seven-day reliability report.
 - Security review with all critical findings resolved.
 
-### Milestone 3: mainnet canary readiness
+### Milestone 3: Arc mainnet readiness
 
 - Official Arc mainnet parameters verified from two sources.
 - Read-only shadow traffic and conformance tests pass.
-- A human-approved canary plan and rollback procedure are complete.
-- Mainnet remains disabled until Circle technical review and explicit release
-  approval are complete.
+- A human-approved Arc mainnet release plan and rollback procedure are complete.
+- Arc mainnet Guard Links remain disabled until Circle technical review and
+  explicit release approval are complete. (Base Mainnet x402 at `/canary` is
+  already live as a separate bounded demo.)
 
 ## Zero-cash execution policy
 

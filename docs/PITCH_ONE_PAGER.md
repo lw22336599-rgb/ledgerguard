@@ -37,7 +37,7 @@ LedgerGuard adds three layers **without custody**:
 | **Preflight API** | Deterministic `ALLOW` / `REVIEW` / `BLOCK` before signing | Arc Testnet + developer API |
 | **Evidence API** | Post-settlement reconciliation vs declared intent | Arc Testnet |
 
-Optional: **x402 testnet** paid resources and a **bounded Base Mainnet x402 demo** at `/canary` (capability proof, not a Guard Link product).
+Optional: **x402 testnet** paid resources and **live Base Mainnet x402** at `/canary` (0.001 USDC; production gates passed; capability proof, not a Guard Link product).
 
 ---
 
@@ -46,7 +46,7 @@ Optional: **x402 testnet** paid resources and a **bounded Base Mainnet x402 demo
 - USDC-native alignment with Circle's Arc ecosystem
 - Agent + programmable payment narrative (x402, MCP, OpenAPI)
 - Non-custodial architecture fits infra partnerships better than becoming a wallet or money transmitter
-- Base remains a secondary, bounded real-USDC demo — not a second product front
+- Base Mainnet x402 is live at `/canary` (real USDC demo) — secondary to Arc, not a second product front
 
 We are **not** building Base Mainnet Guard Links until Arc shows external usage and a credible mainnet path.
 
@@ -58,7 +58,7 @@ We are **not** building Base Mainnet Guard Links until Arc shows external usage 
 - Guard Link E2E on Arc Testnet (create → pay → verify)
 - 134 automated tests, production smoke PASS
 - OpenAPI, MCP, `.well-known/ledgerguard.json`, developer self-service API keys
-- Fail-closed mainnet gates; honest `/v1/meta` boundaries
+- Base Mainnet x402 live at `/canary`; fail-closed Arc mainnet Guard Link gates; honest `/v1/meta` boundaries
 - Privacy, Terms, About pages published
 
 **Honest limits today:**

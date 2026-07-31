@@ -17,6 +17,7 @@
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
     "start": "node --env-file-if-exists=.env --import tsx src/server.ts",
     "build:browser": "node scripts/build-browser.mjs",
+    "compress:marketing": "node scripts/compress-marketing.mjs",
     "build": "npm run build:browser && tsc -p tsconfig.json",
     "smoke": "node scripts/smoke.mjs",
     "smoke:local": "node scripts/local-smoke.mjs",
@@ -51,6 +52,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "@x402/fetch": "^2.20.0",
     "esbuild": "^0.28.1",
+    "sharp": "^0.35.3",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^4.0.6"
