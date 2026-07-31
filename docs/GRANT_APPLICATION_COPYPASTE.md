@@ -1,23 +1,20 @@
 # Circle Developer Grant — copy-paste application pack
 
 **Portal:** https://www.circle.com/grant  
-**Status:** Ready to paste — fill `[YOUR …]` fields only, then submit  
-**Last updated:** 2026-07-31
+**Status:** Ready to paste — background optional edit, then submit  
+**Last updated:** 2026-07-31  
+**Founder:** 老王
 
 ---
 
 ## Before you click Submit
 
-Replace these placeholders (do not invent):
-
-| Field | You fill in |
+| Field | Value |
 | --- | --- |
-| Applicant / founder name | `[YOUR LEGAL NAME]` — **你下一条消息发我，我帮你填进最终版** |
-| Team background (2–4 sentences) | `[YOUR BACKGROUND — shipping history, why Arc/agents]` |
-| Requested USDC total | **USD 35,000** (see milestone split below) |
-| Legal entity | `Independent developer / no company` (or your entity if any) |
-
-Everything else below is **honest and copy-ready**.
+| Applicant / founder name | **老王** |
+| Team background | See **Team** section below (edit if you want) |
+| Requested USDC total | **USD 35,000** (milestone split below) |
+| Legal entity | Independent developer / no registered company |
 
 ---
 
@@ -145,13 +142,13 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 
 ---
 
-## Team (template — replace bracketed parts)
+## Team (copy-paste for grant form)
 
-**Founder:** `[YOUR LEGAL NAME]`  
+**Founder:** 老王 (Lao Wang)  
 **Location:** Singapore  
 **Entity:** Independent developer project (open source); no token; no platform fee on Guard Links  
 
-**Background:** `[YOUR BACKGROUND — e.g. built and shipped LedgerGuard demo, 134 tests, Arc x402 E2E evidence, non-custodial architecture. Prior experience: …]`  
+**Background:** Solo founder of LedgerGuard. Built and shipped the public Arc Testnet demo end-to-end: Guard Links, preflight/evidence APIs, Circle Gateway x402 integration, MCP/OpenAPI surfaces, 134 automated tests, and production smoke checks. Arc-first strategy — Base Mainnet x402 at `/canary` is a separate live demo, not the Guard Link product. Seeking Circle design partners and milestone funding to harden production controls and recruit independent testnet integrations.
 
 **Contact:** lw22336599@gmail.com · X @HuiLibaa · GitHub lw22336599-rgb  
 
@@ -172,12 +169,13 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 
 ## Submission checklist
 
-- [ ] Replaced `[YOUR LEGAL NAME]` and `[YOUR BACKGROUND]`  
-- [ ] Chose `[YOUR AMOUNT]` and milestone split  
-- [ ] Did **not** claim paying customers or 0.5% platform fee  
-- [ ] Said **Arc Testnet** for Guard Links  
-- [ ] Said Base `/canary` is x402 demo, not Guard Link product  
-- [ ] Submitted at https://www.circle.com/grant  
+- [x] Founder name: **老王**
+- [x] Total ask: **USD 35,000** (14,000 + 12,250 + 8,750)
+- [ ] Background edited (optional)
+- [ ] Did **not** claim paying customers or 0.5% platform fee
+- [ ] Said **Arc Testnet** for Guard Links
+- [ ] Said Base `/canary` is x402 demo, not Guard Link product
+- [ ] Submitted at https://www.circle.com/grant
 - [ ] Saved confirmation email / portal link  
 
 ---
