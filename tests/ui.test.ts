@@ -272,9 +272,10 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('id="how-it-works"');
     expect(portalHtml).toContain("/marketing/hero-guard-builder.png");
     expect(portalHtml).toContain("USDC PAYMENT LINKS · ARC TESTNET");
-    expect(portalHtml).toContain("primary product path");
+    expect(portalHtml).toContain("no real money");
     expect(portalHtml).toContain("What is USDC?");
     expect(portalHtml).not.toContain("USDC PAYMENT LINKS · BASE + ARC");
+    expect(portalHtml).not.toContain("how-cta");
   });
 
   it("publishes the pay entry page for pasted links", () => {

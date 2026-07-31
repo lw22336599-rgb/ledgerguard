@@ -19,6 +19,8 @@ const pageHead = (title: string, description: string) => `<!doctype html>
 const arcPrimaryEyebrow = "USDC PAYMENT LINKS · ARC TESTNET";
 const arcPrimaryNetworkNoteHtml =
   "Guard Links run on <strong>Arc Testnet</strong> — our primary product path. <strong>Base Mainnet</strong> x402 USDC is live and operational at <a href=\"/canary\">/canary</a> (production gates passed; real USDC, not a Guard Link).";
+const portalHeroNetworkNoteHtml =
+  "Guard Links use <strong>Arc Testnet</strong> USDC (no real money).";
 const baseMainnetLinkLabel = "Base Mainnet x402";
 /** Legacy demo default; never a real contract — wallet connect replaces this. */
 export const guardRecipientDemoDefault =
@@ -467,12 +469,12 @@ export const portalHtml = `${pageHead(
           <p class="eyebrow">${arcPrimaryEyebrow}</p>
           <h1>Send and receive USDC<br><span>with a simple link.</span></h1>
           <p class="lead">Check who gets paid and how much before you approve. No signup. No technical setup.</p>
-          <p class="portal-network-note">${arcPrimaryNetworkNoteHtml}</p>
+          <p class="portal-network-note">${portalHeroNetworkNoteHtml}</p>
           <div class="portal-actions portal-dual-cta">
             <a class="primary-action portal-primary-cta" href="/guard/create">Get paid</a>
             <a class="secondary-action portal-secondary-cta" href="/pay">Pay a link</a>
           </div>
-          <p class="portal-trust-list"><a href="#how-it-works">New here? How it works</a> &middot; <a href="/testnet-help#arc">No wallet yet?</a> &middot; <a href="/docs">Developers</a></p>
+          <p class="portal-trust-list"><a href="#how-it-works">New here? How it works</a> &middot; <a href="/testnet-help#arc">No wallet yet?</a></p>
         </div>
         <figure class="portal-hero-visual">
           <img src="/marketing/hero-guard-builder.png" alt="Payment link builder with QR code" width="640" height="360" loading="eager">
@@ -510,10 +512,6 @@ export const portalHtml = `${pageHead(
           <dt>Do I need to be a developer?</dt><dd>No. It works like a payment app.</dd>
         </dl>
       </section>
-      <div class="portal-actions how-cta portal-dual-cta">
-        <a class="primary-action portal-primary-cta" href="/guard/create">Get paid</a>
-        <a class="secondary-action portal-secondary-cta" href="/pay">Pay a link</a>
-      </div>
     </section>
     <section class="portal-developers">
       <p class="eyebrow">FOR DEVELOPERS</p>
@@ -521,7 +519,6 @@ export const portalHtml = `${pageHead(
       <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI — same safety core, developer docs inside.</p>
       <div class="links"><a href="/docs">Developer center</a><a href="/canary">${baseMainnetLinkLabel}</a><a href="/status">Live status</a></div>
     </section>
-    <section class="notice"><strong>Testnet:</strong> Guard Links use Arc Testnet USDC (no real money). Base Mainnet x402 at <a href="/canary">/canary</a> is a separate live demo.</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
