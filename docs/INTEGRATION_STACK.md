@@ -36,11 +36,11 @@ Unsupported networks **fail closed** (`503 NETWORK_DISABLED`).
 ## npm SDK
 
 ```bash
-npm install @ledgerguard/sdk
+npm install @ledgerguard1/sdk
 ```
 
 ```js
-import { LedgerGuardClient, withPreflight } from "@ledgerguard/sdk";
+import { LedgerGuardClient, withPreflight } from "@ledgerguard1/sdk";
 
 const client = new LedgerGuardClient({
   baseUrl: "https://ledgerguard-gules.vercel.app",

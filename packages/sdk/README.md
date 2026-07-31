@@ -1,17 +1,17 @@
-# @ledgerguard/sdk
+# @ledgerguard1/sdk
 
 Non-custodial stablecoin payment safety for Arc and supported EVM networks.
 
 ## Install
 
 ```bash
-npm install @ledgerguard/sdk
+npm install @ledgerguard1/sdk
 ```
 
 ## Quick start
 
 ```js
-import { LedgerGuardClient } from "@ledgerguard/sdk";
+import { LedgerGuardClient } from "@ledgerguard1/sdk";
 
 const client = new LedgerGuardClient({
   baseUrl: "https://ledgerguard-gules.vercel.app",
@@ -35,7 +35,7 @@ if (decision.decision !== "ALLOW") {
 ## withPreflight guard
 
 ```js
-import { withPreflight } from "@ledgerguard/sdk";
+import { withPreflight } from "@ledgerguard1/sdk";
 
 await withPreflight(
   {

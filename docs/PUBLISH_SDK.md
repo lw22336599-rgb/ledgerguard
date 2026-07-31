@@ -1,11 +1,10 @@
-# Publish `@ledgerguard/sdk` to npm
+# Publish `@ledgerguard1/sdk` to npm
 
-This guide publishes the standalone SDK from `packages/sdk/`. The monorepo root export (`ledgerguard/sdk`) stays private; npm consumers install `@ledgerguard/sdk`.
+This guide publishes the standalone SDK from `packages/sdk/`. The monorepo root export (`ledgerguard/sdk`) stays private; npm consumers install `@ledgerguard1/sdk`.
 
 ## Prerequisites
 
-1. **npm account** with access to the `@ledgerguard` scope.
-   - First publish: create the org at https://www.npmjs.com/org/create (free) or use your personal scope and rename the package before publish.
+1. **npm account** `ledgerguard` with access to the `@ledgerguard1` org (created on npmjs.com).
 2. **2FA** enabled on npm (recommended for scoped packages).
 3. Clean git tree for the release commit (optional but recommended).
 
@@ -14,37 +13,20 @@ This guide publishes the standalone SDK from `packages/sdk/`. The monorepo root 
 ```bash
 npm login
 npm whoami
+npm org ls ledgerguard1
 ```
 
-If `@ledgerguard` org does not exist yet, either:
-
-- Create `@ledgerguard` on npm and add your user as owner, **or**
-- Change `name` in `packages/sdk/package.json` to your personal scope (e.g. `@youruser/ledgerguard-sdk`) before the first publish.
+Expected org owner: `ledgerguard`.
 
 ## Pre-publish checks (run from repo root)
 
 ```bash
 npm test
 npm run build
-cd packages/sdk
-npm run pack:check
-```
-
-`pack:check` lists tarball contents. Expect only:
-
-- `package/dist/**`
-- `package/README.md`
-- `package/package.json`
-
-### Test install from tarball (no registry)
-
-From repo root:
-
-```bash
 npm run test:sdk-pack
 ```
 
-This runs `npm pack`, installs the `.tgz` into a temp project, and imports `LedgerGuardClient`, `withPreflight`, and `preflightFetch`. **Verified locally on 2026-07-31.**
+`test:sdk-pack` runs `npm pack`, installs the `.tgz` into a temp project, and imports SDK exports. **Verified locally on 2026-07-31.**
 
 ## Publish
 
@@ -52,7 +34,6 @@ This runs `npm pack`, installs the `.tgz` into a temp project, and imports `Ledg
 
 ```bash
 npm login
-# Create org once: https://www.npmjs.com/org/create → name: ledgerguard
 npm run publish:sdk:dry-run   # pack smoke + publish dry-run
 npm run publish:sdk           # real publish
 ```
@@ -69,15 +50,15 @@ npm publish --access public
 ### Verify after publish
 
 ```bash
-npm view @ledgerguard/sdk
-npm install @ledgerguard/sdk
-node -e "import('@ledgerguard/sdk').then(m => console.log(Object.keys(m)))"
+npm view @ledgerguard1/sdk
+npm install @ledgerguard1/sdk
+node -e "import('@ledgerguard1/sdk').then(m => console.log(Object.keys(m)))"
 ```
 
 ## Version bumps
 
 1. Edit `version` in `packages/sdk/package.json` (semver).
-2. Commit: `Release @ledgerguard/sdk v0.1.1`.
+2. Commit: `Release @ledgerguard1/sdk v0.1.1`.
 3. Tag (optional): `git tag sdk-v0.1.1`.
 4. Run publish steps above.
 
@@ -97,13 +78,13 @@ Use an npm **Granular Access Token** with publish scope, stored as `NPM_TOKEN`:
 | Error | Fix |
 | --- | --- |
 | `ENEEDAUTH` | Run `npm login` |
-| `403 Forbidden` | You are not owner of `@ledgerguard` scope |
+| `403 Forbidden` | You are not owner of `@ledgerguard1` scope |
 | `404` on install before first publish | Normal — package does not exist yet |
 | Empty `dist/` | Run `npm run build` in `packages/sdk` |
 
 ## Current status
 
-- Package name: `@ledgerguard/sdk@0.1.0`
-- npm registry: **not published yet** — requires `npm login` + `@ledgerguard` org on this machine
+- Package name: `@ledgerguard1/sdk@0.1.0`
+- npm org: `@ledgerguard1` (owner: `ledgerguard`)
+- npm registry: publish after `npm login` on this machine
 - Local `npm pack` install: **passed** (`npm run test:sdk-pack`)
-- Publish helper: `npm run publish:sdk` (runs pack smoke test first)

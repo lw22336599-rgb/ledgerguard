@@ -20,7 +20,7 @@ writeFileSync(
 try {
   execSync(`npm install "${tarball}"`, { cwd: workdir, stdio: "inherit" });
   execSync(
-    `node --input-type=module -e "import { LedgerGuardClient, withPreflight, preflightFetch } from '@ledgerguard/sdk'; if (typeof LedgerGuardClient !== 'function') throw new Error('missing client'); console.log('pack install smoke ok');"`,
+    `node --input-type=module -e "import { LedgerGuardClient, withPreflight, preflightFetch } from '@ledgerguard1/sdk'; if (typeof LedgerGuardClient !== 'function') throw new Error('missing client'); console.log('pack install smoke ok');"`,
     { cwd: workdir, stdio: "inherit" },
   );
 } finally {

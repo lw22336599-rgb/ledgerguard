@@ -1,5 +1,5 @@
 {
-  "name": "@ledgerguard/sdk",
+  "name": "@ledgerguard1/sdk",
   "version": "0.1.0",
   "description": "LedgerGuard stablecoin payment safety SDK — preflight before signing, evidence after settlement.",
   "type": "module",

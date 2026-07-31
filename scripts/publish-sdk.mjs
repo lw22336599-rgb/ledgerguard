@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Publish @ledgerguard/sdk after auth and org checks.
+ * Publish @ledgerguard1/sdk after auth and org checks.
  * Usage: node scripts/publish-sdk.mjs [--dry-run]
  */
 import { execSync } from "node:child_process";
@@ -15,6 +15,12 @@ function run(command, options = {}) {
     cwd: sdkRoot,
     encoding: "utf8",
     stdio: options.inherit ? "inherit" : "pipe",
+    env: {
+      ...process.env,
+      ...(process.env.NPM_TOKEN
+        ? { NODE_AUTH_TOKEN: process.env.NPM_TOKEN }
+        : {}),
+    },
     ...options,
   }).trim();
 }
@@ -23,8 +29,17 @@ function whoami() {
   try {
     return run("npm whoami");
   } catch {
+    if (process.env.NPM_TOKEN) {
+      console.log("Using NPM_TOKEN for publish (whoami skipped).");
+      return "token-auth";
+    }
     console.error(
-      "Not logged in to npm. Run: npm login\nThen create org: https://www.npmjs.com/org/create (name: ledgerguard)",
+      [
+        "Not logged in to npm.",
+        "Option A: npm login",
+        "Option B: create a Granular Access Token on npmjs.com → set NPM_TOKEN env var",
+        "Org @ledgerguard1 is ready (owner: ledgerguard).",
+      ].join("\n"),
     );
     process.exit(1);
   }
@@ -34,11 +49,11 @@ const user = whoami();
 console.log(`npm user: ${user}`);
 
 try {
-  run("npm org ls ledgerguard");
-  console.log("npm org @ledgerguard: accessible");
+  run("npm org ls ledgerguard1");
+  console.log("npm org @ledgerguard1: accessible");
 } catch {
   console.warn(
-    "Cannot list @ledgerguard org. Create it at https://www.npmjs.com/org/create if this is the first publish.",
+    "Cannot list @ledgerguard1 org. Confirm you are logged in as org owner ledgerguard.",
   );
 }
 
@@ -49,5 +64,5 @@ if (dryRun) {
   console.log("Dry run complete. Remove --dry-run to publish.");
 } else {
   run("npm publish --access public", { stdio: "inherit" });
-  console.log("Published @ledgerguard/sdk");
+  console.log("Published @ledgerguard1/sdk");
 }

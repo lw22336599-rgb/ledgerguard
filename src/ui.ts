@@ -463,7 +463,7 @@ export const integrationsHtml = `${pageHead(
         <p class="step">HOW TO APPEAR HERE</p>
         <h2>Register an integration id</h2>
         <ol>
-          <li>Install <code>@ledgerguard/sdk</code> or call <code>POST /v1/can-sign</code>.</li>
+          <li>Install <code>@ledgerguard1/sdk</code> or call <code>POST /v1/can-sign</code>.</li>
           <li>Send a non-secret <code>X-LedgerGuard-Integration</code> header, for example <code>acme-agent-testnet</code>.</li>
           <li>Save response <code>X-LedgerGuard-Request-Id</code> values or public testnet transaction hashes.</li>
           <li>Open the <code>Independent integration evidence</code> GitHub issue in the repository.</li>
@@ -506,7 +506,7 @@ export const integrationStackHtml = `${pageHead(
   -&gt; LedgerGuard preflight / can-sign
   -&gt; wallet signature or x402 settlement
   -&gt; LedgerGuard evidence</pre>
-      <p class="muted">Install: <code>npm install @ledgerguard/sdk</code>. Free endpoints: <code>POST /v1/preflight</code>, <code>POST /v1/can-sign</code>, <code>POST /v1/evidence</code>.</p>
+      <p class="muted">Install: <code>npm install @ledgerguard1/sdk</code>. Free endpoints: <code>POST /v1/preflight</code>, <code>POST /v1/can-sign</code>, <code>POST /v1/evidence</code>.</p>
       <p class="muted">Enabled networks are published at <a href="/v1/network-adapters">/v1/network-adapters</a>. Unsupported networks fail closed.</p>
     </section>
     ${footer}
