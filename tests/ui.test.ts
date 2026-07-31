@@ -36,6 +36,7 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/testnet-help"');
     expect(portalHtml).toContain('href="/routes"');
     expect(portalHtml).toContain('id="nav-connect"');
+    expect(portalHtml).toContain('class="portal-nav-actions"');
     expect(portalHtml).toContain('id="nav-menu-toggle"');
     expect(portalHtml).toContain('id="nav-mobile-panel"');
     expect(portalHtml).toContain("/wallet.js");
@@ -235,6 +236,8 @@ describe("browser demo experience", () => {
   it("bridges Meter and Receipts through branded pages", () => {
     expect(meterHtml).toContain("Open Meter app");
     expect(meterHtml).toContain("https://arc-meter-xi.vercel.app/");
+    expect(meterHtml).toContain("Base Mainnet x402 USDC is live at");
+    expect(meterHtml).not.toContain("fail-closed until release gates pass");
     expect(receiptsHtml).toContain("Open receipt explorer");
     expect(receiptsHtml).toContain("https://arc-meter-xi.vercel.app/#flow");
   });

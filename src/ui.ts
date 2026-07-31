@@ -38,9 +38,11 @@ export function portalNavHtml(
       <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
       <div class="portal-nav-links">${portalNavLinks}</div>
       <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
-      <button id="nav-connect" class="nav-wallet-btn" type="button">Connect Wallet</button>
-      <span id="nav-wallet-display" class="nav-wallet-display"></span>
-      <span class="${badgeClass}">${badge}</span>
+      <div class="portal-nav-actions">
+        <button id="nav-connect" class="nav-wallet-btn" type="button">Connect Wallet</button>
+        <span id="nav-wallet-display" class="nav-wallet-display"></span>
+        <span class="${badgeClass}">${badge}</span>
+      </div>
     </nav>`;
 }
 
@@ -742,7 +744,7 @@ export const meterHtml = `${pageHead(
       <article class="doc-card"><span>WHAT STAYS HERE</span><h2>Protect + Guard Links</h2><p>Preflight checks, Guard Link creation, and evidence reconciliation remain on LedgerGuard. Meter handles settlement-linked delivery.</p><a href="/guard/create">Create a Guard Link</a></article>
       <article class="doc-card"><span>RECEIPTS</span><h2>Dual receipt trail</h2><p>Settlement and delivery receipts are linked for audit. Open the receipt explorer from the Meter app or the Receipts page here.</p><a href="/receipts">Open receipt explorer</a></article>
     </section>
-    <section class="notice"><strong>Testnet only:</strong> Meter uses Arc Testnet assets with no financial value. Mainnet x402 remains fail-closed until release gates pass.</section>
+    <section class="notice"><strong>Networks:</strong> Meter delivery uses Arc Testnet assets with no financial value. Base Mainnet x402 USDC is live at <a href="/canary">/canary</a>; Meter UI and receipts stay on Arc Testnet.</section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
@@ -938,7 +940,8 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 .nav-wallet-btn.connected,#nav-connect.connected,#w-btn.w-connected{background:transparent;border:1px solid var(--success);color:var(--success)}
 .nav-wallet-display{display:none;font-size:12px;color:var(--link);font-family:ui-monospace,monospace;white-space:nowrap}
 .portal-nav{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px;border-bottom:1px solid var(--line);padding:18px 0;margin-bottom:12px}
-.portal-nav #nav-connect{margin-left:auto}
+.portal-nav-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-left:auto;min-width:0}
+.notice,.doc-card p,code{overflow-wrap:anywhere;word-break:break-word}
 .nav-menu-toggle{display:none;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
 .nav-mobile-panel{display:none;flex-direction:column;gap:12px;width:100%;padding:14px 0 4px}
 .nav-mobile-panel a{color:var(--muted);text-decoration:none;font-size:15px}
@@ -960,8 +963,16 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 .route-readiness.review{border-color:#c4b5fd;background:#faf5ff}
 footer{border-color:var(--line);line-height:1.9}
 @media(max-width:900px){
+  .portal-nav{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand menu" "panel panel" "actions actions";align-items:center;gap:10px 12px}
+  .portal-nav .brand{grid-area:brand;min-width:0}
+  .portal-nav .nav-menu-toggle{grid-area:menu;justify-self:end;display:inline-flex}
   .portal-nav-links{display:none}
-  .nav-menu-toggle{display:inline-flex}
+  .portal-nav .nav-mobile-panel{grid-area:panel;width:100%;padding:8px 0 2px;margin:0}
+  .portal-nav .nav-mobile-panel:not(.open){display:none}
+  .portal-nav .nav-mobile-panel.open{display:flex}
+  .portal-nav-actions{grid-area:actions;width:100%;margin-left:0;justify-content:space-between;gap:10px}
+  .portal-nav-actions .badge{flex:0 1 auto;min-width:0;max-width:55%;white-space:normal;text-align:center;line-height:1.25}
+  .portal-nav-actions .nav-wallet-btn{flex:0 1 auto;min-width:0;max-width:100%}
   .portal-hero-grid{grid-template-columns:1fr;gap:28px}
   .portal-hero-visual{order:-1}
   .how-steps{grid-template-columns:1fr}
@@ -971,7 +982,8 @@ footer{border-color:var(--line);line-height:1.9}
   .flow-row span:last-child{border-bottom:0}
 }
 @media(max-width:760px){
-  main{width:min(100% - 28px,1180px)}
+  html{overflow-x:clip}
+  main{width:min(100% - 28px,1180px);max-width:100%}
   nav{min-height:72px}
   .hero,.subhero{padding:54px 0 36px}
   .product-map,.panel,.grid,.docs-grid{grid-template-columns:1fr}
