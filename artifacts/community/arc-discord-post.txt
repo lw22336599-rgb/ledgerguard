@@ -1,0 +1,15 @@
+Hi Arc builders — sharing a non-custodial USDC payment safety demo I've been shipping on Arc Testnet.
+
+**LedgerGuard** — Guard Links + preflight + evidence (no custody, no private keys):
+
+• Create a Guard Link: https://ledgerguard-gules.vercel.app/guard/create
+• Payer sees amount / recipient / purpose before signing
+• APIs: preflight (ALLOW/REVIEW/BLOCK), evidence reconciliation, x402 testnet resource
+• OpenAPI + MCP + integration guide on GitHub
+
+Arc Testnet only for Guard Links (test assets). Base Mainnet x402 is a separate live demo at https://ledgerguard-gules.vercel.app/canary — not a Guard Link product.
+
+Looking for 1–2 design partners to integrate on testnet and leave reproducible evidence (request IDs / public repos). Happy to walk through a 15-min demo.
+
+Repo: https://github.com/lw22336599-rgb/ledgerguard
+Docs: https://ledgerguard-gules.vercel.app/docs
