@@ -66,7 +66,7 @@
 
 | 谁做 | 任务 |
 |------|------|
-| 你 | 打开 https://www.circle.com/grant 看当前是否开放 |
+| 你 | 打开 https://circle.questbook.app/ 提交（项目页 https://www.circle.com/grant） |
 | 你 | 用 `docs/CIRCLE_DEVELOPER_GRANT.md` + `PITCH_ONE_PAGER.md` 填表 |
 | 你 | 附上：demo 链接、GitHub、Arc 测试网 tx 示例（可问技术要） |
 | 技术 | 更新 Grant 草稿里的测试数量、日期 |

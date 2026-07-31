@@ -20,7 +20,7 @@ Last updated: 2026-07-31
 ## Phase B — You must do manually (security + traffic)
 
 - [ ] Revoke exposed npm tokens; regenerate 2FA recovery codes — see `docs/SECURITY_CREDENTIAL_ROTATION.md`  
-- [ ] Submit Circle Grant at https://circle.questbook.app/ — paste from `docs/GRANT_APPLICATION_COPYPASTE.md`  
+- [ ] Submit Circle Grant on Questbook — https://circle.questbook.app/ (program info: https://www.circle.com/grant) — paste from `docs/GRANT_APPLICATION_COPYPASTE.md`  
 - [ ] Post outreach — copy from `docs/outreach/`  
 
 ## Phase C — Primary goal: first external integration

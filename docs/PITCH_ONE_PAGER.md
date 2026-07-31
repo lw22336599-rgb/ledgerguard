@@ -10,7 +10,9 @@
 
 ## One line
 
-**LedgerGuard is a non-custodial USDC payment safety layer for Arc — humans and agents review intent before signing, then reconcile onchain evidence after settlement.**
+**Non-custodial stablecoin payment intent safety for Arc — preflight before sign (ALLOW / REVIEW / BLOCK), evidence after settlement. One-line SDK (`@ledgerguard1/sdk`).**
+
+Do **not** say: “only player”, “x402 standard author”, or “verified merchant”. See `docs/MESSAGING_AND_CLAIMS.md`.
 
 ---
 
@@ -39,6 +41,8 @@ LedgerGuard adds three layers **without custody**:
 
 Optional: **x402 testnet** paid resources and **live Base Mainnet x402** at `/canary` (0.001 USDC; production gates passed; capability proof, not a Guard Link product).
 
+**x402 compatibility:** we map to the draft [Payment Preflight Record](https://github.com/x402-foundation/x402/pull/2792) as a compatible oracle — see `docs/PREFLIGHT_RECORD_MAPPING.md`. We complement x402 facilitators and endpoint readiness tools; we do not own the x402 specification.
+
 ---
 
 ## Why Arc-first
@@ -56,8 +60,10 @@ We are **not** building Base Mainnet Guard Links until Arc shows external usage 
 
 - Public demo: https://ledgerguard-gules.vercel.app/guard/create
 - Guard Link E2E on Arc Testnet (create → pay → verify)
-- 134 automated tests, production smoke PASS
+- `@ledgerguard1/sdk@0.1.0` on npm; `POST /v1/can-sign`, webhooks, `/integrations`
+- 148 automated tests, production smoke PASS
 - OpenAPI, MCP, `.well-known/ledgerguard.json`, developer self-service API keys
+- Specification docs: Preflight Record mapping, Guard Link format, network adapters, open-source policy
 - Base Mainnet x402 live at `/canary`; fail-closed Arc mainnet Guard Link gates; honest `/v1/meta` boundaries
 - Privacy, Terms, About pages published
 
@@ -75,7 +81,8 @@ We are **not** building Base Mainnet Guard Links until Arc shows external usage 
 1. **Agent frameworks** — preflight before `eth_sendTransaction`, evidence after settlement  
 2. **Merchant / freelancer tools** — Guard Link instead of "paste my address"  
 3. **x402 resource sellers** — pattern reference for paid + reconciled delivery  
-4. **Arc ecosystem builders** — reference implementation for intent-bound USDC flows  
+4. **Wallets / exchanges** — thin `can-sign` path — see `docs/WALLET_EXCHANGE_INTEGRATION.md`  
+5. **Arc ecosystem builders** — reference implementation for intent-bound USDC flows  
 
 ---
 
@@ -84,27 +91,27 @@ We are **not** building Base Mainnet Guard Links until Arc shows external usage 
 | Others often do | LedgerGuard combines |
 | --- | --- |
 | Wallet transfer | + declared intent in the link |
-| x402 paywall | + evidence reconciliation |
-| Policy engines | + human-readable Guard Link for payers |
+| x402 paywall / endpoint readiness | + intent ↔ calldata reconciliation |
+| Generic transaction scanners | + stablecoin payment intent + evidence loop |
 | Custodial checkout | **Non-custodial** — we never hold keys |
 
-We do **not** claim to be the only payment app in crypto. We claim a narrow wedge: **link + preflight + evidence on Arc**.
+We do **not** claim to be the only payment or preflight product in crypto. We claim a narrow wedge: **link + intent reconciliation + preflight + evidence on Arc**, x402-compatible mapping.
 
 ---
 
 ## Integration surface (30 minutes)
 
 ```text
-POST /v1/guard-links          → create shareable Guard Link
-GET  /guard?...               → human payment request page
-POST /v1/preflight            → ALLOW / REVIEW / BLOCK
-POST /v1/evidence             → VERIFIED vs intent
-POST /v1/developer/preflight  → authenticated, metered
-POST /mcp                       → agent tools (read-only)
-GET  /v1/paid/network-risk      → x402 Arc testnet demo
+npm install @ledgerguard1/sdk
+POST /v1/can-sign              → thin wallet preflight
+POST /v1/preflight             → full ALLOW / REVIEW / BLOCK
+POST /v1/evidence              → VERIFIED vs intent
+POST /v1/guard-links           → create shareable Guard Link
+GET  /guard?...                  → human payment request page
+GET  /v1/network-adapters        → enabled networks (fail-closed)
 ```
 
-See `docs/PARTNER_INTEGRATION_GUIDE.md` for a step-by-step partner path.
+See `docs/PARTNER_INTEGRATION_GUIDE.md` and `docs/INTEGRATION_STACK.md`.
 
 ---
 
@@ -119,18 +126,20 @@ See `docs/PARTNER_INTEGRATION_GUIDE.md` for a step-by-step partner path.
 3. **Co-marketing** — after public, reproducible integration evidence exists  
 4. **Milestone funding** — to harden evidence standards, audits, and Arc mainnet readiness  
 
+**Grant submit:** https://circle.questbook.app/ (program: https://www.circle.com/grant)
+
 ---
 
 ## Traction milestones (next 90 days)
 
 | Milestone | Target |
 | --- | --- |
-| Public Arc-first launch messaging | Done |
+| Payment intent safety messaging + spec docs | Done |
 | Legal/trust pages (Privacy, Terms, About) | Done |
 | First external testnet integration | 1 project |
 | Repeat use on 2+ days | Documented |
 | Published integration guide + pitch | Done |
-| Optional Circle Developer Grant submission | In progress |
+| Circle Developer Grant submission (Questbook) | In progress |
 
 ---
 
@@ -147,17 +156,17 @@ Open source. English-first public product.
 
 ## 30-second spoken version
 
-> LedgerGuard helps people and agents pay with USDC more safely on Arc Testnet.  
-> You create a Guard Link; the payer sees a clear payment request before signing.  
-> Developers get preflight and evidence APIs; agents can use MCP.  
-> We are non-custodial, Arc-first, and honest about testnet scope.
+> LedgerGuard provides stablecoin payment intent safety on Arc Testnet.  
+> You create a Guard Link; the payer reviews amount, recipient, and purpose before signing.  
+> Developers use `@ledgerguard1/sdk` for preflight and evidence; we map to the draft x402 Preflight Record as a compatible oracle.  
+> We are non-custodial, Arc-first, and honest about testnet scope — no paying customers until external evidence exists.
 
 ---
 
 ## Safe claims checklist (before you send)
 
 - [ ] Said **Arc Testnet** where money is involved  
-- [ ] Did **not** claim paying customers or platform fees  
+- [ ] Did **not** claim paying customers, platform fees, or “x402 standard author”  
 - [ ] Described **ALLOW** as checks passed, not guaranteed safety  
 - [ ] Positioned Base as **bounded demo**, not equal Guard Link product  
-- [ ] Linked **`/guard/create`** or docs, not vague "mainnet live"
+- [ ] Linked **`/guard/create`**, npm SDK, or docs — not vague "mainnet live"

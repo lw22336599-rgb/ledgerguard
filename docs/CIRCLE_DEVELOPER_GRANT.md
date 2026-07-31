@@ -4,7 +4,9 @@ Status: **technically ready for human completion; not submitted**
 
 Official program: <https://www.circle.com/grant>
 
-Last verified: 2026-07-29
+Submit proposals: <https://circle.questbook.app/> (Circle Developer Grants on Questbook)
+
+Last verified: 2026-07-31
 
 ## Application decision
 

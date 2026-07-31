@@ -841,9 +841,10 @@ export const termsHtml = legalPageHtml(
 
 export const aboutHtml = legalPageHtml(
   "About",
-  "What LedgerGuard is, why it is Arc-first, and how Base fits in.",
+  "Non-custodial stablecoin payment intent safety on Arc Testnet.",
   `<h2>What we build</h2>
-      <p>LedgerGuard is a non-custodial payment safety project for USDC. Merchants create a <strong>Guard Link</strong>; payers review a clear payment request before their wallet asks them to sign. After settlement, evidence can be reconciled against the declared intent.</p>
+      <p>LedgerGuard is a non-custodial <strong>payment intent safety</strong> service for USDC. Merchants create a <strong>Guard Link</strong>; payers review amount, recipient, and purpose before their wallet asks them to sign. After settlement, evidence can be reconciled against the declared intent.</p>
+      <p>Developers use <code>@ledgerguard1/sdk</code> and our HTTP API. We map to the draft <a href="https://github.com/x402-foundation/x402/pull/2792" rel="noreferrer">x402 Payment Preflight Record</a> as a compatible oracle — see <a href="${specDocsBase}/PREFLIGHT_RECORD_MAPPING.md" rel="noreferrer">specifications on GitHub</a>.</p>
       <h2>Arc-first product path</h2>
       <p>Our primary battlefield is <strong>Arc Testnet</strong> today. Guard Link creation, sharing, wallet review, and onchain verification all run on Arc. We align with Circle&apos;s Arc and USDC ecosystem rather than spreading effort across every chain at once.</p>
       <h2>Where Base fits</h2>

@@ -1,7 +1,8 @@
 # Circle Developer Grant — copy-paste application pack
 
-**Portal:** https://www.circle.com/grant  
-**Status:** Ready to paste — background optional edit, then submit  
+**Submit proposals:** https://circle.questbook.app/ (Circle Developer Grants on Questbook)  
+**Program info:** https://www.circle.com/grant  
+**Status:** Ready to paste — background optional edit, then submit on Questbook  
 **Last updated:** 2026-07-31  
 **Founder:** Lao Wang (independent developer)
 
@@ -178,7 +179,7 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 - [ ] Did **not** claim paying customers or 0.5% platform fee
 - [ ] Said **Arc Testnet** for Guard Links
 - [ ] Said Base `/canary` is x402 demo, not Guard Link product
-- [ ] Submitted at https://www.circle.com/grant
+- [ ] Submitted at https://circle.questbook.app/ (Batch 2 open when available)
 - [ ] Saved confirmation email / portal link  
 
 ---
