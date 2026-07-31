@@ -234,11 +234,12 @@ try {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
+      issuer: "UI audit",
       recipient: "0x2222222222222222222222222222222222222222",
-      amountMicroUsdc: "1000000",
+      amount: "1.00",
+      limit: "1.00",
       purpose: "UI audit",
-      expiryHours: 24,
-      limitMicroUsdc: "1000000",
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     }),
     signal: AbortSignal.timeout(20_000),
   });
@@ -247,12 +248,17 @@ try {
     issue("high", "guard-link-api", `POST /v1/guard-links failed: ${res.status}`);
   } else {
     pass("Guard Link API creates payment URL");
-    const guardRes = await fetch(body.url.replace(baseUrl, ""), {
+    const guardUrl = body.url.startsWith("http")
+      ? body.url
+      : `${baseUrl}${body.url.startsWith("/") ? body.url : `/${body.url}`}`;
+    const guardRes = await fetch(guardUrl, {
       signal: AbortSignal.timeout(20_000),
     });
     const guardHtml = await guardRes.text();
     if (guardRes.status !== 200 || !guardHtml.includes("Payment request")) {
       issue("high", "guard-link-page", "Payment request page failed to load");
+    } else if (!guardHtml.includes("Connect wallet")) {
+      issue("high", "guard-link-page", "Payment page missing Connect wallet CTA");
     } else {
       pass("Guard Link payment page loads");
     }
