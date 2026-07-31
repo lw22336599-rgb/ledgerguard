@@ -20,3 +20,12 @@ artifacts/r1-promo/x-debug/
 artifacts/r1-promo/*.png
 artifacts/r1-promo/launch-status.json
 artifacts/r1-promo/payment-url.txt
+
+# Local one-off ops scripts (do not commit)
+scripts/launch-grant-community.mjs
+scripts/open-chrome-*.ps1
+scripts/open-desktop-chrome-ops.ps1
+scripts/open-promo-pages.ps1
+scripts/post-r1-tweet.mjs
+scripts/run-promo-launch.ps1
+scripts/start-chrome-debug.ps1

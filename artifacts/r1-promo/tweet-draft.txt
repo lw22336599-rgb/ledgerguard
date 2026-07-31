@@ -1,11 +1,10 @@
-Send and receive USDC with a simple link — review before you sign.
+Shipped @ledgerguard1/sdk on npm — non-custodial USDC preflight for Arc Testnet.
 
-Get paid or pay a link on Arc Testnet (non-custodial):
-https://ledgerguard-gules.vercel.app/
+Before your wallet signs: match intent ↔ calldata (ALLOW / REVIEW / BLOCK).
 
-Create a link: https://ledgerguard-gules.vercel.app/guard/create
-Pay a link: https://ledgerguard-gules.vercel.app/pay
+npm install @ledgerguard1/sdk
+https://ledgerguard-gules.vercel.app
 
-Base Mainnet x402 demo: https://ledgerguard-gules.vercel.app/canary
+Arc Testnet · no custody · free API
 
-#USDC #Web3 #x402 #ArcTestnet
+Looking for 1 design partner — DM or GitHub integration issue.

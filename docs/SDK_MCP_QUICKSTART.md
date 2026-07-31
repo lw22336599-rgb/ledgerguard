@@ -20,23 +20,27 @@ never connects a wallet or submits a transaction.
 
 1. Open `https://ledgerguard-gules.vercel.app/developer`.
 2. Create a free Arc Testnet API key and save it once.
-3. Run:
+3. Install: `npm install @ledgerguard1/sdk`
+4. Run:
 
-```powershell
-$env:LEDGERGUARD_API_KEY = "lg_test_..."
-$env:LEDGERGUARD_INTEGRATION = "your-public-project-testnet"
+```bash
+export LEDGERGUARD_API_KEY=lg_test_...
+export LEDGERGUARD_INTEGRATION=your-public-project-testnet
 node examples/quickstart.mjs
 ```
 
-The example calls `POST /v1/developer/shadow`. Shadow results are metered but
-never authorize, sign, or submit a transaction. Move to
-`POST /v1/developer/preflight` only after reviewing the policy response.
+The example uses `LedgerGuardClient.preflight()` against
+`POST /v1/developer/preflight`. Free tier also includes `POST /v1/can-sign`
+without an API key.
 
 ## TypeScript client
 
-The repository exports `LedgerGuardClient` from `src/sdk/index.ts`. It supports
-free or authenticated preflight, authenticated shadow, and evidence retrieval.
-HTTP errors are structured and never include the API key.
+Published npm package: `@ledgerguard1/sdk`  
+Monorepo export: `ledgerguard/sdk` (internal tests)
+
+`LedgerGuardClient` supports preflight, can-sign, and evidence. HTTP errors are
+structured and never include the API key. See `withPreflight()` in the package
+README.
 
 ## MCP
 

@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Independent integration evidence
+    url: https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=integration-test.yml
+    about: Submit public testnet integration evidence (no secrets).
   - name: Security disclosure
     url: mailto:lw22336599@gmail.com
     about: Do not post private keys, seed phrases, credentials, or unpatched vulnerabilities publicly.

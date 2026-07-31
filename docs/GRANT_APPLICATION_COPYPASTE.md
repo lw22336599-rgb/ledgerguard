@@ -3,7 +3,7 @@
 **Portal:** https://www.circle.com/grant  
 **Status:** Ready to paste — background optional edit, then submit  
 **Last updated:** 2026-07-31  
-**Founder:** 老王
+**Founder:** Lao Wang (independent developer)
 
 ---
 
@@ -11,8 +11,8 @@
 
 | Field | Value |
 | --- | --- |
-| Applicant / founder name | **老王** |
-| Team background | See **Team** section below (edit if you want) |
+| Applicant / founder name | **Lao Wang** |
+| Team background | See **Team** section below (edit if needed) |
 | Requested USDC total | **USD 35,000** (milestone split below) |
 | Legal entity | Independent developer / no registered company |
 
@@ -57,14 +57,16 @@ LedgerGuard is a non-custodial payment safety layer for USDC on **Arc Testnet**.
 1. **Guard Link** — merchant creates a shareable URL/QR; payer reviews amount, recipient, and purpose on a payment request page before approving in their wallet.
 2. **Preflight API** — compares unsigned calldata to a declared intent and policy; returns deterministic `ALLOW`, `REVIEW`, or `BLOCK`.
 3. **Evidence API** — after settlement, reconciles onchain transfers against the original intent.
-4. **x402** — Arc Testnet paid resource at `GET /v1/paid/network-risk`; Base Mainnet x402 live at `/canary` (0.001 USDC; separate capability demo, not a Guard Link product).
+4. **npm SDK** — `@ledgerguard1/sdk` on npm (preflight, can-sign, withPreflight guard)
+5. **x402** — Arc Testnet paid resource at `GET /v1/paid/network-risk`; Base Mainnet x402 live at `/canary` (0.001 USDC; separate capability demo, not a Guard Link product).
 
 LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It does not custody funds, replace wallets, or claim paying customers today.
 
 **Verified evidence (2026-07-31):**
 
 - Public deployment + OpenAPI 3.1
-- 134 automated tests; production smoke PASS
+- 148 automated tests; production smoke PASS
+- `@ledgerguard1/sdk@0.1.0` published on npm
 - Arc Testnet readiness (`/ready` chain 5042002)
 - Guard Link E2E on Arc Testnet
 - Circle Gateway x402 challenge on Arc Testnet (402 → settle → deliver)
@@ -144,11 +146,11 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 
 ## Team (copy-paste for grant form)
 
-**Founder:** 老王 (Lao Wang)  
+**Founder:** Lao Wang  
 **Location:** Singapore  
 **Entity:** Independent developer project (open source); no token; no platform fee on Guard Links  
 
-**Background:** Solo founder of LedgerGuard. Built and shipped the public Arc Testnet demo end-to-end: Guard Links, preflight/evidence APIs, Circle Gateway x402 integration, MCP/OpenAPI surfaces, 134 automated tests, and production smoke checks. Arc-first strategy — Base Mainnet x402 at `/canary` is a separate live demo, not the Guard Link product. Seeking Circle design partners and milestone funding to harden production controls and recruit independent testnet integrations.
+**Background:** Solo founder of LedgerGuard. Built and shipped the public Arc Testnet demo end-to-end: Guard Links, preflight/evidence APIs, `@ledgerguard1/sdk` on npm, Circle Gateway x402 integration, MCP/OpenAPI surfaces, 148 automated tests, and production smoke checks. Arc-first strategy — Base Mainnet x402 at `/canary` is a separate live demo, not the Guard Link product. Seeking Circle design partners and milestone funding to harden production controls and recruit independent testnet integrations.
 
 **Contact:** lw22336599@gmail.com · X @HuiLibaa · GitHub lw22336599-rgb  
 
@@ -161,7 +163,8 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 | Demo | https://ledgerguard-gules.vercel.app/guard/create |
 | Docs | https://ledgerguard-gules.vercel.app/docs |
 | OpenAPI | https://ledgerguard-gules.vercel.app/openapi.json |
-| Integration guide | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/PARTNER_INTEGRATION_GUIDE.md |
+| Integration guide | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/DEVELOPER_INTEGRATION_INVITE.md |
+| npm SDK | https://www.npmjs.com/package/@ledgerguard1/sdk |
 | x402 evidence doc | https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs/X402_E2E_EVIDENCE.md |
 | About | https://ledgerguard-gules.vercel.app/about |
 
@@ -169,7 +172,7 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 
 ## Submission checklist
 
-- [x] Founder name: **老王**
+- [x] Founder name: **Lao Wang**
 - [x] Total ask: **USD 35,000** (14,000 + 12,250 + 8,750)
 - [ ] Background edited (optional)
 - [ ] Did **not** claim paying customers or 0.5% platform fee
@@ -182,6 +185,7 @@ LedgerGuard **complements** Circle infrastructure (Arc, USDC, Gateway x402). It 
 
 ## After submit (same week)
 
-1. Post English tweet (see `artifacts/r1-promo/tweet-draft.txt`)  
-2. Share demo in Arc Discord (see `artifacts/community/arc-discord-post.txt`)  
-3. Add “Grant submitted” note in your project log — do not claim approval until Circle confirms  
+1. Post English tweet — `docs/outreach/X_POST_EN.md`  
+2. Share demo in Arc Discord — `docs/outreach/ARC_DISCORD_POST_EN.md`  
+3. Send design-partner invite — `docs/DEVELOPER_INTEGRATION_INVITE.md`  
+4. Add “Grant submitted” note in your project log — do not claim approval until Circle confirms  

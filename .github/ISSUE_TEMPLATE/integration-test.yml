@@ -7,7 +7,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        This form is used to verify real adoption. Use testnet assets only. Never paste API keys, wallet keys, seed phrases, personal data, or real-fund transaction details.
+        This form verifies real adoption. Use testnet assets only. Never paste API keys, wallet keys, seed phrases, personal data, or real-fund transaction details.
+
+        Quick start: `npm install @ledgerguard1/sdk` — see `docs/DEVELOPER_INTEGRATION_INVITE.md`.
   - type: input
     id: project
     attributes:
@@ -21,7 +23,8 @@ body:
       label: Integration surface
       options:
         - HTTP API
-        - TypeScript SDK
+        - npm package (@ledgerguard1/sdk)
+        - TypeScript SDK (monorepo)
         - MCP
         - Guard Link
         - x402 testnet resource

@@ -1,13 +1,17 @@
-Hi Arc builders — sharing a non-custodial USDC payment link demo on Arc Testnet.
+Hi Arc builders — sharing a non-custodial USDC payment safety demo on Arc Testnet.
 
-**LedgerGuard** — send or receive USDC with a simple link (no custody, no private keys):
+**LedgerGuard**
 
-• Get paid: https://ledgerguard-gules.vercel.app/guard/create
-• Pay a link: https://ledgerguard-gules.vercel.app/pay
-• Payer reviews amount / recipient / purpose before signing in their wallet
-• APIs: preflight, evidence, x402 testnet — OpenAPI + MCP on GitHub
+• Guard Links (payment request + QR): https://ledgerguard-gules.vercel.app/guard/create
+• npm SDK: npm install @ledgerguard1/sdk
+• APIs: preflight, can-sign, evidence, x402 testnet — OpenAPI + MCP
 
-Arc Testnet only for Guard Links (test assets). Base Mainnet x402 is a separate live demo at https://ledgerguard-gules.vercel.app/canary.
+Payer reviews amount / recipient / purpose before signing. No custody. No private keys.
+
+Arc Testnet only for Guard Links (test assets). Base Mainnet x402 demo: /canary
+
+Seeking 1 design partner — integration evidence issue:
+https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=integration-test.yml
 
 Repo: https://github.com/lw22336599-rgb/ledgerguard
 Home: https://ledgerguard-gules.vercel.app/

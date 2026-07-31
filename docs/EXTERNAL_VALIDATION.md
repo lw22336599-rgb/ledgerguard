@@ -6,15 +6,19 @@ project-owner tests, and testnet payments are not customers or revenue.
 ## Five-minute attributable integration
 
 1. Create a test key at `https://ledgerguard-gules.vercel.app/developer`.
-2. Choose a public, non-secret integration identifier, for example
+2. Install the SDK: `npm install @ledgerguard1/sdk`
+3. Choose a public, non-secret integration identifier, for example
    `acme-agent-testnet`.
-3. Run:
+4. Run:
 
-```powershell
-$env:LEDGERGUARD_API_KEY = "lg_test_..."
-$env:LEDGERGUARD_INTEGRATION = "acme-agent-testnet"
+```bash
+export LEDGERGUARD_API_KEY=lg_test_...
+export LEDGERGUARD_INTEGRATION=acme-agent-testnet
 node examples/quickstart.mjs
 ```
+
+Or use `LedgerGuardClient` / `POST /v1/can-sign` directly — see
+`docs/DEVELOPER_INTEGRATION_INVITE.md`.
 
 Every request returns `X-LedgerGuard-Request-Id`. Server-side sanitized
 telemetry records the client and integration identifiers, method, path, status,

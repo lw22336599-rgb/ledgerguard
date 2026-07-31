@@ -50,7 +50,8 @@ transactions:
 Verified on 2026-07-29:
 
 - Repository working tree was clean before this application draft was added.
-- `npm test`: 6 test files passed, 22 tests passed.
+- `npm test`: 148 tests passed.
+- `@ledgerguard1/sdk@0.1.0` published on npm.
 - `npm run typecheck`: passed.
 - Public `/health`: HTTP 200.
 - Public `/ready`: HTTP 200 and Arc Testnet chain ID `5042002`.
@@ -142,11 +143,7 @@ The technical package is ready, but the application is not yet complete:
 ## Immediate work order
 
 1. Keep the current Arc Testnet demo online without purchasing new services.
-2. Add a five-minute integration example that calls preflight, receives the
-   x402 challenge, and verifies evidence.
+2. Share `docs/DEVELOPER_INTEGRATION_INVITE.md` and recruit two independent Arc/Circle design partners.
 3. Prepare a one-page architecture and threat model for Circle technical review.
-4. Recruit two independent Arc/Circle design partners through official ecosystem
-   channels.
-5. Submit the application only after the human fields are completed; do not
+4. Submit the application only after the human fields are completed; do not
    invent identity, traction, funding amount, or partnerships.
-
