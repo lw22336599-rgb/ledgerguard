@@ -3,21 +3,38 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+const root = join(process.cwd(), "public");
+const brandDir = join(root, "brand");
+const generatedDir = join(process.cwd(), "src", "generated");
+const generatedPath = join(generatedDir, "brand-assets.ts");
+const faviconPngPath = join(root, "favicon.png");
+
 const sourceCandidates = [
   process.env.BRAND_LOGO_SRC,
   join(process.cwd(), "artifacts", "brand", "logo-source-bold-lg.png"),
+  join(root, "brand", "logo-source-bold-lg.png"),
   "C:/Users/lw223/Desktop/LedgerGuard-Logo-Options/lg-logo-01-bold-lg.png",
 ].filter(Boolean);
 const src = sourceCandidates.find((candidate) => existsSync(candidate));
 if (!src) {
+  if (existsSync(generatedPath) && existsSync(faviconPngPath)) {
+    console.log(
+      JSON.stringify(
+        {
+          skipped: true,
+          reason: "committed brand assets present (Vercel build)",
+          outputs: ["src/generated/brand-assets.ts", "public/favicon.png"],
+        },
+        null,
+        2,
+      ),
+    );
+    process.exit(0);
+  }
   throw new Error(
     "Brand logo source not found. Add artifacts/brand/logo-source-bold-lg.png or set BRAND_LOGO_SRC.",
   );
 }
-
-const root = join(process.cwd(), "public");
-const brandDir = join(root, "brand");
-const generatedDir = join(process.cwd(), "src", "generated");
 
 await mkdir(brandDir, { recursive: true });
 await mkdir(join(process.cwd(), "artifacts", "brand"), { recursive: true });
@@ -49,15 +66,48 @@ const cleaned = await sharp(data, {
   .png()
   .toBuffer();
 
+const trimmed = await sharp(cleaned)
+  .trim({ threshold: 18, background: "#ffffff" })
+  .toBuffer();
+
+const { width: trimWidth = 512, height: trimHeight = 512 } =
+  await sharp(trimmed).metadata();
+const pad = Math.round(Math.max(trimWidth, trimHeight) * 0.05);
+const brandCanvas = await sharp(trimmed)
+  .extend({
+    top: pad,
+    bottom: pad,
+    left: pad,
+    right: pad,
+    background: { r: 255, g: 255, b: 255, alpha: 1 },
+  })
+  .png()
+  .toBuffer();
+
 for (const size of [512, 192, 64, 32]) {
-  await sharp(cleaned)
-    .resize(size, size)
+  await sharp(brandCanvas)
+    .resize(size, size, {
+      fit: "contain",
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    })
     .png()
     .toFile(join(brandDir, `logo-${size}.png`));
 }
 
-const faviconPng = await sharp(cleaned).resize(512, 512).png().toBuffer();
-const faviconIco = await sharp(cleaned).resize(32, 32).png().toBuffer();
+const faviconPng = await sharp(brandCanvas)
+  .resize(512, 512, {
+    fit: "contain",
+    background: { r: 255, g: 255, b: 255, alpha: 1 },
+  })
+  .png()
+  .toBuffer();
+const faviconIco = await sharp(brandCanvas)
+  .resize(32, 32, {
+    fit: "contain",
+    background: { r: 255, g: 255, b: 255, alpha: 1 },
+  })
+  .png()
+  .toBuffer();
 const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LedgerGuard"><image href="data:image/png;base64,${faviconPng.toString("base64")}" width="512" height="512"/></svg>`;
 
 await writeFile(join(root, "favicon.png"), faviconPng);
@@ -65,8 +115,11 @@ await writeFile(join(root, "favicon.ico"), faviconIco);
 await writeFile(join(root, "favicon.svg"), faviconSvg, "utf8");
 await writeFile(join(brandDir, "favicon.svg"), faviconSvg, "utf8");
 await writeFile(join(brandDir, "logo-512.png"), faviconPng);
-await sharp(cleaned)
-  .resize(512, 512)
+await sharp(brandCanvas)
+  .resize(512, 512, {
+    fit: "contain",
+    background: { r: 255, g: 255, b: 255, alpha: 1 },
+  })
   .png()
   .toFile(
     join(process.cwd(), "artifacts", "brand", "logo-selected-bold-lg.png"),

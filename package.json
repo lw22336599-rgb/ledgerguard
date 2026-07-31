@@ -17,6 +17,7 @@
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
     "start": "node --env-file-if-exists=.env --import tsx src/server.ts",
     "build:brand": "node scripts/build-brand-assets.mjs",
+    "verify:brand": "node scripts/verify-brand-local.mjs",
     "build:browser": "node scripts/build-browser.mjs",
     "compress:marketing": "node scripts/compress-marketing.mjs",
     "build": "npm run build:brand && npm run build:browser && tsc -p tsconfig.json",
