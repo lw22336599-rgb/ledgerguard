@@ -1,16 +1,15 @@
 # LedgerGuard
 
-LedgerGuard is an Arc-first, non-custodial transaction safety service for AI
-agents. It checks an intended transaction before signing and produces normalized
-evidence after settlement.
+LedgerGuard is an Arc-first, non-custodial **stablecoin payment intent safety** service.
+It checks declared USDC intent against unsigned calldata before signing and produces
+normalized evidence after settlement.
 
 Current status: **testnet MVP / Base Mainnet adapter deployed fail-closed /
 Arc Mainnet unavailable**.
 
-Public demo: **https://ledgerguard-gules.vercel.app** (target custom domain: **https://ledgerguard.app** — see [`docs/CUSTOM_DOMAIN.md`](docs/CUSTOM_DOMAIN.md))
+Public demo: **https://ledgerguard-gules.vercel.app**
 
 Public contact: **lw22336599@gmail.com**
-
 GitHub contact: **lw22336599-rgb**
 
 Official X: **https://x.com/HuiLibaa**
@@ -146,6 +145,15 @@ operating loop, evidence sources, ownership, and production gates. See
 evidence-based ecosystem application pack. This testnet demo has no verified
 customer or revenue claim.
 
+## Specification documents
+
+| Document | Purpose |
+| --- | --- |
+| [`PREFLIGHT_RECORD_MAPPING.md`](docs/PREFLIGHT_RECORD_MAPPING.md) | x402 Payment Preflight Record (draft) compatibility |
+| [`NETWORK_ADAPTER_SPEC.md`](docs/NETWORK_ADAPTER_SPEC.md) | Network adapter slot |
+| [`GUARD_LINK_FORMAT.md`](docs/GUARD_LINK_FORMAT.md) | Guard Link URL format |
+| [`OPEN_SOURCE_POLICY.md`](docs/OPEN_SOURCE_POLICY.md) | What is open vs hosted-only |
+| [`WALLET_EXCHANGE_INTEGRATION.md`](docs/WALLET_EXCHANGE_INTEGRATION.md) | Wallet/exchange 5-minute path |
 ## Mainnet activation gates
 
 Arc Mainnet is represented in the network registry but deliberately has no

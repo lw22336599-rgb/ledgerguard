@@ -17,18 +17,19 @@ const pageHead = (title: string, description: string) => `<!doctype html>
 </head>`;
 
 const arcPrimaryEyebrow = "USDC PAYMENT LINKS · ARC TESTNET";
-const arcPrimaryNetworkNoteHtml =
-  "Guard Links run on <strong>Arc Testnet</strong> — our primary product path. <strong>Base Mainnet</strong> x402 USDC is live and operational at <a href=\"/canary\">/canary</a> (production gates passed; real USDC, not a Guard Link).";
 const portalHeroNetworkNoteHtml =
   "Guard Links use <strong>Arc Testnet</strong> USDC (no real money).";
-const baseMainnetLinkLabel = "Base Mainnet x402";
+const baseMainnetLinkLabel = "Base x402 demo";
+const specDocsBase =
+  "https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs";
 /** Legacy demo default; never a real contract — wallet connect replaces this. */
 export const guardRecipientDemoDefault =
   "0x2222222222222222222222222222222222222222";
 
 const footer = `<footer class="site-footer">
-  <div class="footer-primary">LedgerGuard &middot; Arc-first &middot; Guard Links on Arc Testnet &middot; ${baseMainnetLinkLabel} live at <a href="/canary">/canary</a></div>
+  <div class="footer-primary">LedgerGuard &middot; Payment intent safety &middot; Arc Testnet Guard Links</div>
   <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/pay">Pay a link</a> &middot; <a href="/payments">Check payments</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Wallet setup</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="https://testnet.arcscan.app" rel="noreferrer">ArcScan</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-partners">Compatible with <a href="https://x402.org" rel="noreferrer">x402</a> &middot; <a href="https://www.circle.com/en/arc" rel="noreferrer">Arc</a> &middot; <a href="/canary">${baseMainnetLinkLabel}</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
@@ -200,7 +201,7 @@ export const guardBuilderHtml = `${pageHead(
       <p class="eyebrow">${arcPrimaryEyebrow}</p>
       <h1 class="compact">Create a payment link.</h1>
       <p class="lead">Connect your wallet, enter the amount, and share the link or QR code. They review who gets paid before approving.</p>
-      <p class="portal-network-note">${portalHeroNetworkNoteHtml} Need the Base Mainnet x402 demo? See <a href="/canary">${baseMainnetLinkLabel}</a>.</p>
+      <p class="portal-network-note">${portalHeroNetworkNoteHtml}</p>
     </section>
     <section id="guard-verified-notice" class="notice" hidden><strong>Welcome back.</strong> Your receiving address is prefilled from your verified payment. Connect the same wallet or edit the address before creating a link.</section>
     <section class="panel builder-panel">
@@ -385,8 +386,8 @@ export const payHtml = `${pageHead(
 </html>`;
 
 export const portalHtml = `${pageHead(
-  "LedgerGuard | Send and receive USDC",
-  "Send and receive USDC with a simple payment link on Arc Testnet. No signup. Non-custodial.",
+  "LedgerGuard | Payment intent safety",
+  "Non-custodial stablecoin payment intent safety on Arc Testnet. Review amount, recipient, and purpose before you sign.",
 )}
 <body>
   <main>
@@ -396,7 +397,7 @@ export const portalHtml = `${pageHead(
         <div class="portal-hero-copy">
           <p class="eyebrow">${arcPrimaryEyebrow}</p>
           <h1>Send and receive USDC<br><span>with a simple link.</span></h1>
-          <p class="lead">Check who gets paid and how much before you approve. No signup. No technical setup.</p>
+          <p class="lead">Payment intent safety: check who gets paid, how much, and why before you approve. No signup. Non-custodial.</p>
           <p class="portal-network-note">${portalHeroNetworkNoteHtml}</p>
           <div class="portal-actions portal-dual-cta">
             <a class="primary-action portal-primary-cta" href="/guard/create">Get paid</a>
@@ -507,6 +508,7 @@ export const integrationStackHtml = `${pageHead(
   -&gt; wallet signature or x402 settlement
   -&gt; LedgerGuard evidence</pre>
       <p class="muted">Install: <code>npm install @ledgerguard1/sdk</code>. Free endpoints: <code>POST /v1/preflight</code>, <code>POST /v1/can-sign</code>, <code>POST /v1/evidence</code>.</p>
+      <p class="muted">Specifications: <a href="${specDocsBase}/PREFLIGHT_RECORD_MAPPING.md" rel="noreferrer">x402 mapping</a> · <a href="${specDocsBase}/NETWORK_ADAPTER_SPEC.md" rel="noreferrer">adapters</a> · <a href="${specDocsBase}/GUARD_LINK_FORMAT.md" rel="noreferrer">Guard Links</a> · <a href="${specDocsBase}/OPEN_SOURCE_POLICY.md" rel="noreferrer">open source policy</a></p>
       <p class="muted">Enabled networks are published at <a href="/v1/network-adapters">/v1/network-adapters</a>. Unsupported networks fail closed.</p>
     </section>
     ${footer}
@@ -516,7 +518,7 @@ export const integrationStackHtml = `${pageHead(
 
 export const developerDocsHtml = `${pageHead(
   "LedgerGuard | Developer Documentation",
-  "Human-readable documentation for the LedgerGuard API.",
+  "Human-readable documentation for the LedgerGuard payment intent safety API.",
 )}
 <body>
   <main>
@@ -524,12 +526,31 @@ export const developerDocsHtml = `${pageHead(
     <section class="subhero">
       <p class="eyebrow">HUMAN-READABLE DEVELOPER ENTRY</p>
       <h1 class="compact">API documentation</h1>
-      <p class="lead">This page is designed for people. The <a href="/openapi.json">raw OpenAPI JSON</a> is a machine-readable file for programs, SDKs, and AI agents. Seeing compact JSON when opening it directly is expected.</p>
+      <p class="lead">Non-custodial stablecoin intent safety: preflight before sign, evidence after settlement. This page is for people; machines use the <a href="/openapi.json">OpenAPI JSON</a> machine-readable file.</p>
     </section>
     <section class="docs-grid">
       <article class="doc-card"><span>POST</span><h2>/v1/preflight</h2><p>Parse, compare, and simulate an unsigned transaction before signing. Returns ALLOW, REVIEW, or BLOCK.</p></article>
+      <article class="doc-card"><span>POST</span><h2>/v1/can-sign</h2><p>Thin wallet path: recipient, amount, purpose, and calldata.</p></article>
       <article class="doc-card"><span>POST</span><h2>/v1/evidence</h2><p>After confirmation, reconcile payer, recipient, asset, amount, and unexpected side effects.</p></article>
-      <article class="doc-card"><span>GET + x402</span><h2>/v1/paid/network-risk</h2><p>A paid Arc Testnet resource. Returns a standard HTTP 402 challenge until payment is settled.</p></article>
+    </section>
+    <section class="panel developer-panel">
+      <div>
+        <p class="step">COMPATIBLE STANDARDS</p>
+        <h2>x402 and specifications</h2>
+        <p class="muted">LedgerGuard complements x402 facilitators and endpoint readiness tools. We map to the draft <a href="https://github.com/x402-foundation/x402/pull/2792" rel="noreferrer">x402 Payment Preflight Record</a> as a compatible oracle — we do not own the x402 specification.</p>
+        <ul>
+          <li><a href="${specDocsBase}/PREFLIGHT_RECORD_MAPPING.md" rel="noreferrer">Preflight Record mapping</a></li>
+          <li><a href="${specDocsBase}/NETWORK_ADAPTER_SPEC.md" rel="noreferrer">Network adapter spec</a></li>
+          <li><a href="${specDocsBase}/GUARD_LINK_FORMAT.md" rel="noreferrer">Guard Link format</a></li>
+          <li><a href="${specDocsBase}/OPEN_SOURCE_POLICY.md" rel="noreferrer">Open source policy</a></li>
+          <li><a href="${specDocsBase}/WALLET_EXCHANGE_INTEGRATION.md" rel="noreferrer">Wallet / exchange integration</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="step">SDK</p>
+        <h2>npm package</h2>
+        <p class="muted"><code>npm install @ledgerguard1/sdk</code> — see <a href="/docs/integration-stack">integration stack</a> and GitHub <code>examples/</code>.</p>
+      </div>
     </section>
     <section class="code-card">
       <h2>Minimal request example</h2>
@@ -975,7 +996,8 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 .chain-selector-notice{margin:0;font-size:13px;line-height:1.55;color:var(--muted)}
 .chain-selector-notice a{color:var(--link)}
 .site-footer{display:grid;gap:10px;padding:28px 0 36px;border-top:1px solid var(--line);line-height:1.7}
-.footer-primary,.footer-links{color:var(--muted);font-size:14px}
+.footer-primary,.footer-links,.footer-partners{color:var(--muted);font-size:14px}
+.footer-partners a{color:var(--link);text-decoration:none}
 .footer-links a,.footer-primary a{color:var(--link);text-decoration:none}
 .footer-social{padding-top:6px;border-top:1px solid var(--line)}
 .footer-social a{color:var(--text);font-weight:700;text-decoration:none}

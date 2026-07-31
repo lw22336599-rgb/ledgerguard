@@ -131,5 +131,16 @@ Current verified external integrations: **0**. Testnet usage is free and has no 
 - Not a wallet, escrow, or x402 facilitator
 - Not ML anti-fraud (Blockaid / GoPlus class)
 - Not a “verified merchant” badge for Guard Links
+- Not the author of the x402 Payment Preflight Record specification (compatible mapping only)
+
+## Specification documents
+
+| Document | Purpose |
+| --- | --- |
+| [`PREFLIGHT_RECORD_MAPPING.md`](PREFLIGHT_RECORD_MAPPING.md) | Draft x402 PR #2792 field mapping |
+| [`NETWORK_ADAPTER_SPEC.md`](NETWORK_ADAPTER_SPEC.md) | Network adapter slot |
+| [`GUARD_LINK_FORMAT.md`](GUARD_LINK_FORMAT.md) | Guard Link URLs |
+| [`OPEN_SOURCE_POLICY.md`](OPEN_SOURCE_POLICY.md) | Open vs hosted-only |
+| [`WALLET_EXCHANGE_INTEGRATION.md`](WALLET_EXCHANGE_INTEGRATION.md) | Wallet/exchange path |
 
 See also: `docs/MESSAGING_AND_CLAIMS.md`, `docs/EXTERNAL_VALIDATION.md`.
