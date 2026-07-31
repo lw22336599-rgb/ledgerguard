@@ -32,7 +32,7 @@ const footer = `<footer class="site-footer">
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
-const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/docs">Developers</a><a href="/status">Status</a>`;
+const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/pay">Pay a link</a>`;
 
 export const meterAppOrigin = "https://arc-meter-xi.vercel.app";
 
@@ -512,12 +512,6 @@ export const portalHtml = `${pageHead(
           <dt>Do I need to be a developer?</dt><dd>No. It works like a payment app.</dd>
         </dl>
       </section>
-    </section>
-    <section class="portal-developers">
-      <p class="eyebrow">FOR DEVELOPERS</p>
-      <h2 class="compact">APIs, agents, and automation</h2>
-      <p class="lead">Preflight API · x402 testnet · MCP · OpenAPI — same safety core, developer docs inside.</p>
-      <div class="links"><a href="/docs">Developer center</a><a href="/canary">${baseMainnetLinkLabel}</a><a href="/status">Live status</a></div>
     </section>
     ${footer}
   </main>${portalPageScripts()}

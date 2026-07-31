@@ -276,6 +276,8 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain("What is USDC?");
     expect(portalHtml).not.toContain("USDC PAYMENT LINKS · BASE + ARC");
     expect(portalHtml).not.toContain("how-cta");
+    expect(portalHtml).not.toContain("portal-developers");
+    expect(portalHtml).not.toContain("FOR DEVELOPERS");
   });
 
   it("publishes the pay entry page for pasted links", () => {
