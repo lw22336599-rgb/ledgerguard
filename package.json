@@ -16,9 +16,10 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
     "start": "node --env-file-if-exists=.env --import tsx src/server.ts",
+    "build:brand": "node scripts/build-brand-assets.mjs",
     "build:browser": "node scripts/build-browser.mjs",
     "compress:marketing": "node scripts/compress-marketing.mjs",
-    "build": "npm run build:browser && tsc -p tsconfig.json",
+    "build": "npm run build:brand && npm run build:browser && tsc -p tsconfig.json",
     "smoke": "node scripts/smoke.mjs",
     "smoke:local": "node scripts/local-smoke.mjs",
     "x402:buyer:init": "node scripts/x402-buyer.mjs init",

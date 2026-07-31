@@ -222,11 +222,15 @@ describe("HTTP API", () => {
       expect(asset.headers.get("content-type")).toContain("text/javascript");
     }
 
-    for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
+    const faviconSvg = await app.request("/favicon.svg");
+    expect(faviconSvg.status).toBe(200);
+    expect(faviconSvg.headers.get("content-type")).toContain("image/svg+xml");
+    expect(await faviconSvg.text()).toContain("<svg");
+
+    for (const path of ["/favicon.ico", "/favicon.png"]) {
       const icon = await app.request(path);
       expect(icon.status).toBe(200);
-      expect(icon.headers.get("content-type")).toContain("image/svg+xml");
-      expect(await icon.text()).toContain("<svg");
+      expect(icon.headers.get("content-type")).toContain("image/png");
     }
 
     const openapi = await app.request("/openapi.json");

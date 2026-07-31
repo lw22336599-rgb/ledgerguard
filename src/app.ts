@@ -95,7 +95,6 @@ import {
   developerConsoleHtml,
   developerConsoleJs,
   developerDocsHtml,
-  faviconSvg,
   guardBuilderHtml,
   guardLinkHtml,
   integrationBoundaryHtml,
@@ -468,13 +467,21 @@ app.get("/mainnet-canary.js", (context) =>
     "Cache-Control": "public, max-age=300",
   }),
 );
-for (const path of ["/favicon.svg", "/favicon.ico", "/favicon.png"]) {
-  app.get(path, (context) =>
-    context.body(faviconSvg, 200, {
-      "Content-Type": "image/svg+xml; charset=utf-8",
+for (const [route, fileName, contentType] of [
+  ["/favicon.svg", "favicon.svg", "image/svg+xml; charset=utf-8"],
+  ["/favicon.png", "favicon.png", "image/png"],
+  ["/favicon.ico", "favicon.ico", "image/png"],
+] as const) {
+  app.get(route, (context) => {
+    const filePath = join(process.cwd(), "public", fileName);
+    if (!existsSync(filePath)) {
+      return context.text("Not found", 404);
+    }
+    return context.body(readFileSync(filePath), 200, {
+      "Content-Type": contentType,
       "Cache-Control": "public, max-age=86400",
-    }),
-  );
+    });
+  });
 }
 app.get("/llms.txt", (context) =>
   context.text(`LedgerGuard

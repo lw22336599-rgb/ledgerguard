@@ -5,8 +5,9 @@ const pageHead = (title: string, description: string) => `<!doctype html>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="${description}">
   <title>${title}</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="stylesheet" href="/styles.css">
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
@@ -35,7 +36,7 @@ export function portalNavHtml(
 ): string {
   const badgeClass = options?.danger ? "badge danger" : "badge";
   return `<nav class="portal-nav">
-      <a class="brand" href="/"><img class="brand-mark" src="/favicon.svg" alt="" width="28" height="28" decoding="async">LedgerGuard</a>
+      <a class="brand" href="/"><img class="brand-mark" src="/favicon.png" alt="" width="28" height="28" decoding="async">LedgerGuard</a>
       <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
       <div class="portal-nav-links">${portalNavLinks}</div>
       <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
@@ -234,18 +235,6 @@ export const guardBuilderHtml = `${pageHead(
   </main>${portalPageScripts("/guard-builder.js", "/guard-builder-wallet.js")}
 </body>
 </html>`;
-
-export const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LedgerGuard">
-  <defs>
-    <linearGradient id="lg-shield" x1="32" y1="11" x2="32" y2="52" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#3b82f6"/>
-      <stop offset="1" stop-color="#7c3aed"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="16" fill="#ffffff"/>
-  <path d="M32 11 49 18.5v11.5c0 10.5-6.5 18-17 21.5-10.5-3.5-17-11-17-21.5V18.5L32 11Z" fill="url(#lg-shield)"/>
-  <path fill="#ffffff" d="M20.8 22.6h6.4v13.1h12.6v4.3H20.8V22.6zm14.2 0h8.6c4.8 0 8.7 3.9 8.7 8.7s-3.9 8.7-8.7 8.7h-4.1v-4.2h3.7c2.4 0 4.3-1.9 4.3-4.3s-1.9-4.3-4.3-4.3h-3.7V22.6z"/>
-</svg>`;
 
 export function routesHtml(input: {
   maxAmountUsdc: string;
