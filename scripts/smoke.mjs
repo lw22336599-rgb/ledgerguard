@@ -23,7 +23,8 @@ const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) })
 const homeHtml = await home.text();
 if (
   home.status !== 200 ||
-  !homeHtml.includes("Send a USDC payment link.") ||
+  !homeHtml.includes("Send and receive USDC") ||
+  !homeHtml.includes('href="/pay"') ||
   !homeHtml.includes("https://x.com/HuiLibaa") ||
   !homeHtml.includes('<html lang="en">')
 ) {
@@ -39,7 +40,8 @@ for (const [path, marker] of [
   ["/test", "Complete the test flow end to end"],
   ["/status", "LIVE STATUS"],
   ["/developer", "Developer Console"],
-  ["/guard/create", "Create a USDC payment link."],
+  ["/guard/create", "Create a payment link."],
+  ["/pay", "Pay with USDC"],
   ["/payments", "Check whether a payment arrived."],
   ["/testnet-help", "Set up your wallet for LedgerGuard."],
   ["/routes", "route-readiness"],

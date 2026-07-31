@@ -19,6 +19,7 @@ import {
   termsHtml,
   testerHtml,
   paymentsHtml,
+  payHtml,
   testnetHelpHtml,
 } from "../src/ui.js";
 
@@ -38,16 +39,16 @@ describe("browser demo experience", () => {
     expect(portalHtml).toContain('href="/canary"');
     expect(portalHtml).toContain('href="/status"');
     expect(portalHtml).toContain('href="/docs"');
-    expect(portalHtml).toContain('href="/testnet-help"');
     expect(portalHtml).toContain('href="/payments"');
+    expect(portalHtml).toContain('href="/pay"');
     expect(portalHtml).toContain("ArcScan");
-    expect(portalHtml).toContain('href="/routes"');
+    expect(portalHtml).not.toContain('href="/routes"');
     expect(portalHtml).toContain('id="nav-connect"');
     expect(portalHtml).toContain('href="/privacy"');
     expect(portalHtml).toContain('href="/terms"');
     expect(portalHtml).toContain('href="/about"');
     expect(portalHtml).toContain('class="brand-mark"');
-    expect(portalHtml).toContain('src="/favicon.png?v=2"');
+    expect(portalHtml).toContain('src="/favicon.png?v=3"');
     expect(portalHtml).toContain('class="portal-nav-actions"');
     expect(portalHtml).toContain('id="nav-menu-toggle"');
     expect(portalHtml).toContain('id="nav-mobile-panel"');
@@ -98,8 +99,9 @@ describe("browser demo experience", () => {
       guardBuilderHtml,
     ]) {
       expect(html).toContain('src="/_vercel/insights/script.js"');
-      expect(html).toContain('href="/favicon.svg?v=2"');
-      expect(html).toContain('href="/favicon.png?v=2"');
+      expect(html).toContain('href="/favicon.svg?v=3"');
+      expect(html).toContain('href="/favicon.png?v=3"');
+      expect(html).toContain('href="/favicon.ico?v=3"');
     }
   });
 
@@ -146,10 +148,12 @@ describe("browser demo experience", () => {
     expect(html).toContain("REVIEW");
     expect(html).toContain("request-123");
     expect(html).toContain("Example Agent");
-    expect(html).toContain("Connect test wallet");
+    expect(html).toContain("Connect wallet");
     expect(html).toContain('src="/guard.js"');
     expect(html).toContain("/site-nav.js");
-    expect(html).toContain("Create your Guard Link");
+    expect(html).toContain('id="payment-complete"');
+    expect(html).toContain("Confirm payment complete");
+    expect(html).toContain("Create your payment link");
     expect(html).toContain('id="guard-cta"');
     expect(html).toContain('id="guard-cta-link"');
     expect(html).toContain('id="guard-cta-summary"');
@@ -181,7 +185,8 @@ describe("browser demo experience", () => {
     expect(guardBuilderHtml).toContain("Advanced options");
     expect(guardBuilderHtml).toContain("guard-verified-notice");
     expect(guardBuilderHtml).toContain("Your receiving address");
-    expect(guardBuilderHtml).toContain("Need Arc Testnet USDC?");
+    expect(guardBuilderHtml).toContain("5-minute setup guide");
+    expect(guardBuilderHtml).toContain("template-chip");
     expect(guardBuilderHtml).toContain('href="/payments"');
     expect(guardBuilderBundle).toContain('fetch("/v1/guard-links"');
     expect(guardBuilderBundle).toContain("guard-qr-canvas");
@@ -189,6 +194,7 @@ describe("browser demo experience", () => {
     expect(guardLinkBundle).toContain('fetch("/v1/evidence"');
     expect(guardLinkBundle).toContain("guard-cta-highlight");
     expect(guardLinkBundle).toContain("guard-cta-verified");
+    expect(guardLinkBundle).toContain("verify-evidence");
     expect(guardLinkBundle).toContain("verified-payment");
     expect(guardLinkBundle).not.toMatch(/privateKey|seed phrase/i);
   });
@@ -257,19 +263,23 @@ describe("browser demo experience", () => {
   });
 
   it("leads with a plain-language payment link promise on the portal", () => {
-    expect(portalHtml).toContain("Send a USDC payment link.");
-    expect(portalHtml).toContain("Create a Guard Link");
+    expect(portalHtml).toContain("Send and receive USDC");
+    expect(portalHtml).toContain('href="/pay"');
+    expect(portalHtml).toContain("Get paid");
+    expect(portalHtml).toContain("Pay a link");
     expect(portalHtml).toContain("HOW IT WORKS");
+    expect(portalHtml).toContain('id="how-it-works"');
     expect(portalHtml).toContain("/marketing/hero-guard-builder.png");
     expect(portalHtml).toContain("USDC PAYMENT LINKS · ARC TESTNET");
     expect(portalHtml).toContain("primary product path");
-    expect(portalHtml).toContain("Arc-first &middot; Guard Links on Arc Testnet");
-    expect(portalHtml).toContain("Arc Testnet");
+    expect(portalHtml).toContain("What is USDC?");
     expect(portalHtml).not.toContain("USDC PAYMENT LINKS · BASE + ARC");
-    expect(portalHtml).not.toContain("BASE + ARC &middot; Guard Links on Arc Testnet");
-    expect(portalHtml).not.toContain("Move USDC into Arc");
-    expect(portalHtml).not.toContain("Protect &rarr; Meter &rarr; Receipts");
-    expect(portalHtml).not.toContain("Open the Meter module");
+  });
+
+  it("publishes the pay entry page for pasted links", () => {
+    expect(payHtml).toContain("Pay with USDC");
+    expect(payHtml).toContain('id="pay-form"');
+    expect(payHtml).toContain("/pay.js");
   });
 
   it("publishes the official X account on the public portal", () => {

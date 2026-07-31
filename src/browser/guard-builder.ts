@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import "./guard-templates.js";
 
 const form = document.querySelector<HTMLFormElement>("#guard-builder");
 const result = document.querySelector<HTMLElement>("#guard-builder-result");

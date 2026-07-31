@@ -8,6 +8,10 @@ const verify = document.querySelector<HTMLButtonElement>("#verify-evidence");
 const status = document.querySelector<HTMLElement>("#wallet-status");
 const output = document.querySelector<HTMLElement>("#wallet-result");
 const cta = document.querySelector<HTMLElement>("#guard-cta");
+const paymentComplete = document.querySelector<HTMLElement>("#payment-complete");
+const completeAmount = document.querySelector<HTMLElement>("#complete-amount");
+const completeRecipient = document.querySelector<HTMLElement>("#complete-recipient");
+const completeTx = document.querySelector<HTMLAnchorElement>("#complete-tx");
 const wallet = window.LedgerGuardWallet;
 
 const usdc = ARC_TESTNET_USDC;
@@ -39,6 +43,23 @@ function transferData(): string {
   return `0xa9059cbb${recipient}${amount}`;
 }
 
+function showPaymentComplete(): void {
+  if (!paymentComplete) return;
+  paymentComplete.hidden = false;
+  if (completeAmount) {
+    completeAmount.textContent = `${root?.dataset.amount ?? "0"} USDC`;
+  }
+  if (completeRecipient) {
+    completeRecipient.textContent = root?.dataset.recipient ?? "recipient";
+  }
+  if (completeTx && txHash) {
+    completeTx.href = `https://testnet.arcscan.app/tx/${txHash}`;
+    completeTx.textContent = "View on ArcScan";
+  }
+  root?.setAttribute("hidden", "");
+  paymentComplete.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
 function activateVerifiedCta(payerAddress: string): void {
   if (!cta) return;
   cta.classList.add("guard-cta-highlight", "guard-cta-verified");
@@ -51,14 +72,14 @@ function activateVerifiedCta(payerAddress: string): void {
   if (heading) heading.textContent = "Get paid the same way";
   if (summary) {
     summary.textContent =
-      "Your payment matched the request. Create your own Guard Link with your wallet prefilled, then share it in chat or as a QR code.";
+      "Your payment matched the request. Create your own payment link with your wallet prefilled, then share it in chat or as a QR code.";
   }
   if (link) {
     const url = new URL("/guard/create", location.origin);
     url.searchParams.set("recipient", payerAddress);
     url.searchParams.set("from", "verified-payment");
     link.href = url.toString();
-    link.textContent = "Create your Guard Link";
+    link.textContent = "Create your payment link";
   }
   cta.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -72,9 +93,9 @@ function connected(): void {
   send.disabled = !(root?.dataset.decision === "ALLOW" && matches);
   status.textContent = matches
     ? send.disabled
-      ? "The connected wallet matches, but this intent is not allowed to proceed."
-      : "Wallet matched. Review the exact testnet transaction before signing."
-    : "The connected wallet does not match the declared payer.";
+      ? "The connected wallet matches, but this payment is not ready to send yet."
+      : "Wallet matched. Review the exact transaction before signing."
+    : "Connect the wallet you will pay from, or continue reviewing the details.";
 }
 
 connect?.addEventListener("click", async () => {
@@ -112,7 +133,7 @@ send?.addEventListener("click", async () => {
   if (!provider || !account || root?.dataset.decision !== "ALLOW") return;
   if (
     !confirm(
-      `Continue to your wallet to review a ${root.dataset.amount} test USDC transfer?`,
+      `Approve ${root.dataset.amount} USDC to ${root.dataset.recipient}? Your wallet will show the exact transaction.`,
     )
   ) {
     return;
@@ -138,14 +159,8 @@ send?.addEventListener("click", async () => {
     );
     show(
       "review",
-      "Transaction submitted. Wait for confirmation, then verify the onchain result.",
+      "Payment submitted. Confirm when the transaction is confirmed onchain.",
     );
-    const link = document.createElement("a");
-    link.href = `https://testnet.arcscan.app/tx/${txHash}`;
-    link.rel = "noreferrer";
-    link.target = "_blank";
-    link.textContent = "Open transaction in ArcScan";
-    output?.append(link);
     if (verify) verify.hidden = false;
   } catch (error) {
     show(
@@ -161,10 +176,7 @@ send?.addEventListener("click", async () => {
 verify?.addEventListener("click", async () => {
   if (!txHash) return;
   verify.disabled = true;
-  show(
-    "neutral",
-    "Checking the confirmed transaction against the original intent…",
-  );
+  show("neutral", "Confirming your payment onchain…");
   try {
     const response = await fetch("/v1/evidence", {
       method: "POST",
@@ -184,46 +196,34 @@ verify?.addEventListener("click", async () => {
     });
     const body = (await response.json()) as { status?: string; message?: string; error?: string };
     if (response.status === 404) {
-      show("review", "The transaction is not confirmed yet. Wait a moment and verify again.");
+      show("review", "The transaction is not confirmed yet. Wait a moment and try again.");
       return;
     }
     if (!response.ok) {
       throw new Error(body.message || body.error || "Evidence check failed");
     }
+    if (body.status === "VERIFIED") {
+      showPaymentComplete();
+      if (output) output.hidden = true;
+      if (account) {
+        activateVerifiedCta(account);
+      }
+      return;
+    }
     const kind =
-      body.status === "VERIFIED"
-        ? "allow"
-        : body.status === "MISMATCH"
-          ? "block"
-          : "review";
+      body.status === "MISMATCH"
+        ? "block"
+        : "review";
     show(
       kind,
-      `${body.status}: ${
-        body.status === "VERIFIED"
-          ? "The confirmed asset flow matches the declared payment."
-          : "Review the evidence before treating this payment as complete."
-      }`,
+      body.status === "MISMATCH"
+        ? "The confirmed payment does not match this request. Do not treat it as complete."
+        : "Review the payment details before treating this as complete.",
     );
-    if (body.status === "VERIFIED" && account) {
-      activateVerifiedCta(account);
-      const check = document.createElement("a");
-      const url = new URL("/payments", location.origin);
-      url.searchParams.set("tx", txHash);
-      url.searchParams.set("recipient", root?.dataset.recipient ?? "");
-      url.searchParams.set("amount", root?.dataset.amount ?? "");
-      url.searchParams.set("payer", account);
-      url.searchParams.set("purpose", root?.dataset.purpose ?? "Payment verification");
-      check.href = url.toString();
-      check.textContent = "Save this verification on the check payments page";
-      output?.append(check);
-    }
-    const pre = document.createElement("pre");
-    pre.textContent = JSON.stringify(body, null, 2);
-    output?.append(pre);
   } catch (error) {
     show(
       "error",
-      error instanceof Error ? error.message : "Evidence check failed.",
+      error instanceof Error ? error.message : "Payment confirmation failed.",
     );
   } finally {
     verify.disabled = false;
@@ -234,12 +234,12 @@ if (!wallet) {
   if (connect) connect.disabled = true;
   if (status) {
     status.textContent =
-      "Wallet support did not load. Intent review remains available.";
+      "Wallet support did not load. You can still review the payment details.";
   }
 } else if (root?.dataset.payer) {
   if (status) {
     status.textContent =
-      "Reconnect the declared test wallet to enable the payment button.";
+      "Reconnect your wallet to enable the payment button.";
   }
   void wallet.restore().then(() => connected()).catch(() => {});
 }

@@ -11,8 +11,9 @@ const baseUrl =
 const outDir = join(process.cwd(), "artifacts", "ui-audit");
 
 const pages = [
-  { path: "/", name: "home", marker: "Send a USDC payment link." },
-  { path: "/guard/create", name: "guard-create", marker: "Create a USDC payment link." },
+  { path: "/", name: "home", marker: "Send and receive USDC" },
+  { path: "/guard/create", name: "guard-create", marker: "Create a payment link." },
+  { path: "/pay", name: "pay", marker: "Pay with USDC" },
   { path: "/canary", name: "canary", marker: "Pay with Base Mainnet USDC." },
   { path: "/protect", name: "protect", marker: "Run preflight" },
   { path: "/docs", name: "docs", marker: "API documentation" },
@@ -38,6 +39,7 @@ const assets = [
   "/wallet.js",
   "/site-nav.js",
   "/guard-builder-wallet.js",
+  "/pay.js",
   "/mainnet-canary.js",
   "/routes.js",
   "/favicon.svg",

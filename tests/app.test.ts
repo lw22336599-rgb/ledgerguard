@@ -13,7 +13,9 @@ describe("HTTP API", () => {
     const page = await app.request("/");
     expect(page.status).toBe(200);
     expect(page.headers.get("content-type")).toContain("text/html");
-    expect(await page.text()).toContain("Send a USDC payment link.");
+    const homeHtml = await page.text();
+    expect(homeHtml).toContain("Send and receive USDC");
+    expect(homeHtml).toContain('href="/pay"');
     expect(page.headers.get("content-security-policy")).toContain(
       "default-src 'self'",
     );
@@ -173,7 +175,8 @@ describe("HTTP API", () => {
     const html = await receipt.text();
     expect(html).toContain("Example Agent");
     expect(html).toContain(body.intentId);
-    expect(html).toContain("Connect test wallet");
+    expect(html).toContain("Connect wallet");
+    expect(html).toContain('id="payment-complete"');
 
     const invalid = await app.request("/v1/guard-links", {
       method: "POST",

@@ -30,6 +30,7 @@ const [
   mainnetCanaryBundle,
   testnetHelpBundle,
   paymentsCheckBundle,
+  payOpenBundle,
 ] = await Promise.all([
   bundle("src/browser/routes.ts", "routes"),
   bundle("src/browser/wallet.ts", "wallet"),
@@ -40,6 +41,7 @@ const [
   bundle("src/browser/mainnet-canary.ts", "mainnet-canary"),
   bundle("src/browser/testnet-help.ts", "testnet-help"),
   bundle("src/browser/payments-check.ts", "payments-check"),
+  bundle("src/browser/pay-open.ts", "pay-open"),
 ]);
 
 await mkdir("src/generated", { recursive: true });
@@ -91,6 +93,11 @@ await Promise.all([
   writeFile(
     "src/generated/payments-check-bundle.ts",
     `${header}export const paymentsCheckBundle = ${JSON.stringify(paymentsCheckBundle)};\n`,
+    "utf8",
+  ),
+  writeFile(
+    "src/generated/pay-open-bundle.ts",
+    `${header}export const payOpenBundle = ${JSON.stringify(payOpenBundle)};\n`,
     "utf8",
   ),
 ]);
