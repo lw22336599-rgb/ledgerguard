@@ -1,0 +1,13 @@
+{
+  "name": "ledgerguard-example-ecommerce-checkout",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Reference: USDC checkout guarded by LedgerGuard preflight.",
+  "dependencies": {
+    "@ledgerguard1/sdk": "^0.1.1"
+  },
+  "scripts": {
+    "start": "node checkout.mjs"
+  }
+}
