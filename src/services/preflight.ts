@@ -15,6 +15,7 @@ import { ARC_TESTNET_USDC } from "../config/networks.js";
 import { resolveNetworkAdapter } from "../adapters/network-adapter.js";
 import type { PreflightInput } from "../schemas.js";
 import type { SimulationResult } from "../lib/rpc.js";
+import { checkAddressThreats, checkSelfTransfer } from "./threat-intel.js";
 
 const erc20Abi = parseAbi([
   "function transfer(address to, uint256 amount) returns (bool)",
@@ -361,6 +362,15 @@ export function evaluatePreflight(
       message: "The calldata is not one of LedgerGuard's currently decoded methods.",
     });
   }
+
+  // Ring 7: threat intelligence and anti-phishing (pure-algorithm checks).
+  // Zero address, burn addresses, EIP-55 checksum, seed blacklist, self-transfer.
+  findings.push(
+    ...checkAddressThreats(decoded.recipient),
+    ...checkAddressThreats(decoded.target),
+    ...checkAddressThreats(decoded.debitAddress),
+    ...checkSelfTransfer(decoded.debitAddress ?? input.from, decoded.recipient),
+  );
 
   if (simulation.status === "failed") {
     findings.push({
