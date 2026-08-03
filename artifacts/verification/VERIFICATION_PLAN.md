@@ -1,43 +1,66 @@
 # LedgerGuard 验证档案（Verification Archive）
 
 > 维护：执行CEO 自动归档
-> 更新：2026-08-03
+> 更新：2026-08-03（含真实执行记录）
 
-本目录存放 LedgerGuard 产品验证的**真实证据**。原则：只存真实执行产生的数据，不伪造任何测试结果或链上记录。
+本目录存放 LedgerGuard 产品验证的**真实执行证据**。原则：只记录真实运行的结果，不伪造任何测试结果或链上记录。
 
-## 已有证据（真实链上）
+## ✅ 真实执行记录（2026-08-03，本地实例 127.0.0.1:3097）
 
-### 1. guard-link-evidence.json（2026-07-30）
-- 场景：Arc 测试网 Guard Link 端到端（创建→付款→对账）
+### 1. 服务启动 + 页面检查（真实 HTTP 请求）
+| 检查项 | 方法 | 结果 |
+|:------|:-----|:-----|
+| /health | curl GET | ✅ 200 `{"ok":true,"service":"ledgerguard"}` |
+| / 首页 | curl GET | ✅ 200，含 `html lang="en"` + `href="/pay"` |
+| /docs | curl GET | ✅ 200，含 "API documentation" |
+| /v1/meta | curl GET | ✅ 200，服务元数据完整 |
+| /v1/networks | curl GET | ✅ 200，arcTestnet enabled + arcMainnet 信息 |
+
+### 2. Preflight 引擎真实调用（POST /v1/preflight）
+| 场景 | 结果 | 说明 |
+|:-----|:-----|:-----|
+| 正常 USDC transfer | BLOCK + `SIMULATION_FAILED` | RPC 断网时 fail-closed，符合设计（不静默放行） |
+| **零地址收款（第7环）** | **BLOCK + `ZERO_ADDRESS_RECIPIENT`** | ✅ **第7环威胁检测真实生效** |
+
+### 3. SDK 参考集成真实调用（@ledgerguard1/sdk → 本地 API）
+| 集成 | 方法 | 结果 |
+|:-----|:-----|:-----|
+| agent-mcp 模式 | SDK preflight | ✅ 链路通（BLOCK + SIMULATION_FAILED，fail-closed 正确） |
+| 零地址场景（SDK） | SDK preflight | ✅ BLOCK + `ZERO_ADDRESS_RECIPIENT` |
+
+### 4. 自动化测试 + 类型检查
+| 检查项 | 结果 |
+|:------|:-----|
+| vitest 全量 | ✅ **29 文件 / 160 测试全绿** |
+| tsc typecheck | ✅ 无错误 |
+
+### 5. 已知缺口（如实记录，不假装完成）
+| 缺口 | 原因 | 依赖 |
+|:-----|:-----|:-----|
+| 测试网批量真实交易 | Arc RPC 当前不可达（网络断） | 境外网络/梯子 |
+| 主网真钱自测 | 需网络 + 出资人批准 | 网络 + 批准 |
+| SDK 0.1.1 npm 发布 | npm registry 不可达 | 网络 |
+| /ready 端点 | Arc Testnet RPC 不可达 → 503 | 网络 |
+
+## 历史证据（2026-07-30，网络正常时产生）
+
+### guard-link-evidence.json
 - 真实 txHash：`0x2b536c8c0c6789482c0792290c1f310cb5a75532247ac394270707015c02098b`
-- block：54434949，可在 arcscan 测试网浏览器核实
-- Guard 判定：ALLOW（签名前意图校验通过）
-- Evidence 对账：MISMATCH（链上实际转移与声明 intent 有差异——引擎正确识别不一致，说明对账逻辑真实工作）
-- 意义：证明"签名前校验 + 签名后对账"闭环真实跑通，且 MISMATCH 场景也被正确捕获
+- Arc 测试网 block 54434949，arcscan 可核实
+- Guard 判定 ALLOW（签名前校验通过）；Evidence 对账 MISMATCH（引擎正确识别不一致）
 
-### 2. x402-payment-evidence.json（2026-07-30）
-- 场景：x402 测试网付费证据接口
-- 状态：HTTP 200
+### x402-payment-evidence.json
+- x402 测试网付费证据接口，HTTP 200
 
-## 验证计划（待执行，依赖网络恢复）
+## 验证计划（网络恢复后执行）
 
-### A. 参考集成验证（代码已提交，网络恢复后运行）
-- examples/agent-mcp/ —— AI Agent 花钱前调用 LedgerGuard
-- examples/ecommerce-checkout/ —— 电商结账前校验
-- examples/subscription-billing/ —— 订阅扣费 + 对账
-- 运行方式：`LEDGERGUARD_URL=https://ledgerguard-gules.vercel.app node <example>/<file>.mjs`
-
-### B. 测试网批量交易（网络恢复后自动跑）
-- 目标：10-20 钱包 × 100+ 笔真实交易
-- 覆盖：正常/金额异常/地址异常/超时/重复付款
-- 产出：每条 txHash + 判定 + 时间戳，追加到本目录
-
-### C. 主网真钱自测（需出资人批准 $50-100）
-- 场景：Base 主网 5-10 笔真实 USDC
-- 产出：主网 tx 链接 + 端到端报告（标注"项目方自测"）
+- [ ] 测试网批量：10-20 钱包 × 100+ 笔真实交易
+- [ ] 主网真钱：Base 主网 5-10 笔（需批准）
+- [ ] SDK 0.1.1 发布
+- [ ] 3 个参考集成在官网环境跑通
 
 ## 不可伪造红线
 
-- 本目录只放真实执行的证据（txHash 可链上核实）
-- 网络不通时写"待执行"，不写"已通过"
-- 任何对外展示的验证数据必须能点开链上链接核实
+- 本目录只记录真实执行结果（txHash 可链上核实、HTTP 响应可复现）
+- 网络不通时写"缺口/依赖"，不写"已通过"
+- 任何对外展示的数据必须能核实
