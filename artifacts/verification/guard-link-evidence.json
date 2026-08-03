@@ -1,0 +1,45 @@
+{
+  "verifiedAt": "2026-07-30T13:55:45.071Z",
+  "guardUrl": "https://ledgerguard-gules.vercel.app/guard?recipient=0xF1437d9CD304aE49f2ec005AC967813B3a7c466c&amount=0.01&limit=0.01&purpose=Automated+Arc+validation&expires=2026-07-31T13%3A55%3A41.131Z&payer=0x257713534b81f053200c94ecEFDc0aAfa92dF68F",
+  "guardDecision": "ALLOW",
+  "payer": "0x257713534b81f053200c94ecEFDc0aAfa92dF68F",
+  "recipient": "0xF1437d9CD304aE49f2ec005AC967813B3a7c466c",
+  "amountUsdc": "0.01",
+  "txHash": "0x2b536c8c0c6789482c0792290c1f310cb5a75532247ac394270707015c02098b",
+  "blockNumber": "54434949",
+  "explorerUrl": "https://testnet.arcscan.app/tx/0x2b536c8c0c6789482c0792290c1f310cb5a75532247ac394270707015c02098b",
+  "evidenceStatus": "MISMATCH",
+  "evidence": {
+    "status": "MISMATCH",
+    "network": "arcTestnet",
+    "txHash": "0x2b536c8c0c6789482c0792290c1f310cb5a75532247ac394270707015c02098b",
+    "blockNumber": "54434949",
+    "transactionTo": "0x3600000000000000000000000000000000000000",
+    "nativeValueMicroUsdc": null,
+    "transfers": [
+      {
+        "assetAddress": "0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE",
+        "from": "0x257713534b81f053200c94ecEFDc0aAfa92dF68F",
+        "to": "0xF1437d9CD304aE49f2ec005AC967813B3a7c466c",
+        "amount": "10000000000000000",
+        "logIndex": 48
+      },
+      {
+        "assetAddress": "0x3600000000000000000000000000000000000000",
+        "from": "0x257713534b81f053200c94ecEFDc0aAfa92dF68F",
+        "to": "0xF1437d9CD304aE49f2ec005AC967813B3a7c466c",
+        "amount": "10000",
+        "logIndex": 49
+      }
+    ],
+    "approvals": [],
+    "findings": [
+      {
+        "code": "UNEXPECTED_TRANSFER",
+        "severity": "critical",
+        "message": "The transaction emitted additional or non-matching transfer events."
+      }
+    ],
+    "evidenceHash": "0x15486345ab5d614892ee612e3f04c91985b4e22a6fab6e26e51627c86ff0ab3d"
+  }
+}

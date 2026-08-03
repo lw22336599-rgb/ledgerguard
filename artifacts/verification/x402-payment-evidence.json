@@ -1,0 +1,18 @@
+{
+  "verifiedAt": "2026-07-30T13:53:01.895Z",
+  "target": "https://ledgerguard-gules.vercel.app/v1/paid/network-risk",
+  "network": "eip155:5042002",
+  "asset": "0x3600000000000000000000000000000000000000",
+  "amountMicroUsdc": "1000",
+  "amountUsdc": "0.001",
+  "recipient": "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c",
+  "payer": "0x257713534b81f053200c94ecEFDc0aAfa92dF68F",
+  "status": 200,
+  "transaction": "667bc32d-3e1a-4868-bb28-a3cc3b87a437",
+  "resourceConfirmedPaid": true,
+  "ledgerStatus": "recorded",
+  "resourceSettlementTransaction": "667bc32d-3e1a-4868-bb28-a3cc3b87a437",
+  "explorerUrl": "https://testnet.arcscan.app/tx/667bc32d-3e1a-4868-bb28-a3cc3b87a437",
+  "balanceBefore": "0.006",
+  "balanceAfter": "0.005"
+}
