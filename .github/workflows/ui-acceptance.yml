@@ -1,0 +1,35 @@
+name: Production UI acceptance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ledgerguard-production-ui-acceptance
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run audit:ui:production
+        env:
+          LEDGERGUARD_URL: https://ledgerguard-gules.vercel.app
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-ui-acceptance
+          path: artifacts/ui-audit
+          retention-days: 14

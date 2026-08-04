@@ -49,8 +49,8 @@ source = source.replaceAll(
   "border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:16px 0;background:var(--surface-muted)",
 );
 source = source.replaceAll(
-  ".guard-qr-wrap canvas{border:1px solid #334065;border-radius:12px;background:#060817;padding:8px}",
-  ".guard-qr-wrap canvas{border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px}",
+  ".guard-qr-wrap img{border:1px solid #334065;border-radius:12px;background:#060817;padding:8px}",
+  ".guard-qr-wrap img{border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px}",
 );
 source = source.replace(
   ".guard-cta{margin:28px 0;padding:28px;border:1px solid #2b355b;border-radius:16px;background:linear-gradient(145deg,#111831e8,#090d1ee8);text-align:center}",

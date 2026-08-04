@@ -58,7 +58,7 @@ function renderWallet(): void {
   const state = wallet()!.getState();
   if (state.connected) {
     if (status) status.textContent = "Connected";
-    if (dot) dot.style.background = "#4ade80";
+    if (dot) dot.classList.add("connected");
     if (address) {
       address.hidden = false;
       address.textContent = state.account;
@@ -68,7 +68,7 @@ function renderWallet(): void {
     if (connect) connect.textContent = "Disconnect";
   } else {
     if (status) status.textContent = "Wallet not connected";
-    if (dot) dot.style.background = "#555";
+    if (dot) dot.classList.remove("connected");
     if (address) address.hidden = true;
     if (copy) copy.disabled = true;
     if (refresh) refresh.disabled = true;

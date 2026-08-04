@@ -15,12 +15,12 @@ function bindNavWallet(): void {
         display.textContent = state.chainId
           ? `eip155:${Number.parseInt(state.chainId, 16)}`
           : "";
-        display.style.display = "inline";
+        display.hidden = false;
       }
     } else {
       button.textContent = "Connect Wallet";
       button.classList.remove("connected");
-      if (display) display.style.display = "none";
+      if (display) display.hidden = true;
     }
   };
 

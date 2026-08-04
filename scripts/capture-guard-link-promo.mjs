@@ -63,7 +63,7 @@ await page.locator("#guard-purpose").fill("Coffee order #42");
 await shot("03-create-filled");
 
 await page.locator("#guard-builder").evaluate((form) => form.requestSubmit());
-await page.locator("#guard-qr-wrap:not([hidden]) canvas").waitFor({
+await page.locator("#guard-qr-wrap:not([hidden]) img").waitFor({
   timeout: 30_000,
 });
 await page.waitForTimeout(1500);

@@ -9,9 +9,21 @@ const open = document.querySelector<HTMLAnchorElement>("#guard-open");
 const copy = document.querySelector<HTMLButtonElement>("#guard-copy");
 const share = document.querySelector<HTMLButtonElement>("#guard-share");
 const qrWrap = document.querySelector<HTMLElement>("#guard-qr-wrap");
-const qrCanvas = document.querySelector<HTMLCanvasElement>("#guard-qr-canvas");
+const qrImage = document.querySelector<HTMLImageElement>("#guard-qr-canvas");
 
 let currentUrl = "";
+
+function resetCreatedState(): void {
+  currentUrl = "";
+  if (actions) actions.hidden = true;
+  if (created) {
+    created.hidden = true;
+    created.value = "";
+  }
+  if (open) open.href = "/guard/create";
+  if (qrWrap) qrWrap.hidden = true;
+  qrImage?.removeAttribute("src");
+}
 
 function show(kind: string, title: string, message: string): void {
   if (!result) return;
@@ -23,10 +35,11 @@ function show(kind: string, title: string, message: string): void {
 }
 
 async function renderQr(url: string): Promise<void> {
-  if (!qrWrap || !qrCanvas) return;
+  if (!qrWrap || !qrImage) return;
   qrWrap.hidden = true;
   try {
-    await QRCode.toCanvas(qrCanvas, url, {
+    const svg = await QRCode.toString(url, {
+      type: "svg",
       width: 200,
       margin: 2,
       color: {
@@ -34,19 +47,42 @@ async function renderQr(url: string): Promise<void> {
         light: "#060817",
       },
     });
+    qrImage.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     qrWrap.hidden = false;
   } catch {
     qrWrap.hidden = true;
   }
 }
 
+form?.addEventListener(
+  "invalid",
+  (event) => {
+    resetCreatedState();
+    const field = event.target as HTMLInputElement;
+    show(
+      "review",
+      "Complete required fields",
+      field.validationMessage || "Review the highlighted field and try again.",
+    );
+  },
+  true,
+);
+
+form?.addEventListener("input", () => {
+  if (!currentUrl) return;
+  resetCreatedState();
+  show(
+    "review",
+    "Payment details changed",
+    "Create a new link so the shared request matches the current details.",
+  );
+});
+
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!form || !actions || !created) return;
 
-  actions.hidden = true;
-  created.hidden = true;
-  if (qrWrap) qrWrap.hidden = true;
+  resetCreatedState();
   show("neutral", "Creating link", "Validating the payment request…");
 
   const expiryHours = Number(
