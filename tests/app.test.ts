@@ -95,6 +95,7 @@ describe("HTTP API", () => {
       "/test",
       "/guard/create",
       "/docs/integration",
+      "/catalog",
     ]) {
       const response = await app.request(path);
       expect(response.status).toBe(200);
@@ -107,7 +108,6 @@ describe("HTTP API", () => {
       ["/protect", "/test"],
       ["/meter", "/developer"],
       ["/receipts", "/payments"],
-      ["/catalog", "/docs"],
       ["/routes", "/docs/integration"],
     ] as const) {
       const response = await app.request(path, { redirect: "manual" });
