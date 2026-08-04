@@ -1,0 +1,14 @@
+{
+  "test": "base-mainnet-e2e-loop",
+  "date": "2026-08-04",
+  "network": "baseMainnet (eip155:8453)",
+  "asset": "USDC 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "nature": "project-party real-fund self-test, NOT an external customer payment",
+  "steps": [
+    { "step": "preflight", "endpoint": "https://ledgerguard-gules.vercel.app/v1/preflight", "decision": "reviewed before signing" },
+    { "step": "transfer", "txHash": "0x11f9ee048dfe691b8fae9a7cc7f0ff47cd50a062d8e7b6b3294698bf85e8a697", "block": "49521071", "status": "success", "amountUsdc": "0.5", "to": "0x4732d748a7dA766A0192adC2BBefC6041AAF9056" },
+    { "step": "evidence", "status": "NETWORK_DISABLED", "note": "Base mainnet evidence endpoint is gated by design (HOLD mainnet money until release gates pass)" },
+    { "step": "return-attempt", "txHash": "0xfa2633984ec7c216e85a36d6b761aaa411bf55b39ad9329531942b57a9f1fe5c", "note": "self-transfer bug; funds remained at receiver address" }
+  ],
+  "result": "REAL-FUND LOOP VERIFIED: preflight -> signed onchain transfer -> confirmed. Return step failed due to test script design flaw; 0.5 USDC remains at 0x4732d748... (no known key). Total test loss to date: 1.5 USDC (v1 1.0 + this 0.5), project-assumed."
+}
