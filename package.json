@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "@ledgerguard1/sdk": "file:packages/sdk",
-    "@types/node": "^24.10.0",
+    "@types/node": "^26.1.2",
     "@types/qrcode": "^1.5.6",
     "@vitest/coverage-v8": "^4.1.10",
     "@x402/fetch": "^2.20.0",
