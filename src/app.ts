@@ -285,7 +285,6 @@ for (const [from, to] of [
   ["/protect", "/test"],
   ["/meter", "/developer"],
   ["/receipts", "/payments"],
-  ["/catalog", "/docs"],
   ["/routes", "/docs/integration"],
 ] as const) {
   app.get(from, (context) => context.redirect(to, 301));
