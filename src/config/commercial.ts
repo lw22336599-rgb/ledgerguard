@@ -4,6 +4,9 @@ import { getAddress, isAddress } from "viem";
 export const BASE_MAINNET_NETWORK = "eip155:8453";
 export const BASE_MAINNET_USDC =
   "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+/** USDbC — USDT bridged on Base (Tether canonical deployment, symbol USDbC). */
+export const BASE_MAINNET_USDT =
+  "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA";
 export const BASE_MAINNET_USDC_EIP712_EXTRA = {
   name: "USD Coin",
   version: "2",

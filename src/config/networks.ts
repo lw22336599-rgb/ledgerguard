@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
-import { BASE_MAINNET_USDC } from "./commercial.js";
+import { BASE_MAINNET_USDC, BASE_MAINNET_USDT } from "./commercial.js";
 
 export const ARC_TESTNET_USDC =
   "0x3600000000000000000000000000000000000000" as const;
@@ -19,6 +19,8 @@ export interface NetworkRecord {
   chainId: number | null;
   rpcUrls: readonly string[];
   usdcAddress: `0x${string}` | null;
+  /** Supported stablecoin asset contracts for this network (USDC always first). */
+  supportedAssets: readonly `0x${string}`[];
   explorerUrl: string | null;
   activation:
     | "automatic-safe"
@@ -65,6 +67,7 @@ function parseMainnetConfiguration(): Omit<
       chainId: null,
       rpcUrls: [],
       usdcAddress: null,
+      supportedAssets: [],
       explorerUrl: null,
       activation: "disabled",
       configFingerprint: null,
@@ -97,6 +100,7 @@ function parseMainnetConfiguration(): Omit<
     chainId,
     rpcUrls: [rpcUrl!],
     usdcAddress: usdcAddress as `0x${string}`,
+    supportedAssets: [usdcAddress as `0x${string}`],
     explorerUrl: explorerUrl!,
     activation: enabled ? "manual-canary" : "manual-required",
     configFingerprint,
@@ -123,6 +127,7 @@ function parseBaseMainnetConfiguration(): Omit<
       chainId: null,
       rpcUrls: [],
       usdcAddress: null,
+      supportedAssets: [],
       explorerUrl: null,
       activation: "disabled",
       configFingerprint: null,
@@ -135,6 +140,7 @@ function parseBaseMainnetConfiguration(): Omit<
     chainId: BASE_MAINNET_CHAIN_ID,
     rpcUrls: [rpcUrl],
     usdcAddress: BASE_MAINNET_USDC,
+    supportedAssets: [BASE_MAINNET_USDC, BASE_MAINNET_USDT],
     explorerUrl,
     activation: "manual-required",
     configFingerprint: null,
@@ -152,6 +158,7 @@ export function getNetworkRegistry(): Record<NetworkName, NetworkRecord> {
       chainId: arcTestnet.id,
       rpcUrls: parseRpcUrls(),
       usdcAddress: ARC_TESTNET_USDC,
+      supportedAssets: [ARC_TESTNET_USDC],
       explorerUrl: "https://testnet.arcscan.app",
       activation: "automatic-safe",
       configFingerprint: null,

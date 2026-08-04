@@ -251,14 +251,18 @@ export function evaluatePreflight(
     });
   }
 
+  const assetAddress = decoded.assetAddress;
   if (
-    decoded.assetAddress &&
-    !sameAddress(decoded.assetAddress, adapter.usdcAddress)
+    assetAddress &&
+    !adapter.supportedAssets.some((asset) =>
+      sameAddress(asset as string, assetAddress),
+    )
   ) {
     findings.push({
-      code: "NON_USDC_ASSET",
+      code: "NON_SUPPORTED_ASSET",
       severity: "critical",
-      message: "The token call does not target the official USDC contract for this network.",
+      message:
+        "The token call does not target a supported stablecoin contract (USDC/USDT) for this network.",
     });
   }
 

@@ -23,6 +23,8 @@ export type NetworkAdapter = {
   enabled: boolean;
   chainId: number;
   usdcAddress: `0x${string}`;
+  /** Supported stablecoin assets for this network (USDC always first). */
+  supportedAssets: readonly `0x${string}`[];
   /** Arc uses native USDC gas (18-decimal wei view); Base uses ERC-20 USDC (6 decimals). */
   nativeUsdcGas: boolean;
   explorerUrl: string | null;
@@ -45,6 +47,7 @@ function toAdapter(record: NetworkRecord): NetworkAdapter | null {
     enabled: true,
     chainId: record.chainId,
     usdcAddress: record.usdcAddress,
+    supportedAssets: record.supportedAssets,
     nativeUsdcGas: record.name === "arcTestnet" || record.name === "arcMainnet",
     explorerUrl: record.explorerUrl,
     rpcUrls: record.rpcUrls,
