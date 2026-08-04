@@ -11,6 +11,8 @@ LedgerGuard remains a testnet product and a production candidate. No public docu
 - [x] Privacy-safe opt-in telemetry schema
 - [x] Public Risk Signal Profile draft and self-test fixtures
 - [x] SDK pack and conformance checks in CI
+- [x] Public npm package `@ledgerguard1/sdk@0.1.1` and GitHub release
+- [ ] First OIDC Trusted Publishing release with npm provenance
 - [ ] Independent security review with no unresolved critical findings
 - [ ] One complete testnet settle-deliver-reconcile trace
 - [ ] Three independent developer integrations
@@ -63,7 +65,33 @@ non-project parties.
 - Custody or transaction signing
 - Paid certification labels
 - Claims of customers, revenue, official support, or protocol ownership
-- Publishing packages, posting publicly, submitting grants, or changing accounts without action-time approval
+- Publishing packages, posting publicly, submitting grants, or changing
+  accounts without action-time approval. The owner explicitly authorized the
+  current release-hardening and evidence-led distribution work on 2026-08-04;
+  that authorization does not cover legal attestations, identity claims,
+  spending, wallet signatures, real-fund actions, or future unrelated posts.
+
+## Distribution and funding queue
+
+Every open item must link reproducible evidence before it can be checked off.
+
+- [ ] Configure npm Trusted Publisher for `lw22336599-rgb/ledgerguard`, workflow
+  `publish-sdk.yml`, environment `npm-production`, then validate it with the
+  next intentional patch release.
+- [ ] Revoke the previously exposed npm automation token after OIDC publishing
+  succeeds; never record the token in the repository or project memory.
+- [ ] Publish the verified MCP metadata to the official MCP Registry.
+- [ ] Submit a truthful NTU InnovateX 2026 entry before its deadline, subject to
+  the owner's final identity, team, attendance, and terms declarations.
+- [ ] Add source attribution from public link to first protected request,
+  evidence receipt, repeat use, and paid-pilot response.
+- [ ] Complete one independently reproducible testnet settle-deliver-reconcile
+  trace before requesting x402 Bazaar indexing.
+- [ ] Prepare conditional applications for Startup SG Founder, Microsoft for
+  Startups, Ethereum Foundation ESP, Base funding, and Circle Developer Grants;
+  do not submit until each program's live eligibility and evidence gates pass.
+- [ ] Launch on Product Hunt, Show HN, Reddit, or broad communities only after a
+  no-signup Guard Link demo and attribution funnel pass production acceptance.
 
 ## Evidence links
 

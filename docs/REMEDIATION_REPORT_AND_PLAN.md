@@ -14,8 +14,8 @@ stale Base Mainnet activation language and is not a current claims source.
 | Area | Decision | Evidence boundary |
 |---|---|---|
 | Arc Testnet technical demo | GO | Automated tests and testnet flows only |
-| Public SDK examples | GO with `@ledgerguard1/sdk@0.1.0` | Public `0.1.1` is not published |
-| SDK `0.1.1` publication | HOLD | Requires an intentional npm release and account approval |
+| Public SDK examples | GO with `@ledgerguard1/sdk@0.1.1` | Clean-room installation verified 2026-08-04 |
+| SDK `0.1.1` publication | GO | Public npm package and GitHub release verified; OIDC Trusted Publishing remains unproven until the next release |
 | Base Mainnet real funds | HOLD | `/canary` must return 503; no verified settlement |
 | Arc Mainnet real funds | HOLD | Official parameters and release approval incomplete |
 | Commercial launch | HOLD | No independent repeat use or paid commitment yet |
