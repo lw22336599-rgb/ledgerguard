@@ -53,6 +53,20 @@ project-party transaction is not customer adoption or revenue.
 - These actions are distribution evidence only. They are not external adoption,
   an official endorsement, a customer, a payment commitment, or revenue.
 
+## Live x402 payment-loop verification on 2026-08-04
+
+- A real Arc Testnet x402 v2 payment loop was executed and verified:
+  `402 challenge -> EIP-712 signature -> Gateway settlement -> resource
+  delivery -> durable ledger write -> explorer receipt`.
+- Evidence file: `artifacts/verification/x402-payment-evidence-2026-08-04.json`
+  (payer `0x25771353...6F`, amount 0.001 USDC, status 200, ledger recorded,
+  explorer receipt `https://testnet.arcscan.app/tx/0397d3fb-...`).
+- This is a project-party testnet payment loop, not external adoption,
+  a customer, or revenue.
+- CDP x402 Bazaar indexing still requires a controlled Base Sepolia
+  CDP-facilitated settlement (needs CDP API credentials), which remains HOLD.
+
+
 ## Stop rules
 
 - Do not activate real-fund mainnet paths for eligibility or publicity.
