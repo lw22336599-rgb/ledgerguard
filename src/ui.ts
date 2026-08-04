@@ -442,6 +442,29 @@ export const portalHtml = `${pageHead(
         </dl>
       </section>
     </section>
+    <section id="integrations" class="how-it-works" aria-label="Integration scenarios">
+      <p class="eyebrow">INTEGRATION SCENARIOS</p>
+      <h2 class="compact">One preflight call protects any payment flow.</h2>
+      <p class="muted">LedgerGuard sits in front of your stablecoin transaction. Check who gets paid, how much, and why — before anything is signed. Works with any wallet, any agent, any protocol.</p>
+      <div class="how-steps">
+        <article class="how-step-card">
+          <p class="step">AGENTS</p>
+          <h3>AI agents &amp; MCP</h3>
+          <p class="muted">An agent asks to pay — preflight verifies the recipient, amount, and intent before the wallet signs.</p>
+        </article>
+        <article class="how-step-card">
+          <p class="step">COMMERCE</p>
+          <h3>Checkout &amp; subscriptions</h3>
+          <p class="muted">One link accepts USDC for products, subscriptions, tips, or donations. Zero signup for the payer.</p>
+        </article>
+        <article class="how-step-card">
+          <p class="step">PAYMENTS</p>
+          <h3>APIs &amp; metering</h3>
+          <p class="muted">Metered billing, paywalls, NFT mints, game items — every transfer passes the same safety review.</p>
+        </article>
+      </div>
+      <p class="portal-trust-list" style="margin-top: 1.25rem"><a href="https://github.com/lw22336599-rgb/ledgerguard/tree/main/examples/integrations">See the 15-scene integration library on GitHub</a> &middot; <a href="/docs">API docs</a> &middot; <a href="/catalog">Pricing</a></p>
+    </section>
     ${footer}
   </main>${portalPageScripts()}
 </body>
