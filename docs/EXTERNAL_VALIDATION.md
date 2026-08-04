@@ -22,9 +22,15 @@ Or use `LedgerGuardClient` / `POST /v1/can-sign` directly — see
 
 Every request returns `X-LedgerGuard-Request-Id`. Durable usage events retain
 the request ID, timestamp, operation, and only a SHA-256 digest of a valid
-`X-LedgerGuard-Integration` value for 90 days. The raw integration identifier is
-not stored in the usage ledger. Runtime telemetry records sanitized request
-metadata; neither path records source IP addresses or credentials.
+`X-LedgerGuard-Integration` value for the plan retention window (7 days for
+Sandbox). The raw integration identifier is not stored in the usage ledger.
+Runtime telemetry records sanitized request metadata; neither path records
+source IP addresses or credentials.
+
+The tester can inspect `GET /v1/developer/integration-proof` with the same API
+key. This is a redacted activity summary, not an attestation and not proof of an
+independent user. It lets both sides reconcile request IDs and repeat dates
+without publishing API keys or raw integration identifiers.
 
 ## Evidence gate
 

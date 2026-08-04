@@ -234,6 +234,9 @@ export const openApiDocument = {
         responses: {
           "201": { description: "Tenant and one-time API key created" },
           "400": { description: "Invalid registration request" },
+          "429": {
+            description: "Per-client daily registration limit or cohort capacity reached",
+          },
           "503": {
             description: "Self-service or shared durable storage unavailable",
           },
@@ -245,8 +248,34 @@ export const openApiDocument = {
         summary: "Read the authenticated tenant and durable usage summary",
         security: [{ bearerAuth: [] }],
         responses: {
-          "200": { description: "Tenant and current-month usage" },
+          "200": {
+            description:
+              "Tenant lifecycle, enforceable plan entitlements, usage, and redacted integration proof",
+          },
           "401": { description: "Missing, invalid, or revoked API key" },
+          "503": { description: "Shared durable storage unavailable" },
+        },
+      },
+    },
+    "/v1/plans": {
+      get: {
+        summary: "Read plan entitlements and commercial availability",
+        description:
+          "Machine-readable source of truth for Sandbox enforcement and paid-plan validation targets.",
+        responses: {
+          "200": { description: "Plan catalog and billing activation boundary" },
+        },
+      },
+    },
+    "/v1/developer/integration-proof": {
+      get: {
+        summary: "Read a redacted, non-attested integration activity proof",
+        description:
+          "Counts eligible metered events and repeat activity without exposing raw integration identifiers. It never claims an external integration has been independently verified.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Redacted activity proof and verification boundary" },
+          "401": { description: "Missing, invalid, revoked, suspended, or expired API key" },
           "503": { description: "Shared durable storage unavailable" },
         },
       },

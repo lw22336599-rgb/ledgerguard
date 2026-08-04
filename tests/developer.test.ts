@@ -4,6 +4,7 @@ import { app } from "../src/app.js";
 import {
   getTenantStore,
   QuotaExceededError,
+  RegistrationRateLimitError,
   resetTenantStoreForTests,
   TenantCapacityError,
 } from "../src/services/tenant-store.js";
@@ -26,7 +27,59 @@ describe("developer self-service", () => {
     delete process.env.LEDGERGUARD_STORAGE_BACKEND;
     delete process.env.DEVELOPER_SELF_SERVICE_ENABLED;
     delete process.env.DEVELOPER_MAX_TENANTS;
+    delete process.env.DEVELOPER_REGISTRATIONS_PER_DAY;
     resetTenantStoreForTests();
+  });
+
+  it("creates an active, expiring Sandbox tenant from the shared plan catalog", async () => {
+    const store = getTenantStore();
+    const registration = await store!.register("Lifecycle Project", "client-a");
+    expect(registration.tenant).toMatchObject({
+      plan: "sandbox",
+      status: "active",
+      quotaPerMonth: 500,
+    });
+    expect(Date.parse(registration.tenant.expiresAt)).toBeGreaterThan(Date.now());
+  });
+
+  it("rate limits registration per privacy-preserving client fingerprint", async () => {
+    process.env.DEVELOPER_REGISTRATIONS_PER_DAY = "1";
+    resetTenantStoreForTests();
+    const store = getTenantStore();
+    await expect(store!.register("First Project", "client-a")).resolves.toBeDefined();
+    await expect(store!.register("Second Project", "client-a")).rejects.toBeInstanceOf(
+      RegistrationRateLimitError,
+    );
+    await expect(store!.register("Other Project", "client-b")).resolves.toBeDefined();
+  });
+
+  it("fails closed when a Sandbox tenant expires", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+    const store = getTenantStore();
+    const registration = await store!.register("Expiring Project", "client-expiry");
+    vi.setSystemTime(new Date("2026-04-02T00:00:00.000Z"));
+    await expect(store!.authenticate(registration.apiKey)).resolves.toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("produces a redacted integration proof without claiming external verification", async () => {
+    const store = getTenantStore();
+    const registration = await store!.register("Proof Project", "client-proof");
+    await store!.recordUsage(
+      registration.tenant,
+      "preflight",
+      "proof-request-1",
+      "buyer-agent",
+    );
+    await expect(store!.integrationProof(registration.tenant)).resolves.toMatchObject({
+      tenantId: registration.tenant.id,
+      plan: "sandbox",
+      externallyVerified: false,
+      eligibleIntegrationEvents: 1,
+      activeDays: 1,
+      repeatsAcross14Days: false,
+    });
   });
 
   it("creates a tenant, authenticates, meters usage, and rotates the key", async () => {
@@ -45,6 +98,12 @@ describe("developer self-service", () => {
     expect(account.status).toBe(200);
     const initial = await account.json();
     expect(initial.tenant.name).toBe("External Test Project");
+    expect(initial.entitlements).toMatchObject({
+      plan: "sandbox",
+      monthlyOperations: 500,
+      retentionDays: 7,
+    });
+    expect(initial.integrationProof.externallyVerified).toBe(false);
     expect(initial.usage.used).toBe(0);
     expect(JSON.stringify(initial)).not.toContain(created.apiKey);
 
@@ -82,6 +141,17 @@ describe("developer self-service", () => {
     expect(JSON.stringify(preflightBody.usage)).not.toContain(
       "acme-agent-testnet",
     );
+
+    const proof = await app.request("/v1/developer/integration-proof", {
+      headers: { authorization: `Bearer ${created.apiKey}` },
+    });
+    expect(proof.status).toBe(200);
+    expect(await proof.json()).toMatchObject({
+      proof: {
+        externallyVerified: false,
+        eligibleIntegrationEvents: 1,
+      },
+    });
 
     const rotation = await app.request("/v1/developer/keys/rotate", {
       method: "POST",
@@ -313,7 +383,7 @@ describe("Redis REST tenant persistence", () => {
       const next = current + 1;
       values.set(usageCounter, String(next));
       const recent = lists.get(events) ?? [];
-      recent.unshift(String(args[6]));
+      recent.unshift(String(args[7]));
       lists.set(events, recent.slice(0, 50));
       return [1, next];
     }
@@ -372,7 +442,7 @@ describe("Redis REST tenant persistence", () => {
         "redis-request",
         "redis-agent-testnet",
       ),
-    ).resolves.toMatchObject({ used: 1, remaining: 999 });
+    ).resolves.toMatchObject({ used: 1, remaining: 499 });
     await expect(store!.usage(registration.tenant)).resolves.toMatchObject({
       used: 1,
       recent: [

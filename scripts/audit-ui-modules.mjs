@@ -11,7 +11,7 @@ const baseUrl =
 const outDir = join(process.cwd(), "artifacts", "ui-audit");
 
 const pages = [
-  { path: "/", name: "home", marker: "Send and receive USDC" },
+  { path: "/", name: "home", marker: "Review a stablecoin payment" },
   { path: "/guard/create", name: "guard-create", marker: "Create a payment link." },
   { path: "/pay", name: "pay", marker: "Pay with USDC" },
   { path: "/canary", name: "canary", marker: "Controlled Base Mainnet payment canary.", optional503: true },

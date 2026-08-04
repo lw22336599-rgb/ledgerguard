@@ -1,6 +1,13 @@
+import { getPlan } from "./config/plans.js";
+
 const brandAssetVersion = "5";
 const brandMarkSrc = `/brand/logo-64.png?v=${brandAssetVersion}`;
 const canonicalOrigin = "https://ledgerguard-gules.vercel.app";
+const sandboxPlan = getPlan("sandbox");
+const developerPlan = getPlan("developer");
+const growthPlan = getPlan("growth");
+const businessPlan = getPlan("business");
+const enterprisePlan = getPlan("enterprise");
 
 const pageHead = (
   title: string,
@@ -620,9 +627,9 @@ export const catalogHtml = `${pageHead(
         <h2>Sandbox</h2>
         <ul>
           <li>1 project</li>
-          <li>500 protected operations / month</li>
+          <li>${sandboxPlan.monthlyOperations?.toLocaleString("en-US")} protected operations / month</li>
           <li>Testnet and shadow networks</li>
-          <li>7-day log retention, no SLA</li>
+          <li>${sandboxPlan.retentionDays}-day log retention, no SLA</li>
         </ul>
         <p class="muted">$0</p>
       </div>
@@ -633,22 +640,22 @@ export const catalogHtml = `${pageHead(
         <h2>Developer</h2>
         <ul>
           <li>1 production project</li>
-          <li>10,000 operations / month included</li>
-          <li>Signed decision receipts, 30-day logs</li>
-          <li>Overage: $0.01 / operation</li>
+          <li>${developerPlan.monthlyOperations?.toLocaleString("en-US")} operations / month included</li>
+          <li>Signed decision receipts, ${developerPlan.retentionDays}-day logs</li>
+          <li>Overage: $${developerPlan.overageUsd} / operation</li>
         </ul>
-        <p class="muted">$99 / month (target)</p>
+        <p class="muted">$${developerPlan.monthlyPriceUsd} / month (target)</p>
       </div>
       <div>
         <p class="step">PAID</p>
         <h2>Growth</h2>
         <ul>
-          <li>5 projects</li>
-          <li>100,000 operations / month included</li>
-          <li>Team policies, webhooks, 90-day logs</li>
-          <li>Overage: $0.005 / operation</li>
+          <li>${growthPlan.projects} projects</li>
+          <li>${growthPlan.monthlyOperations?.toLocaleString("en-US")} operations / month included</li>
+          <li>Team policies, webhooks, ${growthPlan.retentionDays}-day logs</li>
+          <li>Overage: $${growthPlan.overageUsd} / operation</li>
         </ul>
-        <p class="muted">$499 / month (target)</p>
+        <p class="muted">$${growthPlan.monthlyPriceUsd} / month (target)</p>
       </div>
     </section>
     <section class="panel developer-panel">
@@ -656,11 +663,11 @@ export const catalogHtml = `${pageHead(
         <p class="step">PAID</p>
         <h2>Business</h2>
         <ul>
-          <li>500,000 operations / month included</li>
+          <li>${businessPlan.monthlyOperations?.toLocaleString("en-US")} operations / month included</li>
           <li>Audit exports, custom retention, priority support</li>
-          <li>Overage: $0.003 / operation</li>
+          <li>Overage: $${businessPlan.overageUsd} / operation</li>
         </ul>
-        <p class="muted">$2,500 / month (target)</p>
+        <p class="muted">$${businessPlan.monthlyPriceUsd?.toLocaleString("en-US")} / month (target)</p>
       </div>
       <div>
         <p class="step">PAID</p>
@@ -670,7 +677,7 @@ export const catalogHtml = `${pageHead(
           <li>Private data rules, white-label</li>
           <li>Contract-based</li>
         </ul>
-        <p class="muted">$5,000 / month start (target)</p>
+        <p class="muted">$${enterprisePlan.monthlyPriceUsd?.toLocaleString("en-US")} / month start (target)</p>
       </div>
     </section>
     <section class="notice"><strong>Honest boundary:</strong> LedgerGuard has not yet confirmed any paid customer. These tiers are planning targets for market validation, not advertised charges, and will be revised with pilot feedback.</section>

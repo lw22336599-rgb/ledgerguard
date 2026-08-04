@@ -32,6 +32,7 @@
     "smoke:integrations": "node scripts/local-integration-smoke.mjs",
     "audit:ui:local": "node scripts/local-ui-audit.mjs",
     "audit:production": "node scripts/fetch-audit-production.mjs",
+    "tenant:govern": "node scripts/tenant-govern.mjs",
     "x402:buyer:init": "node scripts/x402-buyer.mjs init",
     "x402:buyer": "node --env-file-if-exists=.env.x402-buyer.local scripts/x402-buyer.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",

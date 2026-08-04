@@ -1,11 +1,16 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { getPlan, normalizePlanId, type PlanId } from "../config/plans.js";
+
+export type TenantStatus = "active" | "suspended" | "expired";
 
 export type Tenant = {
   id: string;
   name: string;
-  plan: "testnet";
+  plan: PlanId;
+  status: TenantStatus;
   quotaPerMonth: number;
   createdAt: string;
+  expiresAt: string;
   keyVersion: number;
   webhookUrl?: string | null;
 };
@@ -26,6 +31,29 @@ export type UsageSummary = {
   recent: UsageEvent[];
 };
 
+export type IntegrationProof = {
+  tenantId: string;
+  plan: PlanId;
+  generatedAt: string;
+  externallyVerified: false;
+  eligibleIntegrationEvents: number;
+  activeDays: number;
+  firstSeenAt: string | null;
+  lastSeenAt: string | null;
+  repeatsAcross14Days: boolean;
+  integrationIdHashes: string[];
+  requestIds: string[];
+};
+
+export type TenantEntitlements = {
+  plan: PlanId;
+  monthlyOperations: number | null;
+  retentionDays: number | null;
+  projects: number | null;
+  selfService: boolean;
+  availability: "available" | "validation" | "contract";
+};
+
 export type PaymentLedgerEvent = {
   requestId: string;
   payer: string;
@@ -42,7 +70,7 @@ export type Registration = {
 
 export type TenantStore = {
   health(): Promise<boolean>;
-  register(name: string): Promise<Registration>;
+  register(name: string, registrationFingerprint?: string): Promise<Registration>;
   authenticate(apiKey: string): Promise<Tenant | null>;
   rotateKey(tenant: Tenant, currentApiKey: string): Promise<string>;
   recordUsage(
@@ -52,6 +80,7 @@ export type TenantStore = {
     integrationId?: string,
   ): Promise<UsageSummary>;
   usage(tenant: Tenant): Promise<UsageSummary>;
+  integrationProof(tenant: Tenant): Promise<IntegrationProof>;
   recordPayment(event: PaymentLedgerEvent): Promise<"recorded" | "duplicate">;
   updateWebhook(tenant: Tenant, url: string | null): Promise<Tenant>;
 };
@@ -68,10 +97,18 @@ export class TenantCapacityError extends Error {
   }
 }
 
+export class RegistrationRateLimitError extends Error {
+  constructor() {
+    super("The daily registration limit for this client has been reached.");
+  }
+}
+
 const API_KEY_PATTERN = /^lg_test_[A-Za-z0-9_-]{32,80}$/;
-const DEFAULT_MONTHLY_QUOTA = 1_000;
 const DEFAULT_MAX_TENANTS = 100;
+const DEFAULT_REGISTRATIONS_PER_DAY = 3;
+const SANDBOX_LIFETIME_DAYS = 90;
 const EVENT_RETENTION_SECONDS = 90 * 24 * 60 * 60;
+const USAGE_COUNTER_RETENTION_SECONDS = 40 * 24 * 60 * 60;
 const INTEGRATION_ID_PATTERN = /^[A-Za-z0-9._/@ -]{1,80}$/;
 
 function maximumTenants(): number {
@@ -79,6 +116,101 @@ function maximumTenants(): number {
   return Number.isSafeInteger(parsed) && parsed > 0
     ? parsed
     : DEFAULT_MAX_TENANTS;
+}
+
+function maximumRegistrationsPerDay(): number {
+  const parsed = Number.parseInt(
+    process.env.DEVELOPER_REGISTRATIONS_PER_DAY ?? "",
+    10,
+  );
+  return Number.isSafeInteger(parsed) && parsed > 0
+    ? Math.min(parsed, 20)
+    : DEFAULT_REGISTRATIONS_PER_DAY;
+}
+
+function sandboxExpiry(createdAt: string): string {
+  return new Date(
+    Date.parse(createdAt) + SANDBOX_LIFETIME_DAYS * 24 * 60 * 60 * 1_000,
+  ).toISOString();
+}
+
+function normalizeTenant(value: unknown): Tenant | null {
+  if (!value || typeof value !== "object") return null;
+  const source = value as Partial<Tenant> & { plan?: unknown };
+  if (
+    typeof source.id !== "string" ||
+    typeof source.name !== "string" ||
+    typeof source.createdAt !== "string" ||
+    typeof source.keyVersion !== "number"
+  ) {
+    return null;
+  }
+  const plan = normalizePlanId(source.plan);
+  const definition = getPlan(plan);
+  const expiresAt =
+    typeof source.expiresAt === "string"
+      ? source.expiresAt
+      : sandboxExpiry(source.createdAt);
+  const configuredStatus: TenantStatus =
+    source.status === "suspended" || source.status === "expired"
+      ? source.status
+      : "active";
+  const status: TenantStatus =
+    configuredStatus === "active" && Date.parse(expiresAt) <= Date.now()
+      ? "expired"
+      : configuredStatus;
+  return {
+    id: source.id,
+    name: source.name,
+    plan,
+    status,
+    quotaPerMonth: definition.monthlyOperations ?? 0,
+    createdAt: source.createdAt,
+    expiresAt,
+    keyVersion: source.keyVersion,
+    ...(source.webhookUrl !== undefined
+      ? { webhookUrl: source.webhookUrl }
+      : {}),
+  };
+}
+
+export function tenantEntitlements(tenant: Tenant): TenantEntitlements {
+  const plan = getPlan(tenant.plan);
+  return {
+    plan: plan.id,
+    monthlyOperations: plan.monthlyOperations,
+    retentionDays: plan.retentionDays,
+    projects: plan.projects,
+    selfService: plan.selfService,
+    availability: plan.availability,
+  };
+}
+
+function eventRetentionSeconds(tenant: Tenant): number {
+  return Math.max(1, getPlan(tenant.plan).retentionDays ?? 90) * 24 * 60 * 60;
+}
+
+function retainedEvents(tenant: Tenant, events: UsageEvent[]): UsageEvent[] {
+  const cutoff = Date.now() - eventRetentionSeconds(tenant) * 1_000;
+  return events.filter((event) => {
+    const occurredAt = Date.parse(event.occurredAt);
+    return Number.isFinite(occurredAt) && occurredAt >= cutoff;
+  });
+}
+
+function createSandboxTenant(name: string): Tenant {
+  const createdAt = new Date().toISOString();
+  const plan = getPlan("sandbox");
+  return {
+    id: randomUUID(),
+    name,
+    plan: "sandbox",
+    status: "active",
+    quotaPerMonth: plan.monthlyOperations ?? 0,
+    createdAt,
+    expiresAt: sandboxExpiry(createdAt),
+    keyVersion: 1,
+  };
 }
 
 function keyHash(apiKey: string): string {
@@ -113,6 +245,46 @@ function usageKey(id: string, period = currentPeriod()): string {
 
 function eventKey(id: string): string {
   return `ledgerguard:events:${id}`;
+}
+
+function registrationKey(fingerprint?: string): string {
+  const value = fingerprint?.trim() || "unknown";
+  return `ledgerguard:registration:${keyHash(value)}:${currentPeriod()}-${new Date()
+    .toISOString()
+    .slice(8, 10)}`;
+}
+
+function buildIntegrationProof(
+  tenant: Tenant,
+  recent: UsageEvent[],
+): IntegrationProof {
+  const eligible = recent.filter((event) => event.integrationIdHash);
+  const ordered = eligible
+    .map((event) => event.occurredAt)
+    .filter((value) => Number.isFinite(Date.parse(value)))
+    .sort();
+  const activeDays = new Set(ordered.map((value) => value.slice(0, 10))).size;
+  const firstSeenAt = ordered[0] ?? null;
+  const lastSeenAt = ordered.at(-1) ?? null;
+  return {
+    tenantId: tenant.id,
+    plan: tenant.plan,
+    generatedAt: new Date().toISOString(),
+    externallyVerified: false,
+    eligibleIntegrationEvents: eligible.length,
+    activeDays,
+    firstSeenAt,
+    lastSeenAt,
+    repeatsAcross14Days:
+      activeDays >= 2 &&
+      firstSeenAt !== null &&
+      lastSeenAt !== null &&
+      Date.parse(lastSeenAt) - Date.parse(firstSeenAt) >= 13 * 24 * 60 * 60 * 1_000,
+    integrationIdHashes: [
+      ...new Set(eligible.flatMap((event) => event.integrationIdHash ?? [])),
+    ],
+    requestIds: eligible.map((event) => event.requestId),
+  };
 }
 
 function parseInteger(value: unknown): number {
@@ -185,7 +357,21 @@ class RedisTenantStore implements TenantStore {
     return (await this.redis.command(["PING"])) === "PONG";
   }
 
-  async register(name: string): Promise<Registration> {
+  async register(
+    name: string,
+    registrationFingerprint?: string,
+  ): Promise<Registration> {
+    const registrationCount = parseInteger(
+      await this.redis.command(["INCR", registrationKey(registrationFingerprint)]),
+    );
+    await this.redis.command([
+      "EXPIRE",
+      registrationKey(registrationFingerprint),
+      2 * 24 * 60 * 60,
+    ]);
+    if (registrationCount > maximumRegistrationsPerDay()) {
+      throw new RegistrationRateLimitError();
+    }
     const count = parseInteger(
       await this.redis.command(["INCR", "ledgerguard:tenant-count"]),
     );
@@ -195,14 +381,7 @@ class RedisTenantStore implements TenantStore {
         .catch(() => undefined);
       throw new TenantCapacityError();
     }
-    const tenant: Tenant = {
-      id: randomUUID(),
-      name,
-      plan: "testnet",
-      quotaPerMonth: DEFAULT_MONTHLY_QUOTA,
-      createdAt: new Date().toISOString(),
-      keyVersion: 1,
-    };
+    const tenant = createSandboxTenant(name);
     const apiKey = createApiKey();
     const claimed = await this.redis.command([
       "SET",
@@ -242,7 +421,8 @@ class RedisTenantStore implements TenantStore {
     const stored = await this.redis.command(["GET", tenantKey(tenantId)]);
     if (typeof stored !== "string") return null;
     try {
-      return JSON.parse(stored) as Tenant;
+      const tenant = normalizeTenant(JSON.parse(stored));
+      return tenant?.status === "active" ? tenant : null;
     } catch {
       return null;
     }
@@ -287,9 +467,9 @@ class RedisTenantStore implements TenantStore {
       "if n>=tonumber(ARGV[1]) then return {0,n}; end;" +
       "n=redis.call('INCR',KEYS[1]);" +
       "redis.call('EXPIRE',KEYS[1],ARGV[2]);" +
-      "redis.call('LPUSH',KEYS[2],ARGV[3]);" +
+      "redis.call('LPUSH',KEYS[2],ARGV[4]);" +
       "redis.call('LTRIM',KEYS[2],0,49);" +
-      "redis.call('EXPIRE',KEYS[2],ARGV[2]);" +
+      "redis.call('EXPIRE',KEYS[2],ARGV[3]);" +
       "return {1,n};";
     const result = await this.redis.command([
       "EVAL",
@@ -298,7 +478,8 @@ class RedisTenantStore implements TenantStore {
       usageKey(tenant.id),
       eventKey(tenant.id),
       tenant.quotaPerMonth,
-      EVENT_RETENTION_SECONDS,
+      USAGE_COUNTER_RETENTION_SECONDS,
+      eventRetentionSeconds(tenant),
       JSON.stringify(event),
     ]);
     const tuple = Array.isArray(result) ? result : [];
@@ -313,6 +494,21 @@ class RedisTenantStore implements TenantStore {
       await this.redis.command(["GET", usageKey(tenant.id)]),
     );
     return this.usageWithCount(tenant, used);
+  }
+
+  async integrationProof(tenant: Tenant): Promise<IntegrationProof> {
+    const values = await this.redis.command(["LRANGE", eventKey(tenant.id), 0, 49]);
+    const recent = Array.isArray(values)
+      ? values.flatMap((value) => {
+          if (typeof value !== "string") return [];
+          try {
+            return [JSON.parse(value) as UsageEvent];
+          } catch {
+            return [];
+          }
+        })
+      : [];
+    return buildIntegrationProof(tenant, retainedEvents(tenant, recent));
   }
 
   private async usageWithCount(
@@ -335,7 +531,7 @@ class RedisTenantStore implements TenantStore {
           }
         })
       : [];
-    return summary(tenant, used, recent);
+    return summary(tenant, used, retainedEvents(tenant, recent));
   }
 
   async recordPayment(
@@ -381,23 +577,26 @@ class MemoryTenantStore implements TenantStore {
   private readonly usageCounts = new Map<string, number>();
   private readonly events = new Map<string, UsageEvent[]>();
   private readonly payments = new Set<string>();
+  private readonly registrationCounts = new Map<string, number>();
 
   async health(): Promise<boolean> {
     return true;
   }
 
-  async register(name: string): Promise<Registration> {
+  async register(
+    name: string,
+    registrationFingerprint?: string,
+  ): Promise<Registration> {
+    const registration = registrationKey(registrationFingerprint);
+    const count = (this.registrationCounts.get(registration) ?? 0) + 1;
+    this.registrationCounts.set(registration, count);
+    if (count > maximumRegistrationsPerDay()) {
+      throw new RegistrationRateLimitError();
+    }
     if (this.tenants.size >= maximumTenants()) {
       throw new TenantCapacityError();
     }
-    const tenant: Tenant = {
-      id: randomUUID(),
-      name,
-      plan: "testnet",
-      quotaPerMonth: DEFAULT_MONTHLY_QUOTA,
-      createdAt: new Date().toISOString(),
-      keyVersion: 1,
-    };
+    const tenant = createSandboxTenant(name);
     const apiKey = createApiKey();
     this.tenants.set(tenant.id, tenant);
     this.keys.set(keyHash(apiKey), tenant.id);
@@ -407,7 +606,9 @@ class MemoryTenantStore implements TenantStore {
   async authenticate(apiKey: string): Promise<Tenant | null> {
     if (!API_KEY_PATTERN.test(apiKey)) return null;
     const tenantId = this.keys.get(keyHash(apiKey));
-    return tenantId ? this.tenants.get(tenantId) ?? null : null;
+    const tenant = tenantId ? this.tenants.get(tenantId) ?? null : null;
+    const normalized = normalizeTenant(tenant);
+    return normalized?.status === "active" ? normalized : null;
   }
 
   async rotateKey(tenant: Tenant, currentApiKey: string): Promise<string> {
@@ -432,13 +633,13 @@ class MemoryTenantStore implements TenantStore {
         summary(
           tenant,
           existing,
-          (this.events.get(tenant.id) ?? []).slice(0, 20),
+          retainedEvents(tenant, this.events.get(tenant.id) ?? []).slice(0, 20),
         ),
       );
     }
     const used = existing + 1;
     this.usageCounts.set(key, used);
-    const recent = this.events.get(tenant.id) ?? [];
+    const recent = retainedEvents(tenant, this.events.get(tenant.id) ?? []);
     const integrationIdHash = hashIntegrationId(integrationId);
     recent.unshift({
       requestId,
@@ -455,7 +656,14 @@ class MemoryTenantStore implements TenantStore {
     return summary(
       tenant,
       this.usageCounts.get(usageKey(tenant.id)) ?? 0,
-      (this.events.get(tenant.id) ?? []).slice(0, 20),
+      retainedEvents(tenant, this.events.get(tenant.id) ?? []).slice(0, 20),
+    );
+  }
+
+  async integrationProof(tenant: Tenant): Promise<IntegrationProof> {
+    return buildIntegrationProof(
+      tenant,
+      retainedEvents(tenant, this.events.get(tenant.id) ?? []),
     );
   }
 

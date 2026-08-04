@@ -12,6 +12,7 @@ import {
   requireEnabledNetwork,
 } from "./config/networks.js";
 import { getPublicBaseUrl } from "./config/public.js";
+import { listPublicPlans } from "./config/plans.js";
 import {
   BASE_MAINNET_EVIDENCE_PATH,
   getCommercialCandidate,
@@ -90,8 +91,10 @@ import {
 import {
   getTenantStore,
   QuotaExceededError,
+  RegistrationRateLimitError,
   TenantCapacityError,
   selfServiceEnabled,
+  tenantEntitlements,
   type Tenant,
 } from "./services/tenant-store.js";
 import {
@@ -668,6 +671,15 @@ app.get("/v1/adapters", (context) =>
       "Adapters normalize declared payment context only. LedgerGuard never signs or holds keys.",
   }),
 );
+
+app.get("/v1/plans", (context) =>
+  context.json({
+    plans: listPublicPlans(),
+    billingStatus: "validation",
+    notice:
+      "Sandbox is enforceable now. Paid plans are target offers and cannot be purchased until billing and external validation gates are complete.",
+  }),
+);
 app.get("/v1/meta", (context) =>
   context.json({
     service: "LedgerGuard",
@@ -776,7 +788,14 @@ app.post("/v1/developer/register", async (context) => {
     );
   }
   try {
-    const registration = await store.register(parsed.data.name);
+    const registrationFingerprint =
+      context.req.header("x-real-ip") ??
+      context.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
+      "unknown";
+    const registration = await store.register(
+      parsed.data.name,
+      registrationFingerprint,
+    );
     return context.json(
       {
         tenant: registration.tenant,
@@ -787,6 +806,17 @@ app.post("/v1/developer/register", async (context) => {
       201,
     );
   } catch (error) {
+    if (error instanceof RegistrationRateLimitError) {
+      context.header("Retry-After", "86400");
+      return context.json(
+        {
+          error: "REGISTRATION_RATE_LIMITED",
+          message:
+            "The daily Sandbox registration limit for this client has been reached.",
+        },
+        429,
+      );
+    }
     if (error instanceof TenantCapacityError) {
       return context.json(
         {
@@ -815,7 +845,25 @@ app.get("/v1/developer/account", async (context) => {
   try {
     return context.json({
       tenant: auth.tenant,
+      entitlements: tenantEntitlements(auth.tenant),
       usage: await store.usage(auth.tenant),
+      integrationProof: await store.integrationProof(auth.tenant),
+    });
+  } catch {
+    return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  }
+});
+
+app.get("/v1/developer/integration-proof", async (context) => {
+  const auth = await authenticatedTenant(context.req.header("authorization"));
+  if (!auth.ok) return context.json({ error: auth.error }, auth.status);
+  const store = getTenantStore();
+  if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
+  try {
+    return context.json({
+      proof: await store.integrationProof(auth.tenant),
+      verificationBoundary:
+        "This is a redacted tenant activity summary. externallyVerified remains false until attributable external evidence is reviewed.",
     });
   } catch {
     return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
