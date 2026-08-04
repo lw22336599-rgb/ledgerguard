@@ -139,7 +139,10 @@ Trusted Publishing and must not receive `NPM_TOKEN`.
 
 ## Current gate
 
-Version `0.1.1` is public and installable. The next version remains **HOLD**
-until npm Trusted Publisher settings and the GitHub `npm-production`
-environment exactly match the workflow. A successful `0.1.2` or later OIDC
-release is required before claiming trusted publication or provenance.
+Version `0.1.1` is public and installable. On 2026-08-04 npm confirmed the
+Trusted Publisher connection for `lw22336599-rgb/ledgerguard`, workflow
+`publish-sdk.yml`, and environment `npm-production`; the repository workflow
+matches those values. The next version remains **HOLD** until a meaningful SDK
+change is ready. A successful `0.1.2` or later OIDC release is required before
+claiming trusted publication or provenance; do not publish an empty version
+only to test the channel.
