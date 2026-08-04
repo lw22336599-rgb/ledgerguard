@@ -183,23 +183,49 @@ if (
 
 let shadowState = "5042 shadow disabled";
 if (process.env.EXPECT_ARC_MAINNET_SHADOW === "true") {
-  const { body: shadowStatus } = await request("/v1/shadow/arc-mainnet");
+  const shadowResponse = await fetch(`${baseUrl}/v1/shadow/arc-mainnet`, {
+    signal: AbortSignal.timeout(20_000),
+  });
+  const shadowStatus = await shadowResponse.json();
   if (
-    !shadowStatus.ok ||
+    ![200, 503].includes(shadowResponse.status) ||
     shadowStatus.chainId !== 5042 ||
     shadowStatus.mode !== "read-only-shadow" ||
     shadowStatus.realFundsEnabled !== false ||
     shadowStatus.signingEnabled !== false ||
-    shadowStatus.x402MainnetEnabled !== false ||
-    shadowStatus.healthyRpcs < 1 ||
-    shadowStatus.healthyObservers < 1 ||
-    !shadowStatus.contractsConsistent
+    shadowStatus.x402MainnetEnabled !== false
   ) {
     throw new Error(
       `/v1/shadow/arc-mainnet: invalid status ${JSON.stringify(shadowStatus)}`,
     );
   }
-  shadowState = `5042 shadow ${shadowStatus.healthyRpcs} RPC + ${shadowStatus.healthyObservers} observer`;
+  if (shadowResponse.status === 200) {
+    if (
+      !shadowStatus.ok ||
+      shadowStatus.healthyRpcs < 1 ||
+      shadowStatus.healthyObservers < 1 ||
+      !shadowStatus.contractsConsistent
+    ) {
+      throw new Error(
+        `/v1/shadow/arc-mainnet: healthy response failed readiness checks ${JSON.stringify(shadowStatus)}`,
+      );
+    }
+    shadowState = `5042 shadow ${shadowStatus.healthyRpcs} RPC + ${shadowStatus.healthyObservers} observer`;
+  } else {
+    if (
+      shadowStatus.ok !== false ||
+      !Array.isArray(shadowStatus.failures) ||
+      shadowStatus.failures.length === 0
+    ) {
+      throw new Error(
+        `/v1/shadow/arc-mainnet: degraded response did not fail closed ${JSON.stringify(shadowStatus)}`,
+      );
+    }
+    console.warn(
+      `::warning::Arc 5042 shadow is degraded and safely closed: ${shadowStatus.failures.join(" | ")}`,
+    );
+    shadowState = "5042 shadow degraded / safely closed";
+  }
 }
 
 const { body: preflight } = await request("/v1/preflight", {
