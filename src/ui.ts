@@ -568,7 +568,7 @@ export const pilotHtml = `${pageHead(
           <li>Review one de-identified historical transaction or policy sample.</li>
           <li>Run preflight and evidence in Sandbox with test assets only.</li>
           <li>Record reproducible request IDs and the missing or useful decision signal.</li>
-          <li>Repeat the same workflow after seven days if it delivered value.</li>
+          <li>Repeat the same workflow on a later day spanning at least 14 calendar days if it delivered value.</li>
         </ol>
       </div>
     </section>
@@ -579,9 +579,10 @@ export const pilotHtml = `${pageHead(
       <p class="muted">Email the project with your public product URL, monthly transaction-action range, current payment rail, and one sentence describing the control gap. Or open the public integration form if the evidence is safe to disclose.</p>
       <div class="links bottom-links">
         <a href="mailto:lw22336599@gmail.com?subject=LedgerGuard%20design%20partner%20pilot&body=Public%20product%20URL%3A%0AMonthly%20transaction-action%20range%3A%0ACurrent%20payment%20rail%3A%0AControl%20gap%3A%0AEngineering%20owner%3A%0A">Request interview by email</a>
-        <a href="https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=integration-test.yml" rel="noreferrer">Submit public integration evidence</a>
+        <a href="https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=design-partner.yml" rel="noreferrer">Apply in public</a>
         <a href="/docs">Review the API</a>
       </div>
+      <p class="muted">Already integrated? <a href="https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=integration-test.yml" rel="noreferrer">Submit sanitized integration and repeat-use evidence</a>. A selected commercial-next-step option is not a paid commitment; scope, price, decision date, conditions, and acceptance criteria must be confirmed in writing.</p>
       <p class="muted">Current independently verified results: 0 interviews, 0 private samples accepted, 0 Sandbox integrations, 0 repeat users, and 0 paid commitments. We update these counts only from attributable external evidence.</p>
     </section>
     ${footer}

@@ -44,15 +44,20 @@ body:
       description: Include sanitized request IDs, public testnet hashes, or a public code link. Do not include credentials.
     validations:
       required: true
-  - type: dropdown
-    id: repeated
+  - type: input
+    id: first_use_date
     attributes:
-      label: Have you used it on more than one day?
-      options:
-        - "No"
-        - "Yes"
+      label: First attributable use date (UTC)
+      description: Use YYYY-MM-DD. Project-owner tests and CI do not count.
+      placeholder: 2026-08-04
     validations:
       required: true
+  - type: input
+    id: latest_use_date
+    attributes:
+      label: Latest attributable use date (UTC)
+      description: Optional on the first submission. Use YYYY-MM-DD when updating this issue. Repeat use counts only when this is at least 14 calendar days after the first attributable use.
+      placeholder: Not yet, or 2026-08-18
   - type: dropdown
     id: commercial
     attributes:
@@ -64,3 +69,7 @@ body:
         - Need an enterprise/OEM discussion
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: |
+        Choosing a commercial next step records interest only. It is not a paid commitment. A commitment counts only when an authorized buyer confirms scope, price, decision date, conditions, and acceptance criteria in writing. Send non-public commercial terms to the project email rather than posting them in this issue.

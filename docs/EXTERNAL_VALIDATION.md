@@ -29,8 +29,11 @@ and duration. It does not record source IP addresses or credentials.
 An integration counts as externally validated only after the tester submits the
 `Independent integration evidence` GitHub issue with a public project identity
 and reproducible request IDs, public code, or public testnet transaction hashes.
-Repeated use requires verified activity on more than one day. A paid pilot
-requires an explicit written commitment; testnet tokens never count as revenue.
+Repeated use requires attributable verified activity on two or more separate
+days spanning at least 14 calendar days. A paid pilot requires an explicit
+written commitment containing scope, price, decision date, conditions, and
+acceptance criteria; selecting a form option is not a commitment. Testnet tokens
+never count as revenue.
 
 Current public claims remain zero until that evidence exists:
 

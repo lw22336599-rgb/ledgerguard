@@ -86,6 +86,10 @@ describe("HTTP API", () => {
     expect(html).toContain("never send private keys");
     expect(html).toContain("0 Sandbox integrations");
     expect(html).toContain("LedgerGuard%20design%20partner%20pilot");
+    expect(html).toContain("at least 14 calendar days");
+    expect(html).toContain("template=design-partner.yml");
+    expect(html).toContain("template=integration-test.yml");
+    expect(html).toContain("is not a paid commitment");
   });
 
   it("serves human-readable docs, catalog, and status pages", async () => {
