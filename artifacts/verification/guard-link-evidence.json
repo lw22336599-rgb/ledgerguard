@@ -9,6 +9,7 @@
   "blockNumber": "54434949",
   "explorerUrl": "https://testnet.arcscan.app/tx/0x2b536c8c0c6789482c0792290c1f310cb5a75532247ac394270707015c02098b",
   "evidenceStatus": "MISMATCH",
+  "verificationOutcome": "MISMATCH: the strict receipt detected an additional native transfer; this is not a successful evidence reconciliation.",
   "evidence": {
     "status": "MISMATCH",
     "network": "arcTestnet",

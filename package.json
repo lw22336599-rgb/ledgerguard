@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Arc-first preflight and evidence API for AI agent transactions.",
+  "description": "Protocol-neutral, non-custodial transaction intent control and evidence layer.",
   "exports": {
     "./sdk": {
       "types": "./dist/src/sdk/index.d.ts",
@@ -37,8 +37,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@circle-fin/adapter-viem-v2": "^1.14.1",
-    "@circle-fin/app-kit": "^1.11.0",
     "@circle-fin/x402-batching": "^3.2.0",
     "@coinbase/x402": "^2.1.0",
     "@hono/node-server": "^2.0.12",

@@ -1,67 +1,56 @@
-# Open source policy
+# Open-source and hosted-service policy
 
-LedgerGuard is an open repository (MIT) for **integration trust**. Production security
-judgment runs on the **hosted API** at https://ledgerguard-gules.vercel.app. This document
-states what we open, what we keep on the service, and how that may change.
+LedgerGuard uses an open-core model. The repository is licensed under MIT. Code
+already released under MIT remains available under those terms; this project
+does not claim that published rights can be taken back later.
 
-## Principles
+## Public interoperability layer
 
-1. **Open “how to integrate”** — SDK, schemas, examples, adapter interfaces, Guard Link format.
-2. **Protect “how we judge”** — preflight rules, scoring thresholds, threat data, hosted-only paths.
-3. **Fail closed** — unknown networks, failed simulation when required, and ambiguous evidence never imply approval.
-4. **Honest scope** — see `docs/MESSAGING_AND_CLAIMS.md`; no overclaim of uniqueness or paying customers.
+The public repository is the reference implementation for:
 
-## Layer matrix
+- control-envelope schemas and deterministic digests;
+- REST, OpenAPI, SDK, MCP, and Guard Link contracts;
+- protocol and network adapter interfaces;
+- deterministic baseline rules and evidence verification;
+- conformance tests, examples, and receipt verification tools.
 
-| Layer | Contents | Open in repo? | Production use |
-| --- | --- | --- | --- |
-| ① Interface | OpenAPI, MCP, REST paths, `@ledgerguard1/sdk` | **Yes** | Call hosted API |
-| ② Format | Guard Link URL, request/response JSON shapes | **Yes** | Parse & construct requests |
-| ③ Adapter slot | `NetworkAdapter` type, `/v1/network-adapters` | **Yes** | Read enabled networks at runtime |
-| ④ Examples | `examples/`, integration guides | **Yes** | Copy patterns |
-| ⑤ Tests | Public regression tests | **Mostly yes** | CI only; bypass-focused cases may move private later |
-| ⑥ Engine | `src/services/preflight.ts`, evidence rules, simulation policy | **Visible today** | **Use hosted API — do not rely on self-hosted forks for production** |
-| ⑦ Data | Malicious address lists, phishing feeds (when added) | **No** | API-only oracle results |
+Forks and commercial use are permitted by the existing MIT license. A fork may
+not imply that it is the official LedgerGuard hosted service or that LedgerGuard
+certified its results.
 
-### Why the engine is visible today
+## Hosted commercial layer
 
-Early rules are deterministic and relatively small. As rules and data mature, we plan to:
+The commercial product may add operational capabilities that are not bundled
+into the public reference deployment:
 
-- keep the public repo focused on SDK + specs + examples; and/or
-- move rule-heavy paths to a private deployment while keeping HTTP contracts stable.
+- maintained threat and identity data;
+- multi-tenant policy administration and billing;
+- durable evidence retention, alerts, analytics, and audit exports;
+- managed adapter updates, reliability targets, support, and OEM integration;
+- independently reviewed conformance and certification services.
 
-Integrators should treat **`POST /v1/preflight` / `/v1/can-sign` on the hosted service** as the
-supported oracle — not a fork of `preflight.ts`.
+The moat is service quality, maintained data, integrations, evidence, and
+distribution. It is not a false claim that deterministic rules already visible
+in this MIT repository are closed source.
 
-## What you may do
+## Product safety boundary
 
-- Install `@ledgerguard1/sdk` and call the public API (free tier limits apply).
-- Parse Guard Links per `docs/GUARD_LINK_FORMAT.md`.
-- Propose network adapters per `docs/NETWORK_ADAPTER_SPEC.md`.
-- Submit integration evidence via GitHub issues for `/integrations` listing.
+LedgerGuard is non-custodial. AI may explain findings or propose structured
+policy, but it may not sign, hold keys, override a deterministic block, or
+independently authorize a payment. Unknown networks and ambiguous evidence fail
+closed when the configured policy requires certainty.
 
-## What we discourage
+## Contribution and certification
 
-- Self-hosting the engine to bypass metering or avoid API updates.
-- Marketing a fork as “official LedgerGuard” without attribution.
-- Claiming `ALLOW` guarantees safety, profit, or merchant identity.
+Community adapters can be proposed through pull requests. Inclusion in the
+reference repository requires tests and review. “LedgerGuard Conformant” or
+“LedgerGuard Certified” labels are separate claims and require the criteria in
+`GOVERNANCE.md`; self-publishing a plugin does not grant either label.
 
-## Forks and competition
+## Honest claims
 
-MIT allows forks. Our moat is **operational oracle quality**, **hosted availability**,
-**integration attribution**, and **future data layers** — not license lock-in. Competing
-products should differentiate honestly (see public messaging guide).
+Test assets are not revenue. A 402 challenge is not a settled payment. CI is not
+product-market fit. Public claims must match `PROJECT_STATUS.md` and
+`MESSAGING_AND_CLAIMS.md`.
 
-## x402 compatibility
-
-We map to the draft [Payment Preflight Record](https://github.com/x402-foundation/x402/pull/2792)
-as a **compatible implementation** — we do not own the x402 specification. See
-`docs/PREFLIGHT_RECORD_MAPPING.md`.
-
-## Questions
-
-- Integration: `docs/DEVELOPER_INTEGRATION_INVITE.md`
-- Security reports: GitHub Issues (no secrets in public tickets)
-- Contact: lw22336599@gmail.com
-
-Last updated: 2026-07-31
+Last updated: 2026-08-04

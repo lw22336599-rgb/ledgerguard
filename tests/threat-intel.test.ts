@@ -8,6 +8,7 @@ import {
   hasValidEip55,
   isInSeedBlacklist,
   setSeedBlacklist,
+  runExternalSources,
   ZERO_ADDRESS,
 } from "../src/services/threat-intel.js";
 
@@ -46,8 +47,12 @@ describe("threat-intel pure checks", () => {
   });
 
   it("validates EIP-55 for canonical addresses", () => {
-    const canonical = getAddress(recipient);
+    const canonical = getAddress("0x52908400098527886E0F7030069857D2E4169EE7");
     expect(hasValidEip55(canonical)).toBe(true);
+  });
+
+  it("rejects a mixed-case address with an invalid EIP-55 checksum", () => {
+    expect(hasValidEip55("0x52908400098527886E0F7030069857D2E4169Ee7")).toBe(false);
   });
 
   it("treats all-lowercase as checksum-less and valid", () => {
@@ -77,5 +82,21 @@ describe("threat-intel pure checks", () => {
   it("treats malformed address as critical format error", () => {
     const findings = checkAddressThreats("0xnotanaddress");
     expect(findings.some((f) => f.code === "INVALID_ADDRESS_FORMAT" && f.severity === "critical")).toBe(true);
+  });
+
+  it("marks an external source timeout as degraded", async () => {
+    const result = await runExternalSources(
+      recipient,
+      [
+        {
+          name: "never-responds",
+          check: () => new Promise(() => undefined),
+        },
+      ],
+      5,
+    );
+
+    expect(result.degraded).toBe(true);
+    expect(result.findings.some((finding) => finding.code === "THREAT_SOURCE_UNAVAILABLE")).toBe(true);
   });
 });

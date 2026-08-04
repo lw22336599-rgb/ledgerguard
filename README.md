@@ -1,11 +1,12 @@
 # LedgerGuard
 
-LedgerGuard is an Arc-first, non-custodial **stablecoin payment intent safety** service.
-It checks declared USDC intent against unsigned calldata before signing and produces
-normalized evidence after settlement.
+LedgerGuard is a protocol-neutral, non-custodial **transaction intent control** layer.
+It normalizes a declared payment or transaction intent, applies deterministic policy
+before signing, and produces normalized evidence after settlement. Arc, Base, x402,
+MCP, and future payment protocols are adapters around the same core.
 
-Current status: **testnet MVP / Base Mainnet adapter deployed fail-closed /
-Arc Mainnet unavailable**.
+Current status: **public preview / Arc Testnet live / Base Mainnet x402 challenge
+enabled but independently reproducible settlement unproven / Arc Mainnet disabled**.
 
 Public demo: **https://ledgerguard-gules.vercel.app**
 
@@ -154,6 +155,10 @@ customer or revenue claim.
 | [`GUARD_LINK_FORMAT.md`](docs/GUARD_LINK_FORMAT.md) | Guard Link URL format |
 | [`OPEN_SOURCE_POLICY.md`](docs/OPEN_SOURCE_POLICY.md) | What is open vs hosted-only |
 | [`WALLET_EXCHANGE_INTEGRATION.md`](docs/WALLET_EXCHANGE_INTEGRATION.md) | Wallet/exchange 5-minute path |
+| [`PRODUCT_BLUEPRINT_3_5_YEAR.md`](docs/PRODUCT_BLUEPRINT_3_5_YEAR.md) | Product direction, horizons, and commercial gates |
+| [`CONTROL_ENVELOPE.md`](docs/CONTROL_ENVELOPE.md) | Protocol-neutral intent, policy, decision, and receipt contract |
+| [`GOVERNANCE.md`](docs/GOVERNANCE.md) | Contribution, conformance, and release governance |
+| [`PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) | Verified current state and unresolved claims |
 ## Mainnet activation gates
 
 Arc Mainnet is represented in the network registry but deliberately has no

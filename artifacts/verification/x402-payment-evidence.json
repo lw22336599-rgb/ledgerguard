@@ -8,11 +8,14 @@
   "recipient": "0xf1437d9cd304ae49f2ec005ac967813b3a7c466c",
   "payer": "0x257713534b81f053200c94ecEFDc0aAfa92dF68F",
   "status": 200,
-  "transaction": "667bc32d-3e1a-4868-bb28-a3cc3b87a437",
+  "facilitatorSettlementId": "667bc32d-3e1a-4868-bb28-a3cc3b87a437",
+  "onchainTransactionHash": null,
   "resourceConfirmedPaid": true,
   "ledgerStatus": "recorded",
   "resourceSettlementTransaction": "667bc32d-3e1a-4868-bb28-a3cc3b87a437",
-  "explorerUrl": "https://testnet.arcscan.app/tx/667bc32d-3e1a-4868-bb28-a3cc3b87a437",
+  "explorerUrl": null,
+  "evidenceScope": "facilitator-ledger-and-resource-delivery",
+  "onchainSettlementVerified": false,
   "balanceBefore": "0.006",
   "balanceAfter": "0.005"
 }

@@ -1,0 +1,8 @@
+* @lw22336599-rgb
+
+# Safety-critical control and release surfaces require explicit owner review.
+/src/domain/ @lw22336599-rgb
+/src/services/ @lw22336599-rgb
+/src/config/ @lw22336599-rgb
+/.github/workflows/ @lw22336599-rgb
+/docs/PROJECT_STATUS.md @lw22336599-rgb

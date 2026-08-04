@@ -2,9 +2,11 @@
   "cdpUrl": "http://127.0.0.1:9222",
   "grantDashboard": "https://circle.questbook.app/dashboard/?grantId=6992785dfb7e884efacadb1e&chainId=10&role=community",
   "filled": {},
-  "submitted": true,
+  "submitted": false,
+  "submitClicked": true,
+  "verified": false,
   "notes": [
-    "Final submit clicked"
+    "Final submit was clicked, but no submitted proposal or confirmation receipt was found. Do not claim submission until independently verified."
   ],
   "finalUrl": "https://circle.questbook.app/dashboard/?grantId=6992785dfb7e884efacadb1e&chainId=10&role=community"
 }

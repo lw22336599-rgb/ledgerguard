@@ -187,13 +187,26 @@ export async function runExternalSources(
   timeoutMs = 3000,
 ): Promise<{ findings: Finding[]; degraded: boolean }> {
   if (!address || sources.length === 0) return { findings: [], degraded: false };
+
+  const checkWithTimeout = async (source: ThreatDataSource): Promise<Finding[]> => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        source.check(address),
+        new Promise<Finding[]>((_, reject) => {
+          timeout = setTimeout(
+            () => reject(new Error(`Threat source timed out: ${source.name}`)),
+            Math.max(1, timeoutMs),
+          );
+        }),
+      ]);
+    } finally {
+      if (timeout) clearTimeout(timeout);
+    }
+  };
+
   const results = await Promise.allSettled(
-    sources.map((source) => {
-      const timer = new Promise<Finding[]>((resolve) =>
-        setTimeout(() => resolve([]), timeoutMs),
-      );
-      return Promise.race([source.check(address), timer]);
-    }),
+    sources.map((source) => checkWithTimeout(source)),
   );
   const findings: Finding[] = [];
   let degraded = false;
