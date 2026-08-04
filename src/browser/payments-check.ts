@@ -55,6 +55,57 @@ function applyQueryPrefill(): void {
 
 applyQueryPrefill();
 
+addressForm?.addEventListener(
+  "invalid",
+  () => {
+    showResult(
+      addressResult,
+      "review",
+      "Invalid address",
+      "Enter a valid 0x receiving address.",
+    );
+  },
+  true,
+);
+
+let verifyInvalidScheduled = false;
+
+verifyForm?.addEventListener(
+  "invalid",
+  () => {
+    if (verifyInvalidScheduled) return;
+    verifyInvalidScheduled = true;
+    queueMicrotask(() => {
+      verifyInvalidScheduled = false;
+      const field = verifyForm?.querySelector<HTMLInputElement>("input:invalid");
+      const messages: Record<string, [string, string]> = {
+        "payments-tx": [
+          "Invalid transaction hash",
+          "Paste the full 0x transaction hash from your wallet or ArcScan.",
+        ],
+        "payments-recipient": [
+          "Invalid recipient",
+          "Enter the receiving address from the Guard Link.",
+        ],
+        "payments-amount": [
+          "Invalid amount",
+          "Enter the USDC amount using up to six decimal places.",
+        ],
+        "payments-payer": [
+          "Invalid payer",
+          "Leave the optional payer empty or enter a valid 0x address.",
+        ],
+      };
+      const [heading, message] = messages[field?.id ?? ""] ?? [
+        "Review payment details",
+        "Correct the highlighted field and try again.",
+      ];
+      showResult(verifyResult, "review", heading, message);
+    });
+  },
+  true,
+);
+
 addressForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const value = addressInput?.value.trim() ?? "";

@@ -75,6 +75,32 @@ describe("browser demo experience", () => {
 
   });
 
+  it("gives Guard Link validation feedback and invalidates stale links", () => {
+    expect(guardBuilderBundle).toContain("Complete required fields");
+    expect(guardBuilderBundle).toContain("Payment details changed");
+    expect(guardBuilderBundle).toContain("Create a new link");
+  });
+
+  it("marks aggregate status degraded when enabled shadow monitoring fails", () => {
+    const html = statusHtml({
+      ready: true,
+      chainId: 5042002,
+      blockNumber: "1",
+      x402: true,
+      mainnet: false,
+      shadow: {
+        ok: false,
+        enabled: true,
+        chainId: 5042,
+        headBlock: null,
+        healthyRpcs: 0,
+        healthyObservers: 0,
+      },
+    });
+    expect(html).toContain("Some monitored services are degraded");
+    expect(html).not.toContain("All monitored services are operational");
+  });
+
 
 
   it("routes people to readable pages instead of raw JSON", () => {
@@ -609,9 +635,8 @@ describe("browser demo experience", () => {
 
     }
 
-    expect(aboutHtml).toContain("payment intent safety");
-
-    expect(aboutHtml).toContain("Arc-first");
+    expect(aboutHtml).toContain("protocol-neutral");
+    expect(aboutHtml).toContain("Network adapters");
 
     expect(aboutHtml).toContain("separately gated canary");
 

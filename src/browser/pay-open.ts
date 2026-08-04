@@ -53,6 +53,14 @@ function renderRecentLink(): void {
   }
 }
 
+form?.addEventListener(
+  "invalid",
+  () => {
+    show("review", "Paste a link", "Paste the full payment link you received.");
+  },
+  true,
+);
+
 form?.addEventListener("submit", (event) => {
   event.preventDefault();
   const value = input?.value.trim() ?? "";

@@ -38,7 +38,7 @@ function render(): void {
     status.textContent = `Connected: ${wallet().shortAddress(state.account)}`;
     button.textContent = "Disconnect";
     button.classList.add("w-connected");
-    dot.style.background = "#4ade80";
+    dot.classList.add("connected");
     section.classList.add("wallet-connected");
     if (detail) {
       detail.hidden = false;
@@ -59,7 +59,7 @@ function render(): void {
     status.textContent = "No wallet connected";
     button.textContent = "Connect Wallet";
     button.classList.remove("w-connected");
-    dot.style.background = "#555";
+    dot.classList.remove("connected");
     section.classList.remove("wallet-connected");
     if (detail) detail.hidden = true;
   }

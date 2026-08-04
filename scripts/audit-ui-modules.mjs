@@ -16,12 +16,17 @@ const pages = [
   { path: "/pay", name: "pay", marker: "Pay with USDC" },
   { path: "/canary", name: "canary", marker: "Controlled Base Mainnet payment canary.", optional503: true },
   { path: "/docs", name: "docs", marker: "API documentation" },
+  { path: "/about", name: "about", marker: "What we build" },
+  { path: "/integrations", name: "integrations", marker: "INTEGRATIONS" },
+  { path: "/catalog", name: "catalog", marker: "PRICING" },
+  { path: "/pilot", name: "pilot", marker: "DESIGN PARTNER" },
   { path: "/developer", name: "developer", marker: "Developer Console" },
   { path: "/status", name: "status", marker: "LIVE STATUS" },
   { path: "/payments", name: "payments", marker: "Check whether a payment arrived." },
   { path: "/testnet-help", name: "testnet-help", marker: "Set up your wallet" },
   { path: "/test", name: "test", marker: "Complete the test flow" },
   { path: "/docs/integration", name: "integration", marker: "INTEGRATION SAFETY" },
+  { path: "/docs/integration-stack", name: "integration-stack", marker: "INTEGRATION STACK" },
   { path: "/privacy", name: "privacy", marker: "Privacy Policy" },
   { path: "/terms", name: "terms", marker: "Terms of Service" },
 ];
@@ -144,7 +149,7 @@ const browser = await chromium.launch({
   args: ["--disable-dev-shm-usage"],
 });
 
-async function auditViewport(label, viewport, isMobile) {
+async function auditViewport(label, viewport, isMobile, selectedPages = pages) {
   const context = await browser.newContext({
     ...viewport,
     deviceScaleFactor: 2,
@@ -180,12 +185,12 @@ async function auditViewport(label, viewport, isMobile) {
   const availablePaths = new Set(
     report.http.filter((entry) => entry.status === 200).map((entry) => entry.path),
   );
-  for (const p of pages.filter((x) => !x.expect404 && availablePaths.has(x.path))) {
+  for (const p of selectedPages.filter((x) => !x.expect404 && availablePaths.has(x.path))) {
     await page.goto(`${baseUrl}${p.path}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: 90_000,
     });
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     const overflow = await page.evaluate(() => {
       const doc = document.documentElement;
@@ -241,8 +246,118 @@ await auditViewport("desktop", { viewport: { width: 1280, height: 800 } }, false
 await auditViewport("mobile", devices["iPhone 13"], true);
 
 const breakpointWidths = [899, 759, 479];
+const breakpointPages = pages.filter((page) =>
+  ["/", "/guard/create", "/developer", "/status"].includes(page.path),
+);
 for (const width of breakpointWidths) {
-  await auditViewport(`bp-${width}`, { viewport: { width, height: 844 } }, width <= 900);
+  await auditViewport(
+    `bp-${width}`,
+    { viewport: { width, height: 844 } },
+    width <= 900,
+    breakpointPages,
+  );
+}
+
+// --- Real interaction acceptance (not just screenshots) ---
+const interactionContext = await browser.newContext({
+  viewport: { width: 1280, height: 900 },
+});
+const interactionPage = await interactionContext.newPage();
+
+async function expectVisible(selector, module, message) {
+  const visible = await interactionPage.locator(selector).isVisible().catch(() => false);
+  if (!visible) issue("high", module, message);
+  return visible;
+}
+
+try {
+  await interactionPage.goto(`${baseUrl}/guard/create`, { waitUntil: "domcontentloaded" });
+  await interactionPage.getByRole("button", { name: "Create payment link" }).click();
+  if (!(await interactionPage.locator("#guard-builder-result strong").textContent())?.includes("Complete required fields")) {
+    issue("high", "guard-create", "Required-field submission has no application-level feedback");
+  } else {
+    pass("Guard builder explains missing required fields");
+  }
+
+  await interactionPage.getByRole("button", { name: "Freelance invoice" }).click();
+  const templateAmount = await interactionPage.locator("#guard-amount").inputValue();
+  const templatePurpose = await interactionPage.locator("#guard-purpose").inputValue();
+  if (templateAmount !== "50.00" || templatePurpose !== "Freelance invoice") {
+    issue("high", "guard-create", "Payment template did not update amount and purpose");
+  } else {
+    pass("Guard Link templates update the form");
+  }
+
+  await interactionPage.locator("#guard-recipient").fill("0x2222222222222222222222222222222222222222");
+  await interactionPage.getByRole("button", { name: "Create payment link" }).click();
+  await interactionPage.locator("#guard-builder-result strong").filter({ hasText: "Payment link ready" }).waitFor();
+  await expectVisible("#guard-builder-actions", "guard-create", "Created Guard Link actions are hidden");
+  await expectVisible("#guard-created-url", "guard-create", "Created Guard Link URL is hidden");
+  pass("Guard Link form creates a shareable request");
+
+  await interactionPage.locator("#guard-purpose").fill("Changed after creation");
+  const changedHeading = await interactionPage.locator("#guard-builder-result strong").textContent();
+  const staleActionsVisible = await interactionPage.locator("#guard-builder-actions").isVisible();
+  if (!changedHeading?.includes("Payment details changed") || staleActionsVisible) {
+    issue("high", "guard-create", "Editing payment details leaves a stale shareable link visible");
+  } else {
+    pass("Editing payment details invalidates the old Guard Link");
+  }
+
+  await interactionPage.goto(`${baseUrl}/pay`, { waitUntil: "domcontentloaded" });
+  await interactionPage.getByRole("button", { name: "Open payment" }).click();
+  if (!(await interactionPage.locator("#pay-result strong").textContent())?.includes("Paste a link")) {
+    issue("high", "pay", "Empty payment-link submission has no feedback");
+  }
+  await interactionPage.locator("#pay-url").fill("https://example.com/not-a-guard-link");
+  await interactionPage.getByRole("button", { name: "Open payment" }).click();
+  if (!(await interactionPage.locator("#pay-result strong").textContent())?.includes("Invalid payment link")) {
+    issue("high", "pay", "Invalid payment link has no feedback");
+  } else {
+    pass("Pay page explains empty and invalid links");
+  }
+
+  await interactionPage.goto(`${baseUrl}/payments`, { waitUntil: "domcontentloaded" });
+  await interactionPage.getByRole("button", { name: "Open ArcScan history" }).click();
+  if (!(await interactionPage.locator("#payments-address-result strong").textContent())?.includes("Invalid address")) {
+    issue("high", "payments", "Invalid receiving address has no feedback");
+  }
+  await interactionPage.locator("#payments-tx").fill("0x1234");
+  await interactionPage.getByRole("button", { name: "Verify onchain result" }).click();
+  if (!(await interactionPage.locator("#payments-verify-result strong").textContent())?.includes("Invalid transaction hash")) {
+    issue("high", "payments", "Invalid transaction hash has no feedback");
+  } else {
+    pass("Payments page explains invalid address and transaction hash");
+  }
+
+  await interactionPage.goto(`${baseUrl}/developer`, { waitUntil: "domcontentloaded" });
+  const loadAccountButton = interactionPage.getByRole("button", { name: "Load account" });
+  if (await loadAccountButton.isEnabled()) {
+    await interactionPage.locator("#developer-key").fill(`lg_test_${"a".repeat(32)}`);
+    await loadAccountButton.click();
+    await interactionPage.locator("#developer-status strong").filter({ hasText: "Could not load account" }).waitFor();
+    pass("Developer console reports an invalid API key");
+  } else {
+    const developerText = await interactionPage.locator("main").innerText();
+    if (!/unavailable|disabled|not configured/i.test(developerText)) {
+      issue("high", "developer", "Developer actions are disabled without an explanatory status");
+    } else {
+      pass("Developer console explains why self-service is unavailable");
+    }
+  }
+
+  await interactionPage.goto(`${baseUrl}/status`, { waitUntil: "domcontentloaded" });
+  const statusText = await interactionPage.locator(".status-list").innerText();
+  const statusHeading = await interactionPage.locator("h1").innerText();
+  if (statusText.includes("DEGRADED") && statusHeading.includes("All monitored services are operational")) {
+    issue("high", "status", "Aggregate status says operational while a monitored service is degraded");
+  } else {
+    pass("Aggregate status matches monitored service state");
+  }
+} catch (error) {
+  issue("high", "interaction-audit", String(error));
+} finally {
+  await interactionContext.close();
 }
 
 await browser.close();

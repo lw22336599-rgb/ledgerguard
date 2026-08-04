@@ -21,7 +21,11 @@ Safety boundaries:
 - Use each asset's declared atomic unit; never infer decimals from a marketing label.
 
 Before release, run `npm test`, `npm run typecheck`, `npm run build`,
-`npm audit --omit=dev`, and the documented read-only production checks.
+`npm audit --omit=dev`, `npm run audit:ui:local`, and the documented
+read-only production checks. After deployment, run
+`npm run audit:ui:production`. A release is not complete until the real
+production UI has passed form submission, invalid-input, stale-state,
+desktop/mobile, status-consistency, and route checks in `docs/RELEASE_ACCEPTANCE.md`.
 
 Never convert test assets, self-traffic, automation clicks, social impressions,
 or a 402 challenge into claims of customers, revenue, settlement, or official recognition.

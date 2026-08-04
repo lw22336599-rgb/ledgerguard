@@ -276,7 +276,7 @@ export const guardBuilderHtml = `${pageHead(
         <input id="guard-created-url" readonly hidden aria-label="Created Guard Link">
         <div id="guard-qr-wrap" class="guard-qr-wrap" hidden>
           <p class="step">SCAN OR SCREENSHOT</p>
-          <canvas id="guard-qr-canvas" width="200" height="200" aria-label="QR code for payment link"></canvas>
+          <img id="guard-qr-canvas" width="200" height="200" alt="QR code for payment link">
         </div>
         <div id="guard-builder-actions" class="wallet-buttons" hidden>
           <button id="guard-copy" type="button" class="secondary">Copy link</button>
@@ -681,7 +681,7 @@ export const catalogHtml = `${pageHead(
       </div>
     </section>
     <section class="notice"><strong>Honest boundary:</strong> LedgerGuard has not yet confirmed any paid customer. These tiers are planning targets for market validation, not advertised charges, and will be revised with pilot feedback.</section>
-    <p class="muted" style="margin-top: 1rem"><a href="/pilot">Apply for the design partner pilot</a> &middot; <a href="/docs">API docs</a></p>
+    <p class="muted pilot-links"><a href="/pilot">Apply for the design partner pilot</a> &middot; <a href="/docs">API docs</a></p>
     ${footer}
   </main>${portalPageScripts()}
 </body>
@@ -914,6 +914,10 @@ export function statusHtml(input: {
     healthyObservers: number;
   };
 }): string {
+  const overallOperational =
+    input.ready &&
+    (!input.shadow.enabled || input.shadow.ok) &&
+    !input.mainnet;
   const rpcLabel = input.ready
     ? `Operational · Arc Testnet ${input.chainId} · Block ${input.blockNumber}`
     : "Degraded · The current RPC readiness probe failed";
@@ -928,10 +932,10 @@ export function statusHtml(input: {
   )}
 <body>
   <main>
-    ${portalNavHtml(input.ready ? "OPERATIONAL" : "DEGRADED")}
+    ${portalNavHtml(overallOperational ? "OPERATIONAL" : "DEGRADED")}
     <section class="subhero">
       <p class="eyebrow">LIVE STATUS</p>
-      <h1 class="compact">${input.ready ? "All monitored services are operational" : "Some services are degraded"}</h1>
+      <h1 class="compact">${overallOperational ? "All monitored services are operational" : "Some monitored services are degraded"}</h1>
       <p class="lead">This page runs a read-only Arc Testnet RPC check when opened. It does not connect a wallet or request a signature.</p>
     </section>
     <section class="status-list">
@@ -1039,12 +1043,13 @@ export const termsHtml = legalPageHtml(
 
 export const aboutHtml = legalPageHtml(
   "About",
-  "Non-custodial stablecoin payment intent safety on Arc Testnet.",
+  "Protocol-neutral, non-custodial transaction intent control and evidence.",
   `<h2>What we build</h2>
-      <p>LedgerGuard is a non-custodial <strong>payment intent safety</strong> service for USDC. Merchants create a <strong>Guard Link</strong>; payers review amount, recipient, and purpose before their wallet asks them to sign. After settlement, evidence can be reconciled against the declared intent.</p>
+      <p>LedgerGuard is a <strong>protocol-neutral, non-custodial transaction intent control</strong> and evidence layer. It checks who pays whom, how much, on which network, and under which policy before signing, then reconciles what actually happened after settlement.</p>
+      <p><strong>Guard Link</strong> is the current human-facing Arc Testnet adapter: merchants create a request and payers review amount, recipient, and purpose before their wallet asks them to sign.</p>
       <p>Developers use <code>@ledgerguard1/sdk</code> and our HTTP API. We map to the draft <a href="https://github.com/x402-foundation/x402/pull/2792" rel="noreferrer">x402 Payment Preflight Record</a> as a compatible oracle — see <a href="${specDocsBase}/PREFLIGHT_RECORD_MAPPING.md" rel="noreferrer">specifications on GitHub</a>.</p>
-      <h2>Arc-first product path</h2>
-      <p>Our primary battlefield is <strong>Arc Testnet</strong> today. Guard Link creation, sharing, wallet review, and onchain verification all run on Arc. We align with Circle&apos;s Arc and USDC ecosystem rather than spreading effort across every chain at once.</p>
+      <h2>Network adapters</h2>
+      <p><strong>Arc Testnet</strong> is the current public validation environment for Guard Link creation, sharing, wallet review, and onchain verification. Arc, Base, x402, wallets, and agent protocols remain thin adapters around the same deterministic control and evidence core.</p>
       <h2>Where Base fits</h2>
       <p><strong>Base Mainnet</strong> x402 is implemented as a separately gated canary at <a href="/canary">/canary</a>, but the public real-fund page is disabled by default. It is an experimental adapter, <em>not</em> a production Guard Link or proof of customer demand.</p>
       <h2>Who we are</h2>
@@ -1061,6 +1066,7 @@ export const aboutHtml = legalPageHtml(
 const siteBaseCss = `:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}main{margin:auto}nav{display:flex;align-items:center;justify-content:space-between}.subhero{padding:64px 0 38px;max-width:900px}h1{margin:20px 0 26px;letter-spacing:-.065em}h1.compact{font-size:clamp(44px,6vw,70px)}h2{font-size:28px;letter-spacing:-.03em;margin:8px 0}h3{margin:14px 0 4px}.muted,article p{color:var(--muted)}form{display:grid;gap:14px}label{display:grid;gap:6px;font-size:13px;color:var(--muted)}input{width:100%;padding:13px;font:inherit;color:var(--text)}button{cursor:pointer;font-weight:800;padding:14px;border:0}button:disabled{opacity:.6}.developer-panel{margin-bottom:28px}.panel{display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:32px}.result{grid-column:1/-1;border-left:4px solid var(--success);border-radius:8px;padding:18px;min-height:96px}.result p{color:var(--muted);margin:6px 0}.result ul{margin:10px 0;padding-left:22px}.result details{margin-top:12px}.result pre,.code-card pre{white-space:pre-wrap;word-break:break-word;overflow:auto;padding:16px;color:#334155}.grid,.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);padding:32px 0 64px}.grid article{border-top:1px solid var(--line);padding:22px 4px}.grid span,.doc-card span{font-size:12px;font-weight:800}.grid h3{margin:14px 0 4px}.doc-card h2{font-size:20px;overflow-wrap:anywhere}.code-card{margin-bottom:28px}.status-list{display:grid;gap:14px;margin:10px 0 30px}.status-list article{display:flex;gap:16px;align-items:flex-start;border-radius:14px;padding:20px}.status-list p{margin:4px 0 0}.status-dot{width:12px;height:12px;border-radius:99px;margin-top:6px;background:var(--orange);flex:none}.links{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px}.bottom-links{margin:30px 0 54px}a{text-underline-offset:5px}footer{padding:26px 0 42px;color:var(--muted);font-size:13px}.badge.danger{color:var(--red);border-color:#fecaca;background:#fef2f2}.legal-hero{max-width:900px;padding-bottom:28px}.legal-prose{display:block;padding:28px 32px 36px;margin-bottom:64px;line-height:1.7}.legal-prose h2{font-size:20px;margin:26px 0 8px;color:var(--text)}.legal-prose h2:first-child{margin-top:0}.legal-prose p,.legal-prose li{color:var(--muted);margin:8px 0}.legal-prose ul{padding-left:22px}.legal-prose a{color:var(--link)}`;
 
 export const unifiedBrandCss = `
+[hidden]{display:none!important}
 :root{
   --bg:#f8fafc;
   --panel:#ffffff;
@@ -1213,7 +1219,7 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 .builder-advanced summary{cursor:pointer;color:var(--link);font-weight:700}
 .builder-advanced-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
 .guard-qr-wrap{display:grid;justify-items:start;gap:10px;margin:16px 0 4px}
-.guard-qr-wrap canvas{border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px}
+.guard-qr-wrap img{border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px}
 .guard-cta{margin:28px 0;padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:var(--shadow);text-align:center}
 .guard-cta h2{margin:10px 0 8px;font-size:clamp(28px,4vw,40px);color:var(--text)}
 .guard-cta .button-link{margin-top:12px}
@@ -1257,6 +1263,8 @@ button.secondary{background:var(--panel);border:1px solid var(--line);color:var(
 .wallet-status-card{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:20px;background:var(--surface-muted)}
 .wallet-status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .wallet-status-dot{width:10px;height:10px;border-radius:50%;background:#94a3b8;flex:none}
+.wallet-status-dot.connected{background:#4ade80}
+.pilot-links{margin-top:1rem}
 .wallet-status-label{flex:1;color:var(--muted);min-width:160px}
 .wallet-status-detail{margin-top:10px;font-family:ui-monospace,monospace;font-size:13px;color:var(--muted);word-break:break-all}
 .wallet-connected{border-color:var(--success)}

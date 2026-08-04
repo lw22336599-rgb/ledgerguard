@@ -31,6 +31,7 @@
     "smoke:local": "node scripts/local-smoke.mjs",
     "smoke:integrations": "node scripts/local-integration-smoke.mjs",
     "audit:ui:local": "node scripts/local-ui-audit.mjs",
+    "audit:ui:production": "node scripts/audit-ui-modules.mjs",
     "audit:production": "node scripts/fetch-audit-production.mjs",
     "tenant:govern": "node scripts/tenant-govern.mjs",
     "x402:buyer:init": "node scripts/x402-buyer.mjs init",

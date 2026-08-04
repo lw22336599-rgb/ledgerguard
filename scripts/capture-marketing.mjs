@@ -46,7 +46,7 @@ await page.locator("#guard-recipient").fill(
 await page.locator("#guard-amount").fill("1.00");
 await page.locator("#guard-purpose").fill("Coffee order #42");
 await page.locator("#guard-builder").evaluate((form) => form.requestSubmit());
-await page.locator("#guard-qr-wrap:not([hidden]) canvas").waitFor({
+await page.locator("#guard-qr-wrap:not([hidden]) img").waitFor({
   timeout: 30_000,
 });
 await page.waitForTimeout(800);
