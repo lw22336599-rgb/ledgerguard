@@ -10,8 +10,13 @@ It uses valueless Arc Testnet assets only.
 - Never paste a private key into the website, an issue, a log, or Git.
 - The helper creates a disposable key in the git-ignored local file
   `.env.x402-buyer.local`.
+- Treat that wallet as disposable even though the helper requests restrictive
+  file permissions. Windows and copied files do not guarantee Unix-style
+  `0600` protection.
 - The helper refuses changes to the network, USDC address, price, seller
   address, or Circle verifying contract.
+- Before any balance query, deposit, or payment, the helper verifies that the
+  connected RPC reports Arc Testnet chain ID `5042002`.
 - A wallet signature cannot be delegated to LedgerGuard or to a remote operator.
 
 ## Test sequence
@@ -36,6 +41,11 @@ npm.cmd run x402:buyer -- pay
 The final command must return HTTP 200, `paid: true`, a balance decrease of
 `0.001` test USDC, and a `receipt` containing the Arc Testnet explorer URL.
 Local evidence is written under `tmp/`, which is ignored by Git.
+
+The public repository also contains a sanitized successful-run artifact under
+`artifacts/verification/`. It proves a valueless testnet settle-deliver-ledger
+flow only. It does not prove ownership of the configured seller address,
+customer adoption, revenue, or mainnet readiness.
 
 ## Report the result
 
