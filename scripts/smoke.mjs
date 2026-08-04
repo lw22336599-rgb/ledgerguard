@@ -23,7 +23,8 @@ const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) })
 const homeHtml = await home.text();
 if (
   home.status !== 200 ||
-  !homeHtml.includes("Send and receive USDC") ||
+  !homeHtml.includes("Review a stablecoin payment") ||
+  !homeHtml.includes("not affiliated with Ledger SAS") ||
   !homeHtml.includes('href="/pay"') ||
   !homeHtml.includes("https://x.com/HuiLibaa") ||
   !homeHtml.includes('<html lang="en">')
@@ -36,6 +37,7 @@ if (!home.headers.get("content-security-policy")?.includes("default-src 'self'")
 
 for (const [path, marker] of [
   ["/docs", "API documentation"],
+  ["/catalog", "PRICING &middot; TARGETS UNDER VALIDATION"],
   ["/test", "Complete the test flow end to end"],
   ["/status", "LIVE STATUS"],
   ["/developer", "Developer Console"],
@@ -67,7 +69,6 @@ for (const [path, location] of [
   ["/protect", "/test"],
   ["/meter", "/developer"],
   ["/receipts", "/payments"],
-  ["/catalog", "/docs"],
   ["/routes", "/docs/integration"],
 ]) {
   const response = await fetch(`${baseUrl}${path}`, {

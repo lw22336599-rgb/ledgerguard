@@ -44,18 +44,18 @@ for (const path of paths) {
 
 console.log("\n=== HOME CONTENT ===");
 const checks = [
-  ["Send and receive USDC (title/meta)", /Send and receive USDC/i.test(home)],
-  ["h1 simple link", /with a simple link/i.test(home)],
+  ["Payment intent safety (title/meta)", /Payment intent safety/i.test(home)],
+  ["Review before signing", /Review a stablecoin payment/i.test(home)],
   ["Get paid text", /Get paid/.test(home)],
   ["Pay a link text", /Pay a link/.test(home)],
   ["No signup", /No signup/i.test(home)],
   ["#how-it-works", /id="how-it-works"/.test(home)],
-  ["No wallet yet", /No wallet yet/.test(home)],
+  ["Wallet explanation", /What is a wallet\?/.test(home)],
   ["Connect wallet step", />Connect wallet</.test(home)],
   ["Enter amount step", />Enter amount</.test(home)],
   ["Share the link step", />Share the link</.test(home)],
   ["Developers in footer", /footer-links[\s\S]*Developers/.test(home)],
-  ["Base Mainnet mention", /Base Mainnet/.test(home)],
+  ["Arc Testnet boundary", /Arc Testnet/.test(home)],
 ];
 
 for (const [label, ok] of checks) {
@@ -89,7 +89,6 @@ for (const [path, location] of [
   ["/protect", "/test"],
   ["/meter", "/developer"],
   ["/receipts", "/payments"],
-  ["/catalog", "/docs"],
   ["/routes", "/docs/integration"],
 ]) {
   const r = await fetch(`${base}${path}`, { redirect: "manual" });
