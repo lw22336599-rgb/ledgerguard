@@ -13,6 +13,7 @@ const abi = parseAbi([
 const sender = "0x1111111111111111111111111111111111111111";
 const recipient = "0x2222222222222222222222222222222222222222";
 const debitSource = "0x3333333333333333333333333333333333333333";
+const baseUsdbc = "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA";
 
 describe("preflight", () => {
   it("allows a matching simulated USDC transfer", () => {
@@ -42,6 +43,41 @@ describe("preflight", () => {
     const result = evaluatePreflight(data, { status: "success" });
     expect(result.decision).toBe("ALLOW");
     expect(result.decoded.kind).toBe("erc20_transfer");
+  });
+
+  it("blocks USDbC when only official Base USDC is explicitly verified", () => {
+    const original = process.env.BASE_PREFLIGHT_ENABLED;
+    process.env.BASE_PREFLIGHT_ENABLED = "true";
+    try {
+      const data = preflightSchema.parse({
+        network: "baseMainnet",
+        from: sender,
+        to: baseUsdbc,
+        data: encodeFunctionData({
+          abi,
+          functionName: "transfer",
+          args: [recipient, 1_000_000n],
+        }),
+        intent: {
+          action: "transfer",
+          expectedDebitAddress: sender,
+          expectedRecipient: recipient,
+          expectedAssetAddress: baseUsdbc,
+          expectedAmountMicroUsdc: "1000000",
+          purpose: "Reject an unverified asset label",
+        },
+        policy: {},
+      });
+
+      const result = evaluatePreflight(data, { status: "success" });
+      expect(result.decision).toBe("BLOCK");
+      expect(result.findings.map((finding) => finding.code)).toContain(
+        "NON_SUPPORTED_ASSET",
+      );
+    } finally {
+      if (original === undefined) delete process.env.BASE_PREFLIGHT_ENABLED;
+      else process.env.BASE_PREFLIGHT_ENABLED = original;
+    }
   });
 
   it("blocks a recipient mismatch", () => {

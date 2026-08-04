@@ -262,7 +262,7 @@ export function evaluatePreflight(
       code: "NON_SUPPORTED_ASSET",
       severity: "critical",
       message:
-        "The token call does not target a supported stablecoin contract (USDC/USDT) for this network.",
+        "The token call does not target an explicitly verified asset contract for this network.",
     });
   }
 

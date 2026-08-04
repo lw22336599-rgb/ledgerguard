@@ -23,7 +23,7 @@ export type NetworkAdapter = {
   enabled: boolean;
   chainId: number;
   usdcAddress: `0x${string}`;
-  /** Supported stablecoin assets for this network (USDC always first). */
+  /** Explicitly verified asset contracts for this network. */
   supportedAssets: readonly `0x${string}`[];
   /** Arc uses native USDC gas (18-decimal wei view); Base uses ERC-20 USDC (6 decimals). */
   nativeUsdcGas: boolean;

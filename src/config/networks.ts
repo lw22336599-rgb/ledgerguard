@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
-import { BASE_MAINNET_USDC, BASE_MAINNET_USDT } from "./commercial.js";
+import { BASE_MAINNET_USDC } from "./commercial.js";
 
 export const ARC_TESTNET_USDC =
   "0x3600000000000000000000000000000000000000" as const;
@@ -19,7 +19,7 @@ export interface NetworkRecord {
   chainId: number | null;
   rpcUrls: readonly string[];
   usdcAddress: `0x${string}` | null;
-  /** Supported stablecoin asset contracts for this network (USDC always first). */
+  /** Explicitly verified asset contracts for this network. */
   supportedAssets: readonly `0x${string}`[];
   explorerUrl: string | null;
   activation:
@@ -140,7 +140,7 @@ function parseBaseMainnetConfiguration(): Omit<
     chainId: BASE_MAINNET_CHAIN_ID,
     rpcUrls: [rpcUrl],
     usdcAddress: BASE_MAINNET_USDC,
-    supportedAssets: [BASE_MAINNET_USDC, BASE_MAINNET_USDT],
+    supportedAssets: [BASE_MAINNET_USDC],
     explorerUrl,
     activation: "manual-required",
     configFingerprint: null,
