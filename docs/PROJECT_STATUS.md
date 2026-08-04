@@ -46,12 +46,12 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
   address; production charging remains gated on address-control reconciliation.
 - CDP Bazaar indexing is false in the live candidate response.
 - The Circle/Questbook page evidence does not verify a submitted proposal.
-- npm Trusted Publishing is not yet proven by a successful release. The
-  repository contains the intended `publish-sdk.yml` workflow and the GitHub
-  `npm-production` environment. Saving the matching npm Trusted Publisher
-  connection reached npm's required security-key challenge on 2026-08-04 and
-  remains owner-authentication gated. The next intentional version must still
-  validate OIDC publication and provenance.
+- npm Trusted Publishing is configured but is not yet proven by a successful
+  release. On 2026-08-04 npm confirmed the Trusted Publisher connection for
+  `lw22336599-rgb/ledgerguard`, workflow `publish-sdk.yml`, and environment
+  `npm-production`; those values exactly match the repository workflow. The
+  next intentional SDK version must still validate OIDC publication and npm
+  provenance before trusted publication is claimed.
 - There are no verified external integrations, paying customers, recurring
   revenue, or official endorsement in the checked evidence.
 - No proprietary threat-data flywheel, independent conformance program,

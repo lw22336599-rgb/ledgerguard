@@ -77,10 +77,11 @@ Every open item must link reproducible evidence before it can be checked off.
 
 - [x] Add the GitHub OIDC release workflow and `npm-production` environment for
   `lw22336599-rgb/ledgerguard`.
-- [ ] Complete npm account two-factor authentication to save the Trusted
-  Publisher connection for workflow `publish-sdk.yml`, then validate it with
-  the next intentional patch release. The form reached npm's security-key
-  challenge on 2026-08-04; no bypass was attempted.
+- [x] Save the npm Trusted Publisher connection for workflow
+  `publish-sdk.yml` and environment `npm-production`. npm confirmed the
+  connection on 2026-08-04 and its values match the repository workflow.
+- [ ] Validate OIDC publication and npm provenance with the next intentional
+  SDK patch release; do not create an empty release only to test the channel.
 - [ ] Revoke the previously exposed npm automation token after OIDC publishing
   succeeds; never record the token in the repository or project memory.
 - [ ] Publish the verified MCP metadata to the official MCP Registry.
