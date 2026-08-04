@@ -32,6 +32,12 @@ production SLA, globally consistent quota, tenant isolation, or durable evidence
 retention. Real-funds use remains out of scope until those controls and an
 independent security review exist.
 
+Local scripts that request a funded-wallet private key or submit a transaction
+must never run as part of tests, CI, deployment, or agent automation. They are
+not accepted release artifacts. Any real-fund action requires an explicit,
+action-time human confirmation of the exact network, asset, amount, recipient,
+and rollback plan.
+
 ## Reporting a vulnerability
 
 Use GitHub's private vulnerability reporting for this repository. Do not open

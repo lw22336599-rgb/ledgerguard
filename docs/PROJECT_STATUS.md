@@ -27,6 +27,15 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
 - There are no verified external integrations, paying customers, recurring
   revenue, or official endorsement in the checked evidence.
 
+## Local real-fund incident
+
+Untracked local files record a project-wallet Base Mainnet self-transfer run on
+2026-08-04. Read-only RPC checks confirmed that the five listed transaction
+receipts succeeded. The run was project-party testing, not an external customer
+payment, and its own record reports 1 USDC stranded after an ephemeral test key
+was lost. The real-fund scripts are quarantined by `.gitignore` and must not be
+run, committed, scheduled, or used as commercial evidence.
+
 ## Release drift
 
 At this snapshot, local `main` is ahead of GitHub `main`, contains unreviewed
