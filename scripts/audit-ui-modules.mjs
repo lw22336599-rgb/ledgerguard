@@ -335,7 +335,11 @@ try {
   if (await loadAccountButton.isEnabled()) {
     await interactionPage.locator("#developer-key").fill(`lg_test_${"a".repeat(32)}`);
     await loadAccountButton.click();
-    await interactionPage.locator("#developer-status strong").filter({ hasText: "Could not load account" }).waitFor();
+    // Production serverless storage can cold-start more slowly than page HTML.
+    await interactionPage
+      .locator("#developer-title")
+      .filter({ hasText: "Could not load account" })
+      .waitFor({ timeout: 60_000 });
     pass("Developer console reports an invalid API key");
   } else {
     const developerText = await interactionPage.locator("main").innerText();

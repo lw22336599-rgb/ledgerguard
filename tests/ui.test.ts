@@ -497,6 +497,14 @@ describe("browser demo experience", () => {
 
   });
 
+  it("uses a browser-valid API key pattern in the developer console", () => {
+    const html = developerConsoleHtml({
+      storageReady: true,
+      registrationEnabled: true,
+    });
+    expect(html).toContain('pattern="lg_test_[-A-Za-z0-9_]{32,80}"');
+  });
+
 
 
   it("shows a danger badge when developer self-service is unavailable", () => {
