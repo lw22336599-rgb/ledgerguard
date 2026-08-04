@@ -41,12 +41,20 @@ payment, and its own record reports 1 USDC stranded after an ephemeral test key
 was lost. The real-fund scripts are quarantined by `.gitignore` and must not be
 run, committed, scheduled, or used as commercial evidence.
 
-## Release drift
+## Release provenance
 
-At this snapshot, local `main` is ahead of GitHub `main`, contains unreviewed
-changes from multiple AI tools, and production does not prove it runs the local
-revision. Therefore the current release state is **HOLD** until the candidate is
-clean, reproducible, reviewed, pushed, and deployed with provenance.
+- GitHub `main` and the reviewed local code revision were synchronized at
+  `ddfde4467cff89a2d931b895cbed7721175f132a` on 2026-08-04.
+- GitHub CI run `30887364243` completed successfully for that revision.
+- Production smoke run `30887375752` completed successfully. Its Arc 5042
+  shadow observation was degraded and safely closed because an official or
+  independently verified Arc Mainnet RPC/observer was unavailable.
+- The local brand image `artifacts/brand/logo-selected-bold-lg.png` remains a
+  user-owned uncommitted change and is not part of the reviewed release.
+
+This removes the earlier source-control drift, but it does not change the
+product gate: public mainnet activation and commercial claims remain **HOLD**
+until the evidence in `docs/NEXT_STEPS.md` exists.
 
 ## Allowed public wording
 

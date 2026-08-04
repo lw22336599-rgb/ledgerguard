@@ -27,6 +27,28 @@ Until all unchecked items are evidenced, status is **HOLD for public mainnet act
 4. Publish a versioned, vendor-neutral risk vocabulary and conformance fixtures.
 5. Validate distribution through wallet, agent, merchant, and x402 integrations.
 
+## Asset expansion decision
+
+- Keep Arc routes USDC-only until an official Arc USDT deployment, exact asset
+  identity, decimals, transfer semantics, and facilitator compatibility are
+  independently verified.
+- Make the public control contract asset-neutral before adding another token:
+  use CAIP-2 network IDs, stable asset IDs/addresses, `amountAtomic`, and an
+  explicit decimals registry. Preserve the existing micro-USDC request fields
+  as a deprecated compatibility layer during migration.
+- Add USDT first as an **experimental adapter** on one verified network/token
+  pair. It may not be described as production-ready until preflight, signing,
+  settlement, replay protection, and evidence reconciliation all pass.
+- Do not expand to every chain. A new adapter graduates only after deterministic
+  fixtures, a complete test payment trace, and one independent integration.
+
+## Integration evidence rule
+
+Project-owned sample apps and scheduled tests may prove compatibility and
+reliability, but they do not count as independent developers, repeat external
+use, customer demand, or a paid commitment. Those gates require evidence from
+non-project parties.
+
 ## Moat gates
 
 - **Data flywheel:** no claim until opt-in records improve a measured benchmark against a fixed holdout set.
