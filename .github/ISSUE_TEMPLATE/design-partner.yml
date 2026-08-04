@@ -1,0 +1,57 @@
+name: Sandbox design partner
+description: Apply for a LedgerGuard transaction-control Sandbox session. Never include secrets or personal data.
+title: "[Design partner] "
+labels:
+  - design-partner
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This public form is for qualification only. Do not post private keys, seed phrases, API keys, signing authorizations, personal data, customer identifiers, or unredacted production logs.
+  - type: input
+    id: organization
+    attributes:
+      label: Public organization or project URL
+      placeholder: https://example.com
+    validations:
+      required: true
+  - type: dropdown
+    id: volume
+    attributes:
+      label: Monthly automated or semi-automated transaction actions
+      options:
+        - Less than 1,000
+        - 1,000 to 10,000
+        - 10,001 to 100,000
+        - More than 100,000
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: Intent, approval, simulation, or settlement control gap
+      description: Describe the workflow and the last failure or near miss without sensitive data.
+    validations:
+      required: true
+  - type: textarea
+    id: stack
+    attributes:
+      label: Current stack and Sandbox or testnet
+    validations:
+      required: true
+  - type: checkboxes
+    id: owners
+    attributes:
+      label: Pilot ownership
+      options:
+        - label: An engineering owner can attend a 30-minute Sandbox session.
+          required: true
+        - label: A budget owner can review a paid pilot if the Sandbox result passes.
+          required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Evidence and privacy
+      options:
+        - label: I will provide only de-identified samples and understand that project-owner tests and testnet assets are not commercial proof.
+          required: true

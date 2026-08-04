@@ -43,6 +43,13 @@ The protected Base Sepolia to Arc Testnet wallet flow and its exact acceptance
 evidence are defined in `docs/CROSSCHAIN_ACCEPTANCE.md`. That document does not
 lower these external-adoption gates.
 
+## Buyer-validation gate
+
+Buyer qualification, sample privacy boundaries, the 14-day repeat-use rule,
+and the paid-commitment test are defined in
+`docs/BUYER_VALIDATION_PROTOCOL.md`. Current audited counts are maintained in
+`docs/BUYER_EVIDENCE_REGISTER.md`.
+
 ## CDP Bazaar testnet gate
 
 `POST /v1/paid/base-sepolia/evidence` is a fail-closed CDP Bazaar candidate. Its

@@ -1,17 +1,35 @@
 const brandAssetVersion = "5";
 const brandMarkSrc = `/brand/logo-64.png?v=${brandAssetVersion}`;
+const canonicalOrigin = "https://ledgerguard-gules.vercel.app";
 
-const pageHead = (title: string, description: string) => `<!doctype html>
+const pageHead = (
+  title: string,
+  description: string,
+  path?: string,
+) => `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="${description}">
+  <meta name="application-name" content="LedgerGuard">
+  <meta name="theme-color" content="#07110d">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="LedgerGuard">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:image" content="${canonicalOrigin}/brand/logo-192.png?v=${brandAssetVersion}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@HuiLibaa">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"LedgerGuard","url":"${canonicalOrigin}","applicationCategory":"SecurityApplication","operatingSystem":"Web","description":"${description}","codeRepository":"https://github.com/lw22336599-rgb/ledgerguard","sameAs":["https://x.com/HuiLibaa"]}</script>
   <title>${title}</title>
+  ${path ? `<link rel="canonical" href="${canonicalOrigin}${path}">` : ""}
   <link rel="icon" href="/favicon.png?v=${brandAssetVersion}" type="image/png">
   <link rel="icon" href="/favicon.svg?v=${brandAssetVersion}" type="image/svg+xml">
   <link rel="shortcut icon" href="/favicon.ico?v=${brandAssetVersion}" type="image/png">
   <link rel="apple-touch-icon" href="/brand/logo-192.png?v=${brandAssetVersion}">
+  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/styles.css">
   <script defer src="/_vercel/insights/script.js"></script>
 </head>`;
@@ -28,8 +46,8 @@ export const guardRecipientDemoDefault =
 
 const footer = `<footer class="site-footer">
   <div class="footer-primary">LedgerGuard &middot; Payment intent safety &middot; Arc Testnet Guard Links</div>
-  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/pay">Pay a link</a> &middot; <a href="/payments">Check payments</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Wallet setup</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="https://testnet.arcscan.app" rel="noreferrer">ArcScan</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
-  <div class="footer-partners">Compatible with <a href="https://x402.org" rel="noreferrer">x402</a> &middot; <a href="https://www.circle.com/en/arc" rel="noreferrer">Arc</a> &middot; <a href="/canary">${baseMainnetLinkLabel}</a></div>
+  <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/pay">Pay a link</a> &middot; <a href="/payments">Check payments</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/pilot">Design partner pilot</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Wallet setup</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="https://testnet.arcscan.app" rel="noreferrer">ArcScan</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
+  <div class="footer-partners">Compatible with <a href="https://x402.org" rel="noreferrer">x402</a> &middot; <a href="https://www.arc.io/" rel="noreferrer">Arc</a> &middot; <a href="/canary">${baseMainnetLinkLabel}</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
 </footer>`;
 
@@ -388,6 +406,7 @@ export const payHtml = `${pageHead(
 export const portalHtml = `${pageHead(
   "LedgerGuard | Payment intent safety",
   "Non-custodial stablecoin payment intent safety on Arc Testnet. Review amount, recipient, and purpose before you sign.",
+  "/",
 )}
 <body>
   <main>
@@ -493,6 +512,7 @@ export const integrationsHtml = `${pageHead(
           <li>Open the <code>Independent integration evidence</code> GitHub issue in the repository.</li>
         </ol>
         <p class="muted">Current public verified integrations: <strong>0</strong>. Testnet usage is free and has no financial value.</p>
+        <p><a href="/pilot">Apply for the design partner pilot</a></p>
       </div>
       <div>
         <p class="step">RECOMMENDED STACK</p>
@@ -507,6 +527,148 @@ export const integrationsHtml = `${pageHead(
         <a href="/docs/integration-stack">Read INTEGRATION_STACK.md</a>
       </div>
     </section>
+    ${footer}
+  </main>${portalPageScripts()}
+</body>
+</html>`;
+
+export const pilotHtml = `${pageHead(
+  "LedgerGuard | Design partner pilot",
+  "A bounded Sandbox pilot for teams that automate stablecoin payments and need reproducible pre-sign intent checks and post-settlement evidence.",
+  "/pilot",
+)}
+<body>
+  <main>
+    ${portalNavHtml("SANDBOX PILOT")}
+    <section class="subhero">
+      <p class="eyebrow">DESIGN PARTNER VALIDATION &middot; NO REAL FUNDS REQUIRED</p>
+      <h1 class="compact">Prove one payment control gap in 30 minutes.</h1>
+      <p class="lead">This pilot is for teams running automated or semi-automated stablecoin transactions. We compare a declared payment intent with unsigned calldata before signing, then reconcile the finalized transaction into portable evidence.</p>
+    </section>
+    <section class="panel developer-panel">
+      <div>
+        <p class="step">A QUALIFIED PILOT</p>
+        <h2>Who should apply</h2>
+        <ul>
+          <li>Your team operates or is preparing at least 1,000 automated transaction actions per month.</li>
+          <li>You own an agent, wallet, payment API, checkout, treasury, or transaction automation workflow.</li>
+          <li>You can describe a real intent, approval, simulation, or settlement-reconciliation gap.</li>
+          <li>An engineering owner can run a Sandbox request and a budget owner can discuss a paid continuation.</li>
+        </ul>
+      </div>
+      <div>
+        <p class="step">30-MINUTE WORKING SESSION</p>
+        <h2>What we verify</h2>
+        <ol>
+          <li>Review one de-identified historical transaction or policy sample.</li>
+          <li>Run preflight and evidence in Sandbox with test assets only.</li>
+          <li>Record reproducible request IDs and the missing or useful decision signal.</li>
+          <li>Repeat the same workflow after seven days if it delivered value.</li>
+        </ol>
+      </div>
+    </section>
+    <section class="notice"><strong>Privacy boundary:</strong> never send private keys, seed phrases, API secrets, personal data, customer identifiers, or real-fund signing authority. Replace addresses and transaction hashes when a public testnet equivalent is sufficient.</section>
+    <section class="panel">
+      <p class="step">START</p>
+      <h2>Request a pilot interview</h2>
+      <p class="muted">Email the project with your public product URL, monthly transaction-action range, current payment rail, and one sentence describing the control gap. Or open the public integration form if the evidence is safe to disclose.</p>
+      <div class="links bottom-links">
+        <a href="mailto:lw22336599@gmail.com?subject=LedgerGuard%20design%20partner%20pilot&body=Public%20product%20URL%3A%0AMonthly%20transaction-action%20range%3A%0ACurrent%20payment%20rail%3A%0AControl%20gap%3A%0AEngineering%20owner%3A%0A">Request interview by email</a>
+        <a href="https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=integration-test.yml" rel="noreferrer">Submit public integration evidence</a>
+        <a href="/docs">Review the API</a>
+      </div>
+      <p class="muted">Current independently verified results: 0 interviews, 0 private samples accepted, 0 Sandbox integrations, 0 repeat users, and 0 paid commitments. We update these counts only from attributable external evidence.</p>
+    </section>
+    ${footer}
+  </main>${portalPageScripts()}
+</body>
+</html>`;
+
+export const catalogHtml = `${pageHead(
+  "LedgerGuard | Pricing",
+  "Free open-source core and Sandbox. Paid tiers start at the Developer plan. Prices are targets under market validation, not confirmed charges.",
+  "/catalog",
+)}
+<body>
+  <main>
+    ${portalNavHtml("PRICING")}
+    <section class="subhero">
+      <p class="eyebrow">PRICING &middot; TARGETS UNDER VALIDATION</p>
+      <h1 class="compact">Platform fee + protected operations + overage.</h1>
+      <p class="lead">The open-source core and Sandbox are free. Production plans are paid per month with a protected operations allowance and a metered overage. Prices below are planning targets, not confirmed charges — they will be finalized with pilot customers.</p>
+    </section>
+    <section class="panel developer-panel">
+      <div>
+        <p class="step">FREE</p>
+        <h2>Open Source</h2>
+        <ul>
+          <li>Local verification engine (MIT repository)</li>
+          <li>Deterministic test vectors and receipt verification</li>
+          <li>CLI / SDK / MCP interfaces</li>
+          <li>No account required</li>
+        </ul>
+        <p class="muted">$0</p>
+      </div>
+      <div>
+        <p class="step">FREE</p>
+        <h2>Sandbox</h2>
+        <ul>
+          <li>1 project</li>
+          <li>500 protected operations / month</li>
+          <li>Testnet and shadow networks</li>
+          <li>7-day log retention, no SLA</li>
+        </ul>
+        <p class="muted">$0</p>
+      </div>
+    </section>
+    <section class="panel developer-panel">
+      <div>
+        <p class="step">PAID</p>
+        <h2>Developer</h2>
+        <ul>
+          <li>1 production project</li>
+          <li>10,000 operations / month included</li>
+          <li>Signed decision receipts, 30-day logs</li>
+          <li>Overage: $0.01 / operation</li>
+        </ul>
+        <p class="muted">$99 / month (target)</p>
+      </div>
+      <div>
+        <p class="step">PAID</p>
+        <h2>Growth</h2>
+        <ul>
+          <li>5 projects</li>
+          <li>100,000 operations / month included</li>
+          <li>Team policies, webhooks, 90-day logs</li>
+          <li>Overage: $0.005 / operation</li>
+        </ul>
+        <p class="muted">$499 / month (target)</p>
+      </div>
+    </section>
+    <section class="panel developer-panel">
+      <div>
+        <p class="step">PAID</p>
+        <h2>Business</h2>
+        <ul>
+          <li>500,000 operations / month included</li>
+          <li>Audit exports, custom retention, priority support</li>
+          <li>Overage: $0.003 / operation</li>
+        </ul>
+        <p class="muted">$2,500 / month (target)</p>
+      </div>
+      <div>
+        <p class="step">PAID</p>
+        <h2>Enterprise / OEM</h2>
+        <ul>
+          <li>SLA, dedicated adapters</li>
+          <li>Private data rules, white-label</li>
+          <li>Contract-based</li>
+        </ul>
+        <p class="muted">$5,000 / month start (target)</p>
+      </div>
+    </section>
+    <section class="notice"><strong>Honest boundary:</strong> LedgerGuard has not yet confirmed any paid customer. These tiers are planning targets for market validation, not advertised charges, and will be revised with pilot feedback.</section>
+    <p class="muted" style="margin-top: 1rem"><a href="/pilot">Apply for the design partner pilot</a> &middot; <a href="/docs">API docs</a></p>
     ${footer}
   </main>${portalPageScripts()}
 </body>

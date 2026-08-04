@@ -7,7 +7,10 @@ import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
 import { getAddress, type Address, type Hex } from "viem";
-import { getNetworkRegistry, requireEnabledNetwork } from "./config/networks.js";
+import {
+  getNetworkRegistry,
+  requireEnabledNetwork,
+} from "./config/networks.js";
 import { getPublicBaseUrl } from "./config/public.js";
 import {
   BASE_MAINNET_EVIDENCE_PATH,
@@ -112,6 +115,8 @@ import {
   payHtml,
   integrationsHtml,
   integrationStackHtml,
+  pilotHtml,
+  catalogHtml,
 } from "./ui.js";
 import { guardLinkBundle } from "./generated/guard-link-bundle.js";
 import {
@@ -216,6 +221,66 @@ app.use(
 );
 
 app.get("/", (context) => context.html(portalHtml));
+app.get("/robots.txt", (context) =>
+  context.text(
+    `User-agent: *\nAllow: /\nDisallow: /developer\nDisallow: /canary\nSitemap: ${getPublicBaseUrl()}/sitemap.xml\n`,
+    200,
+    { "Cache-Control": "public, max-age=3600" },
+  ),
+);
+app.get("/sitemap.xml", (context) => {
+  const paths = [
+    "/",
+    "/about",
+    "/docs",
+    "/integrations",
+    "/privacy",
+    "/terms",
+    "/status",
+    "/test",
+    "/pilot",
+  ];
+  const urls = paths
+    .map((path) => `  <url><loc>${getPublicBaseUrl()}${path}</loc></url>`)
+    .join("\n");
+  return context.body(
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`,
+    200,
+    {
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
+    },
+  );
+});
+app.get("/manifest.webmanifest", (context) =>
+  context.json(
+    {
+      name: "LedgerGuard",
+      short_name: "LedgerGuard",
+      description:
+        "Non-custodial payment intent safety for people, apps, and AI agents.",
+      start_url: "/",
+      display: "standalone",
+      background_color: "#07110d",
+      theme_color: "#07110d",
+      icons: [
+        { src: "/brand/logo-192.png", sizes: "192x192", type: "image/png" },
+      ],
+    },
+    200,
+    { "Cache-Control": "public, max-age=3600" },
+  ),
+);
+app.get("/.well-known/security.txt", (context) =>
+  context.text(
+    `Contact: mailto:lw22336599@gmail.com\nContact: https://github.com/lw22336599-rgb/ledgerguard/security/advisories/new\nExpires: 2027-08-04T00:00:00.000Z\nPreferred-Languages: en, zh\nCanonical: ${getPublicBaseUrl()}/.well-known/security.txt\nPolicy: ${getPublicBaseUrl()}/docs/integration\n`,
+    200,
+    {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
+    },
+  ),
+);
 for (const [from, to] of [
   ["/protect", "/test"],
   ["/meter", "/developer"],
@@ -337,6 +402,8 @@ app.get("/privacy", (context) => context.html(privacyHtml));
 app.get("/terms", (context) => context.html(termsHtml));
 app.get("/about", (context) => context.html(aboutHtml));
 app.get("/integrations", (context) => context.html(integrationsHtml));
+app.get("/pilot", (context) => context.html(pilotHtml));
+app.get("/catalog", (context) => context.html(catalogHtml));
 app.get("/docs/integration-stack", (context) =>
   context.html(integrationStackHtml),
 );
@@ -361,16 +428,14 @@ app.get("/docs/integration", (context) =>
 );
 app.get("/test", (context) =>
   context.html(
-    testerHtml(
-      getConfiguredX402PriceMicroUsdc(),
-      getConfiguredSellerAddress(),
-    ),
+    testerHtml(getConfiguredX402PriceMicroUsdc(), getConfiguredSellerAddress()),
   ),
 );
 app.get("/status", async (context) => {
   let readiness:
-    | { ready: true; chainId: number; blockNumber: string }
-    | { ready: false } = { ready: false };
+    { ready: true; chainId: number; blockNumber: string } | { ready: false } = {
+    ready: false,
+  };
   try {
     const network = requireEnabledNetwork("arcTestnet");
     const probe = await probeRpc(network.rpcUrls);
@@ -429,7 +494,9 @@ app.get("/styles.css", (context) =>
   }),
 );
 app.get("/app.js", (context) =>
-  context.body(demoJs, 200, { "Content-Type": "text/javascript; charset=utf-8" }),
+  context.body(demoJs, 200, {
+    "Content-Type": "text/javascript; charset=utf-8",
+  }),
 );
 app.get("/developer.js", (context) =>
   context.body(`${developerConsoleJs}\n${developerShadowJs}`, 200, {
@@ -519,13 +586,10 @@ app.get("/.well-known/ledgerguard.json", (context) => {
       x: "https://x.com/HuiLibaa",
       handle: "@HuiLibaa",
     },
-    support:
-      "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
+    support: "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     custody: "none",
     signing: "client-side-only",
-    mainnet: commercialCandidate.realFundsEnabled
-      ? "base-canary"
-      : "disabled",
+    mainnet: commercialCandidate.realFundsEnabled ? "base-canary" : "disabled",
     arcMainnet: "official-parameters-unavailable",
     baseMainnet: commercialCandidate.realFundsEnabled
       ? "canary-enabled"
@@ -627,8 +691,7 @@ app.get("/v1/meta", (context) =>
     commercialCandidate: "/v1/commercial-candidate",
     tenantApi:
       getTenantStore() && selfServiceEnabled() ? "enabled" : "disabled",
-    support:
-      "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
+    support: "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     requestTracking: "X-LedgerGuard-Request-Id",
   }),
 );
@@ -802,10 +865,7 @@ app.post("/v1/developer/keys/rotate", async (context) => {
   const store = getTenantStore();
   if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
   try {
-    const apiKey = await store.rotateKey(
-      auth.tenant,
-      auth.apiKey,
-    );
+    const apiKey = await store.rotateKey(auth.tenant, auth.apiKey);
     return context.json({
       apiKey,
       apiKeyNotice:
@@ -832,11 +892,7 @@ app.post("/v1/developer/preflight", async (context) => {
   if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
   const requestId = context.get("requestId") as string;
   try {
-    const usage = await store.recordUsage(
-      auth.tenant,
-      "preflight",
-      requestId,
-    );
+    const usage = await store.recordUsage(auth.tenant, "preflight", requestId);
     const result = await runPreflight(parsed.data);
     void notifyDeveloperWebhook(auth.tenant, {
       type: "preflight.completed",
@@ -850,10 +906,7 @@ app.post("/v1/developer/preflight", async (context) => {
     return context.json({ ...result, usage });
   } catch (error) {
     if (error instanceof QuotaExceededError) {
-      return context.json(
-        { error: "QUOTA_EXCEEDED", usage: error.usage },
-        429,
-      );
+      return context.json({ error: "QUOTA_EXCEEDED", usage: error.usage }, 429);
     }
     if (
       error instanceof Error &&
@@ -905,10 +958,7 @@ app.post("/v1/developer/shadow", async (context) => {
     });
   } catch (error) {
     if (error instanceof QuotaExceededError) {
-      return context.json(
-        { error: "QUOTA_EXCEEDED", usage: error.usage },
-        429,
-      );
+      return context.json({ error: "QUOTA_EXCEEDED", usage: error.usage }, 429);
     }
     if (
       error instanceof Error &&
@@ -1017,7 +1067,8 @@ app.get("/ready", async (context) => {
   } catch (error) {
     console.error("Readiness RPC probe failed", {
       name: error instanceof Error ? error.name : "UnknownError",
-      message: error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+      message:
+        error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
     });
     return context.json(
       {
@@ -1260,7 +1311,8 @@ app.get("/v1/paid/network-risk", async (context) => {
     }
     console.error("x402 request failed", {
       name: error instanceof Error ? error.name : "UnknownError",
-      message: error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
+      message:
+        error instanceof Error ? error.message.slice(0, 500) : "Unknown error",
     });
     return context.json(
       {
@@ -1423,7 +1475,9 @@ app.post("/v1/paid/evidence", async (context) => {
 app.get("/openapi.json", (context) => context.json(openApiDocument));
 
 app.post("/v1/preflight", async (context) => {
-  const parsed = preflightSchema.safeParse(await context.req.json().catch(() => null));
+  const parsed = preflightSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
   if (!parsed.success) {
     return context.json(
       { error: "INVALID_REQUEST", issues: parsed.error.issues },
@@ -1447,7 +1501,9 @@ app.post("/v1/preflight", async (context) => {
 });
 
 app.post("/v1/can-sign", async (context) => {
-  const parsed = canSignSchema.safeParse(await context.req.json().catch(() => null));
+  const parsed = canSignSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
   if (!parsed.success) {
     return context.json(
       { error: "INVALID_REQUEST", issues: parsed.error.issues },
@@ -1483,12 +1539,10 @@ app.post("/v1/can-sign", async (context) => {
 
 app.get("/v1/network-adapters", (context) =>
   context.json({
-    adapters: listNetworkAdapters().map(
-      ({ rpcUrls, ...adapter }) => ({
-        ...adapter,
-        rpcConfigured: rpcUrls.length > 0,
-      }),
-    ),
+    adapters: listNetworkAdapters().map(({ rpcUrls, ...adapter }) => ({
+      ...adapter,
+      rpcConfigured: rpcUrls.length > 0,
+    })),
   }),
 );
 
@@ -1528,7 +1582,9 @@ app.post("/v1/cctp/evidence", async (context) => {
 });
 
 app.post("/v1/evidence", async (context) => {
-  const parsed = evidenceSchema.safeParse(await context.req.json().catch(() => null));
+  const parsed = evidenceSchema.safeParse(
+    await context.req.json().catch(() => null),
+  );
   if (!parsed.success) {
     return context.json(
       { error: "INVALID_REQUEST", issues: parsed.error.issues },
@@ -1548,7 +1604,10 @@ app.post("/v1/evidence", async (context) => {
     }
     if (message.includes("disabled")) {
       return context.json(
-        { error: "NETWORK_DISABLED", message: "Requested network is disabled." },
+        {
+          error: "NETWORK_DISABLED",
+          message: "Requested network is disabled.",
+        },
         503,
       );
     }

@@ -35,6 +35,57 @@ describe("HTTP API", () => {
     expect(meta.headers.get("cache-control")).toBe("no-store");
   });
 
+  it("publishes crawler, install, and security ownership signals", async () => {
+    const robots = await app.request("/robots.txt");
+    expect(robots.status).toBe(200);
+    expect(await robots.text()).toContain(
+      "Sitemap: https://ledgerguard-gules.vercel.app/sitemap.xml",
+    );
+
+    const sitemap = await app.request("/sitemap.xml");
+    expect(sitemap.status).toBe(200);
+    expect(sitemap.headers.get("content-type")).toContain("application/xml");
+    const sitemapXml = await sitemap.text();
+    expect(sitemapXml).toContain(
+      "<loc>https://ledgerguard-gules.vercel.app/about</loc>",
+    );
+    expect(sitemapXml).toContain(
+      "<loc>https://ledgerguard-gules.vercel.app/pilot</loc>",
+    );
+
+    const manifest = await app.request("/manifest.webmanifest");
+    expect(manifest.status).toBe(200);
+    expect(await manifest.json()).toMatchObject({
+      name: "LedgerGuard",
+      short_name: "LedgerGuard",
+      start_url: "/",
+    });
+
+    const security = await app.request("/.well-known/security.txt");
+    expect(security.status).toBe(200);
+    const securityText = await security.text();
+    expect(securityText).toContain("mailto:lw22336599@gmail.com");
+    expect(securityText).toContain("/security/advisories/new");
+
+    const home = await (await app.request("/")).text();
+    expect(home).toContain(
+      'rel="canonical" href="https://ledgerguard-gules.vercel.app/"',
+    );
+    expect(home).toContain('rel="manifest" href="/manifest.webmanifest"');
+    expect(home).toContain('property="og:site_name" content="LedgerGuard"');
+    expect(home).toContain('"@type":"SoftwareApplication"');
+  });
+
+  it("publishes an honest, privacy-bounded design partner pilot", async () => {
+    const response = await app.request("/pilot");
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("Prove one payment control gap in 30 minutes");
+    expect(html).toContain("never send private keys");
+    expect(html).toContain("0 Sandbox integrations");
+    expect(html).toContain("LedgerGuard%20design%20partner%20pilot");
+  });
+
   it("serves human-readable docs, catalog, and status pages", async () => {
     for (const path of [
       "/",
@@ -74,7 +125,9 @@ describe("HTTP API", () => {
   it("uses LedgerGuard as the single public entry for Guard Links and payments", async () => {
     const testPage = await app.request("/test");
     expect(testPage.status).toBe(200);
-    expect(await testPage.text()).toContain("Complete the test flow end to end");
+    expect(await testPage.text()).toContain(
+      "Complete the test flow end to end",
+    );
 
     const payments = await app.request("/payments");
     const paymentsHtml = await payments.text();
@@ -85,7 +138,9 @@ describe("HTTP API", () => {
   });
 
   it("rejects malformed Guard Links and publishes protocol boundaries", async () => {
-    const guard = await app.request("/guard?amount=1&purpose=Missing%20recipient");
+    const guard = await app.request(
+      "/guard?amount=1&purpose=Missing%20recipient",
+    );
     expect(guard.status).toBe(400);
     expect(await guard.json()).toMatchObject({
       error: "INVALID_GUARD_LINK",
@@ -110,7 +165,11 @@ describe("HTTP API", () => {
   });
 
   it("rejects out-of-limit CCTP evidence and keeps the API documented", async () => {
-    for (const path of ["/wallet.js", "/site-nav.js", "/guard-builder-wallet.js"]) {
+    for (const path of [
+      "/wallet.js",
+      "/site-nav.js",
+      "/guard-builder-wallet.js",
+    ]) {
       const script = await app.request(path);
       expect(script.status).toBe(200);
       expect(script.headers.get("content-type")).toContain("javascript");
@@ -166,7 +225,9 @@ describe("HTTP API", () => {
     expect(body.url).toContain("/guard?");
     expect(body.url).toContain("issuer=Example+Agent");
 
-    const receipt = await app.request(new URL(body.url).pathname + new URL(body.url).search);
+    const receipt = await app.request(
+      new URL(body.url).pathname + new URL(body.url).search,
+    );
     expect(receipt.status).toBe(200);
     const html = await receipt.text();
     expect(html).toContain("Example Agent");
@@ -277,12 +338,8 @@ describe("HTTP API", () => {
         }),
       ]),
     );
-    expect(body.humanDocs).toBe(
-      "https://ledgerguard-gules.vercel.app/docs",
-    );
-    expect(body.testing).toBe(
-      "https://ledgerguard-gules.vercel.app/test",
-    );
+    expect(body.humanDocs).toBe("https://ledgerguard-gules.vercel.app/docs");
+    expect(body.testing).toBe("https://ledgerguard-gules.vercel.app/test");
     expect(body.support).toBe(
       "https://github.com/lw22336599-rgb/ledgerguard/issues/new/choose",
     );
@@ -311,13 +368,14 @@ describe("HTTP API", () => {
   });
 
   it("reports Arc RPC readiness and renders the live status", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(
-      async () =>
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async () =>
         Response.json([
           { jsonrpc: "2.0", id: 1, result: "0x4cef52" },
           { jsonrpc: "2.0", id: 2, result: "0x64" },
         ]),
-    );
+      );
     const ready = await app.request("/ready");
     expect(ready.status).toBe(200);
     expect(await ready.json()).toMatchObject({
@@ -438,9 +496,9 @@ describe("HTTP API", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.decision).toBe("REVIEW");
-    expect(body.findings.map((finding: { code: string }) => finding.code)).toContain(
-      "SIMULATION_REQUIRED",
-    );
+    expect(
+      body.findings.map((finding: { code: string }) => finding.code),
+    ).toContain("SIMULATION_REQUIRED");
   });
 
   it("rejects invalid JSON, oversized bodies, and unknown routes", async () => {
