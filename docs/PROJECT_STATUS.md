@@ -52,14 +52,18 @@ must never receive assets. The tracked helper is now read-only; no repository
 script may sign, fund, transfer, reconstruct keys, or be scheduled. These tests
 are project-party engineering evidence, not external adoption or revenue.
 
-## Current release candidate
+## Release provenance
 
-- The candidate passes 194 automated tests, conformance tests, TypeScript
+- Code-bearing release commit `84db24f3eaf5ae6b8062bdee6d39728a967722d9`
+  passes GitHub CI run `30911222063` and production smoke run `30911365837`.
+- The release passes 194 automated tests, conformance tests, TypeScript
   checking, production build, SDK clean-room installation, local smoke, and
   production-dependency audit with zero reported vulnerabilities.
 - The browser acceptance suite passes 31 checks with zero reported UI issues.
-- The release is not considered synchronized until the candidate commit passes
-  GitHub CI and the resulting production deployment passes production smoke.
+- Production smoke confirms Arc Testnet readiness, public Sandbox pricing,
+  fail-closed mainnet controls, and the x402 test challenge. Arc 5042 shadow is
+  degraded and safely closed because its configured sources do not meet the
+  independent-source agreement threshold.
 
 These checks do not change the product gate: public mainnet activation and
 commercial claims remain **HOLD** until the evidence in `docs/NEXT_STEPS.md`
