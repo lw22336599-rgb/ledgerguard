@@ -49,11 +49,11 @@ are project-party engineering evidence, not external adoption or revenue.
 
 ## Release provenance
 
-- GitHub `main` and the reviewed local code revision were synchronized at
-  `0875f8659516ee23cb19e8ec1742d2bdb8590c6e` before the current remediation
-  batch on 2026-08-04.
-- GitHub CI run `30887364243` completed successfully for that revision.
-- Production smoke run `30887375752` completed successfully. Its Arc 5042
+- GitHub `main`, the reviewed local code, and the production deployment were
+  synchronized at remediation revision
+  `0889384e380b8b41b8886e4fd0f93ad162476706` on 2026-08-04.
+- GitHub CI run `30893216063` completed successfully for that revision.
+- Production smoke run `30893461298` completed successfully. Its Arc 5042
   shadow observation was degraded and safely closed because an official or
   independently verified Arc Mainnet RPC/observer was unavailable.
 - The local brand image `artifacts/brand/logo-selected-bold-lg.png` remains a
