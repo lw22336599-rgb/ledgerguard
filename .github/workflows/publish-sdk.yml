@@ -1,0 +1,49 @@
+name: Publish SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact SDK version from packages/sdk/package.json
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-sdk
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm-production
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Install a Trusted Publishing compatible npm CLI
+        run: npm install --global npm@latest
+      - name: Verify requested version
+        shell: bash
+        run: |
+          package_version=$(node -p "require('./packages/sdk/package.json').version")
+          if [[ "$package_version" != "${{ inputs.version }}" ]]; then
+            echo "Requested version ${{ inputs.version }} does not match package version $package_version"
+            exit 1
+          fi
+          if npm view "@ledgerguard1/sdk@$package_version" version >/dev/null 2>&1; then
+            echo "@ledgerguard1/sdk@$package_version already exists"
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run verify:release
+      - name: Publish with npm Trusted Publishing
+        working-directory: packages/sdk
+        run: npm publish --access public

@@ -10,9 +10,12 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
 - The Base Mainnet paid evidence endpoint currently returns an x402 `402`
   challenge and the production-candidate endpoint reports its configuration
   gates enabled.
-- npm package `@ledgerguard1/sdk` version `0.1.0` exists.
-- The `0.1.1` SDK candidate passes package dry-run and clean-room installation,
-  but npm authentication is not available in the current release environment.
+- npm package `@ledgerguard1/sdk` version `0.1.1` is publicly available. A
+  clean temporary project installed it and imported `LedgerGuardClient` on
+  2026-08-04.
+- GitHub release `sdk-v0.1.1` points to the public package. Version `0.1.1` was
+  published manually and therefore does not prove the new OIDC Trusted
+  Publishing path or carry that path's provenance evidence.
 - Official MCP Registry metadata in `server.json` passes the Registry publisher
   validation. It has not been published because Registry login and acceptance
   of its terms remain owner-controlled actions.
@@ -35,7 +38,10 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
   and accounting ownership are confirmed.
 - CDP Bazaar indexing is false in the live candidate response.
 - The Circle/Questbook page evidence does not verify a submitted proposal.
-- npm version `0.1.1` was not published by the recorded automation.
+- npm Trusted Publishing is not yet proven by a successful release. The
+  repository contains the intended `publish-sdk.yml` workflow, but npm package
+  settings and the GitHub `npm-production` environment must match it before the
+  next version can validate OIDC publication.
 - There are no verified external integrations, paying customers, recurring
   revenue, or official endorsement in the checked evidence.
 - No proprietary threat-data flywheel, independent conformance program,
@@ -64,6 +70,11 @@ are project-party engineering evidence, not external adoption or revenue.
   fail-closed mainnet controls, and the x402 test challenge. Arc 5042 shadow is
   degraded and safely closed because its configured sources do not meet the
   independent-source agreement threshold.
+
+- Public release evidence: npm `@ledgerguard1/sdk@0.1.1`, GitHub release
+  `sdk-v0.1.1`, and repository commit `99c9192` recording clean-room
+  installation. Download counts, clone counts, and project-party checks are not
+  external-adoption evidence.
 
 These checks do not change the product gate: public mainnet activation and
 commercial claims remain **HOLD** until the evidence in `docs/NEXT_STEPS.md`

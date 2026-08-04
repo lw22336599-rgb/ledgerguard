@@ -111,7 +111,7 @@ export class LedgerGuardClient {
   private async post<T>(path: string, body: unknown): Promise<T> {
     const headers: Record<string, string> = {
       "content-type": "application/json",
-      "x-ledgerguard-client": "ledgerguard-ts/0.1.0",
+      "x-ledgerguard-client": "ledgerguard-ts/0.1.1",
     };
     if (this.apiKey) headers.authorization = `Bearer ${this.apiKey}`;
     if (this.integration) {

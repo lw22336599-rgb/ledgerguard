@@ -2,13 +2,44 @@
 
 This guide publishes the standalone SDK from `packages/sdk/`. The monorepo root export (`ledgerguard/sdk`) stays private; npm consumers install `@ledgerguard1/sdk`.
 
+## Current release state
+
+- Public package: `@ledgerguard1/sdk@0.1.1`
+- Public GitHub release: `sdk-v0.1.1`
+- Clean-room installation: verified 2026-08-04
+- Release method for `0.1.1`: manual token publication
+- Required method for the next release: GitHub Actions OIDC Trusted Publishing
+
+The manual token path is retained only as historical evidence. Do not publish a
+new version with a long-lived token.
+
 ## Prerequisites
 
 1. **npm account** `ledgerguard` with access to the `@ledgerguard1` org (created on npmjs.com).
 2. **2FA** enabled on npm (recommended for scoped packages).
 3. Clean git tree for the release commit (optional but recommended).
 
-## One-time setup
+## One-time Trusted Publishing setup
+
+1. Open the npm package settings for `@ledgerguard1/sdk`.
+2. Add a GitHub Actions trusted publisher with these exact values:
+
+   - organization or user: `lw22336599-rgb`
+   - repository: `ledgerguard`
+   - workflow filename: `publish-sdk.yml`
+   - environment: `npm-production`
+   - allowed action: `npm publish`
+
+3. Create the GitHub environment `npm-production` and require an approval before
+   deployment when the account plan supports it.
+4. After one OIDC release succeeds, set package publishing access to require 2FA
+   and disallow tokens, then revoke obsolete automation tokens.
+
+The workflow uses a GitHub-hosted runner, Node 24, a current npm CLI,
+`id-token: write`, a version equality check, full release verification, and no
+long-lived npm secret.
+
+## Legacy manual setup (do not use for a new release)
 
 ```bash
 npm login
@@ -30,7 +61,7 @@ npm.cmd run publish:sdk
 
 Or from repo root: `scripts\npm-win.cmd login --auth-type=web`
 
-### 2FA required to publish
+### Legacy 2FA and token publishing
 
 npm rejects publish when account 2FA is disabled. Either:
 
@@ -47,9 +78,20 @@ npm run test:sdk-pack
 
 `test:sdk-pack` runs `npm pack`, installs the `.tgz` into a temp project, and imports SDK exports. **Verified locally on 2026-07-31.**
 
-## Publish
+## Publish the next version
 
-### Automated (from repo root)
+1. Bump `packages/sdk/package.json` to a new patch version.
+2. Run `npm run verify:release` locally.
+3. Merge the reviewed change into `main`.
+4. In GitHub Actions, run **Publish SDK** and enter the exact package version.
+5. Approve the `npm-production` environment deployment.
+6. Verify the npm version, provenance, clean installation, release notes, and
+   repository status before announcing it.
+
+The workflow refuses to publish when the requested version differs from
+`package.json` or already exists in the npm registry.
+
+### Legacy automated command (historical only)
 
 ```bash
 npm login
@@ -77,20 +119,14 @@ node -e "import('@ledgerguard1/sdk').then(m => console.log(Object.keys(m)))"
 ## Version bumps
 
 1. Edit `version` in `packages/sdk/package.json` (semver).
-2. Commit: `Release @ledgerguard1/sdk v0.1.1`.
-3. Tag (optional): `git tag sdk-v0.1.1`.
+2. Commit: `Release @ledgerguard1/sdk v<version>`.
+3. Tag (optional): `git tag sdk-v<version>`.
 4. Run publish steps above.
 
-## CI publish (optional, later)
+## CI publish
 
-Use an npm **Granular Access Token** with publish scope, stored as `NPM_TOKEN`:
-
-```yaml
-- run: npm publish --access public
-  working-directory: packages/sdk
-  env:
-    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-```
+The authoritative workflow is `.github/workflows/publish-sdk.yml`. It uses npm
+Trusted Publishing and must not receive `NPM_TOKEN`.
 
 ## Troubleshooting
 
@@ -101,10 +137,9 @@ Use an npm **Granular Access Token** with publish scope, stored as `NPM_TOKEN`:
 | `404` on install before first publish | Normal — package does not exist yet |
 | Empty `dist/` | Run `npm run build` in `packages/sdk` |
 
-## Current status
+## Current gate
 
-- Registry version: `@ledgerguard1/sdk@0.1.0`
-- Release candidate: `@ledgerguard1/sdk@0.1.1`
-- npm org: `@ledgerguard1` (owner: `ledgerguard`)
-- npm registry: **HOLD** until `npm whoami` succeeds on this machine
-- Local `npm pack --dry-run`: **passed** for `0.1.1` on 2026-08-04; package contains only README, package metadata, JavaScript, and declarations
+Version `0.1.1` is public and installable. The next version remains **HOLD**
+until npm Trusted Publisher settings and the GitHub `npm-production`
+environment exactly match the workflow. A successful `0.1.2` or later OIDC
+release is required before claiming trusted publication or provenance.

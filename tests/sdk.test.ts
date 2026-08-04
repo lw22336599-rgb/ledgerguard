@@ -55,7 +55,7 @@ describe("LedgerGuard SDK", () => {
         method: "POST",
         headers: expect.objectContaining({
           authorization: "Bearer lg_test_example",
-          "x-ledgerguard-client": "ledgerguard-ts/0.1.0",
+          "x-ledgerguard-client": "ledgerguard-ts/0.1.1",
         }),
       }),
     );
