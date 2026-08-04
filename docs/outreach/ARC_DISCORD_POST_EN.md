@@ -16,7 +16,7 @@ Hi Arc builders — sharing a non-custodial USDC payment safety demo on **Arc Te
 
 No custody · no private keys · honest preflight copy (not “verified merchant”).
 
-Guard Links are **Arc Testnet only** (test assets). Base Mainnet x402 is a separate bounded demo at `/canary`.
+Guard Links are **Arc Testnet only** (test assets). Base Mainnet x402 is a disabled-by-default canary code path; the public `/canary` route remains closed.
 
 **Looking for:** 1 external team to integrate and file public evidence (request IDs + repo link):  
 https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=integration-test.yml

@@ -21,3 +21,15 @@ Working session: `docs/SANDBOX_PILOT.md`
 Public application: `/pilot`
 
 Current decision: `GO_MARKET_VALIDATION / HOLD_FEATURE_BUILD / HOLD_MAINNET_MONEY`.
+
+## Outreach activity (not evidence-gate credit)
+
+As of 2026-08-04:
+
+- 21 personalized initial messages were sent to candidate organizations;
+- 1 address (`support@openfort.xyz`) produced a confirmed delivery failure;
+- 0 genuine external replies or completed interviews are verified;
+- follow-up drafts are not sent messages and do not count as activity or demand.
+
+These figures document operating activity only. They do not change any
+`Verified` count in the table above.

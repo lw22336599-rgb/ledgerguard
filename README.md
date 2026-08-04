@@ -38,7 +38,7 @@ Official X: **https://x.com/HuiLibaa**
 - `POST /mcp` - authenticated Streamable HTTP MCP server for read-only tools.
 - `POST /v1/paid/evidence` - x402 testnet purchase of a strict evidence receipt.
 - `POST /v1/paid/base-sepolia/evidence` - fail-closed CDP Bazaar candidate paid with Base Sepolia test USDC.
-- `POST /v1/paid/base/evidence` - fail-closed Base Mainnet x402 canary for strict Arc evidence.
+- `POST /v1/paid/base/evidence` - disabled-by-default Base Mainnet x402 canary code path; the public `/canary` route remains closed.
 - `GET /v1/bazaar-candidate` - machine-readable CDP activation and indexing-proof gates.
 - `GET /v1/commercial-candidate` - fail-closed Base production-candidate gates.
 - `GET /guard/create` - browser builder for a time-bound human payment request.

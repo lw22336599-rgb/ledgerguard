@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Reference: AI agent payment-safety tool backed by LedgerGuard.",
   "dependencies": {
-    "@ledgerguard1/sdk": "^0.1.1"
+    "@ledgerguard1/sdk": "^0.1.0"
   },
   "scripts": {
     "start": "node agent-mcp.mjs"

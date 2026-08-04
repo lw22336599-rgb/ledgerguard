@@ -563,7 +563,7 @@ export const openApiDocument = {
         responses: {
           "200": {
             description:
-              "Base Mainnet payment settled and strict Arc evidence delivered",
+              "When the disabled-by-default canary is explicitly enabled, Base Mainnet payment settled and strict Arc evidence delivered",
           },
           "400": { description: "Invalid request; no charge attempted" },
           "402": { description: "CDP x402 payment required or rejected" },

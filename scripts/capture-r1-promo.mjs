@@ -14,8 +14,7 @@ const outDir = join(process.cwd(), "artifacts", "r1-promo");
 const tweetDraft = `Send a USDC payment link. They review before they sign.
 
 Non-custodial Guard Links on Arc Testnet.
-Base Mainnet x402 USDC is live:
-${baseUrl}/canary
+Base Mainnet x402 remains disabled while independent settlement and security gates are incomplete.
 
 Create a link:
 ${baseUrl}/guard/create

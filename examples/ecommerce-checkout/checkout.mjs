@@ -18,7 +18,7 @@ import { LedgerGuardClient } from "@ledgerguard1/sdk";
 const client = new LedgerGuardClient({
   baseUrl: process.env.LEDGERGUARD_URL ?? "https://ledgerguard-gules.vercel.app",
   integration: "reference-ecommerce-checkout",
-  clientVersion: "0.1.1",
+  clientVersion: "0.1.0",
 });
 
 const USDC_ARC_TESTNET = "0x3600000000000000000000000000000000000000";

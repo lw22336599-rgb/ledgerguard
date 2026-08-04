@@ -33,8 +33,8 @@ replace it, custody funds, or duplicate a general payment SDK.
 - Live Arc Testnet chain-ID/readiness verification
 - Browser preflight demo requiring no wallet
 - Circle Gateway x402 v2 payment challenge on Arc Testnet
-- Base Mainnet x402 USDC live at `/canary` (0.001 USDC; production activation
-  gates passed; real USDC — separate from Arc Guard Links)
+- Base Mainnet x402 canary code exists but the public `/canary` route is
+  disabled; no independently verified real-USDC settlement is claimed
 - Fail-closed Arc mainnet Guard Link gates until official Arc mainnet parameters
   and explicit release approval
 - Automated tests, build/type checks, production smoke test, and hourly uptime
@@ -57,8 +57,9 @@ or guaranteed revenue.
 3. Complete a security review and global rate-limit/billing controls.
 4. Run official-parameter conformance and read-only shadow traffic for Arc
    mainnet readiness.
-5. Keep Base Mainnet x402 at `/canary` operational; enable Arc mainnet Guard
-   Links only after explicit release approval.
+5. Keep `/canary` closed until independent settlement evidence, security review,
+   monitoring, and explicit release approval exist; apply the same fail-closed
+   rule to Arc mainnet Guard Links.
 
 ## Required human fields
 

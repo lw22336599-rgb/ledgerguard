@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Reference: recurring USDC billing guarded by LedgerGuard preflight + evidence.",
   "dependencies": {
-    "@ledgerguard1/sdk": "^0.1.1"
+    "@ledgerguard1/sdk": "^0.1.0"
   },
   "scripts": {
     "start": "node subscription.mjs"
