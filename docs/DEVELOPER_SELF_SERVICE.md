@@ -45,6 +45,10 @@ temporarily unavailable; the chain receipt remains the payment evidence.
 Arc Testnet USDC has no financial value. A completed testnet delivery is a
 technical integration result, not revenue.
 
+For attributable trials, send a non-secret `X-LedgerGuard-Integration` value.
+The durable usage ledger keeps only its SHA-256 digest alongside request IDs and
+timestamps for 90 days. It never stores the raw integration value.
+
 ## External-user evidence gate
 
 The first external user is counted only when a non-project person independently:

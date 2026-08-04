@@ -20,15 +20,20 @@ node examples/quickstart.mjs
 Or use `LedgerGuardClient` / `POST /v1/can-sign` directly — see
 `docs/DEVELOPER_INTEGRATION_INVITE.md`.
 
-Every request returns `X-LedgerGuard-Request-Id`. Server-side sanitized
-telemetry records the client and integration identifiers, method, path, status,
-and duration. It does not record source IP addresses or credentials.
+Every request returns `X-LedgerGuard-Request-Id`. Durable usage events retain
+the request ID, timestamp, operation, and only a SHA-256 digest of a valid
+`X-LedgerGuard-Integration` value for 90 days. The raw integration identifier is
+not stored in the usage ledger. Runtime telemetry records sanitized request
+metadata; neither path records source IP addresses or credentials.
 
 ## Evidence gate
 
 An integration counts as externally validated only after the tester submits the
 `Independent integration evidence` GitHub issue with a public project identity
 and reproducible request IDs, public code, or public testnet transaction hashes.
+The operator can hash the identifier claimed by the tester and compare it with
+the durable digest; a matching digest supports attribution but does not by
+itself prove that the tester is independent.
 Repeated use requires attributable verified activity on two or more separate
 days spanning at least 14 calendar days. A paid pilot requires an explicit
 written commitment containing scope, price, decision date, conditions, and

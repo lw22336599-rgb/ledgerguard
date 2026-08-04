@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { app } from "../src/app.js";
 import {
@@ -52,6 +53,7 @@ describe("developer self-service", () => {
       headers: {
         authorization: `Bearer ${created.apiKey}`,
         "content-type": "application/json",
+        "x-ledgerguard-integration": "acme-agent-testnet",
       },
       body: JSON.stringify({
         network: "arcTestnet",
@@ -72,7 +74,14 @@ describe("developer self-service", () => {
       }),
     });
     expect(preflight.status).toBe(200);
-    expect((await preflight.json()).usage.used).toBe(1);
+    const preflightBody = await preflight.json();
+    expect(preflightBody.usage.used).toBe(1);
+    expect(preflightBody.usage.recent[0].integrationIdHash).toBe(
+      `sha256:${createHash("sha256").update("acme-agent-testnet").digest("hex")}`,
+    );
+    expect(JSON.stringify(preflightBody.usage)).not.toContain(
+      "acme-agent-testnet",
+    );
 
     const rotation = await app.request("/v1/developer/keys/rotate", {
       method: "POST",
@@ -357,10 +366,22 @@ describe("Redis REST tenant persistence", () => {
       { id: registration.tenant.id },
     );
     await expect(
-      store!.recordUsage(registration.tenant, "preflight", "redis-request"),
+      store!.recordUsage(
+        registration.tenant,
+        "preflight",
+        "redis-request",
+        "redis-agent-testnet",
+      ),
     ).resolves.toMatchObject({ used: 1, remaining: 999 });
     await expect(store!.usage(registration.tenant)).resolves.toMatchObject({
       used: 1,
+      recent: [
+        {
+          integrationIdHash: `sha256:${createHash("sha256")
+            .update("redis-agent-testnet")
+            .digest("hex")}`,
+        },
+      ],
     });
 
     const replacement = await store!.rotateKey(

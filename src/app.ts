@@ -891,7 +891,12 @@ app.post("/v1/developer/preflight", async (context) => {
   if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
   const requestId = context.get("requestId") as string;
   try {
-    const usage = await store.recordUsage(auth.tenant, "preflight", requestId);
+    const usage = await store.recordUsage(
+      auth.tenant,
+      "preflight",
+      requestId,
+      context.req.header("x-ledgerguard-integration"),
+    );
     const result = await runPreflight(parsed.data);
     void notifyDeveloperWebhook(auth.tenant, {
       type: "preflight.completed",
@@ -942,7 +947,12 @@ app.post("/v1/developer/shadow", async (context) => {
   if (!store) return context.json({ error: "DURABLE_STORE_UNAVAILABLE" }, 503);
   const requestId = context.get("requestId") as string;
   try {
-    const usage = await store.recordUsage(auth.tenant, "shadow", requestId);
+    const usage = await store.recordUsage(
+      auth.tenant,
+      "shadow",
+      requestId,
+      context.req.header("x-ledgerguard-integration"),
+    );
     const result = await runPreflight(parsed.data);
     return context.json({
       mode: "shadow" as const,
@@ -986,7 +996,13 @@ app.all("/mcp", async (context) => {
   const requestId = context.get("requestId") as string;
   const metered = async (
     operation: "mcp.preflight" | "mcp.shadow" | "mcp.evidence",
-  ) => store.recordUsage(auth.tenant, operation, `${requestId}:${operation}`);
+  ) =>
+    store.recordUsage(
+      auth.tenant,
+      operation,
+      `${requestId}:${operation}`,
+      context.req.header("x-ledgerguard-integration"),
+    );
   const server = createLedgerGuardMcpServer({
     preflight: async (input) => {
       const usage = await metered("mcp.preflight");

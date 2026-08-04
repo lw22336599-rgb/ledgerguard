@@ -15,6 +15,7 @@ export type UsageEvent = {
   operation: string;
   occurredAt: string;
   units: number;
+  integrationIdHash?: string;
 };
 
 export type UsageSummary = {
@@ -48,6 +49,7 @@ export type TenantStore = {
     tenant: Tenant,
     operation: string,
     requestId: string,
+    integrationId?: string,
   ): Promise<UsageSummary>;
   usage(tenant: Tenant): Promise<UsageSummary>;
   recordPayment(event: PaymentLedgerEvent): Promise<"recorded" | "duplicate">;
@@ -70,6 +72,7 @@ const API_KEY_PATTERN = /^lg_test_[A-Za-z0-9_-]{32,80}$/;
 const DEFAULT_MONTHLY_QUOTA = 1_000;
 const DEFAULT_MAX_TENANTS = 100;
 const EVENT_RETENTION_SECONDS = 90 * 24 * 60 * 60;
+const INTEGRATION_ID_PATTERN = /^[A-Za-z0-9._/@ -]{1,80}$/;
 
 function maximumTenants(): number {
   const parsed = Number.parseInt(process.env.DEVELOPER_MAX_TENANTS ?? "", 10);
@@ -80,6 +83,12 @@ function maximumTenants(): number {
 
 function keyHash(apiKey: string): string {
   return createHash("sha256").update(apiKey, "utf8").digest("hex");
+}
+
+function hashIntegrationId(value?: string): string | undefined {
+  const normalized = value?.trim();
+  if (!normalized || !INTEGRATION_ID_PATTERN.test(normalized)) return undefined;
+  return `sha256:${createHash("sha256").update(normalized, "utf8").digest("hex")}`;
 }
 
 function createApiKey(): string {
@@ -263,12 +272,15 @@ class RedisTenantStore implements TenantStore {
     tenant: Tenant,
     operation: string,
     requestId: string,
+    integrationId?: string,
   ): Promise<UsageSummary> {
+    const integrationIdHash = hashIntegrationId(integrationId);
     const event: UsageEvent = {
       requestId,
       operation,
       occurredAt: new Date().toISOString(),
       units: 1,
+      ...(integrationIdHash ? { integrationIdHash } : {}),
     };
     const script =
       "local n=tonumber(redis.call('GET',KEYS[1]) or '0');" +
@@ -411,6 +423,7 @@ class MemoryTenantStore implements TenantStore {
     tenant: Tenant,
     operation: string,
     requestId: string,
+    integrationId?: string,
   ): Promise<UsageSummary> {
     const key = usageKey(tenant.id);
     const existing = this.usageCounts.get(key) ?? 0;
@@ -426,11 +439,13 @@ class MemoryTenantStore implements TenantStore {
     const used = existing + 1;
     this.usageCounts.set(key, used);
     const recent = this.events.get(tenant.id) ?? [];
+    const integrationIdHash = hashIntegrationId(integrationId);
     recent.unshift({
       requestId,
       operation,
       occurredAt: new Date().toISOString(),
       units: 1,
+      ...(integrationIdHash ? { integrationIdHash } : {}),
     });
     this.events.set(tenant.id, recent.slice(0, 50));
     return summary(tenant, used, recent.slice(0, 20));
