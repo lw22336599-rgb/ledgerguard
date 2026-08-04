@@ -42,9 +42,10 @@ const pageHead = (
 </head>`;
 
 const arcPrimaryEyebrow = "USDC PAYMENT LINKS · ARC TESTNET";
+const homeEyebrow = "RUNTIME AUTHORIZATION · EVIDENCE GATEWAY";
 const portalHeroNetworkNoteHtml =
   "Guard Links use <strong>Arc Testnet</strong> USDC (no real money).";
-const baseMainnetLinkLabel = "Base x402 demo";
+const baseMainnetLinkLabel = "Mainnet lab (disabled)";
 const specDocsBase =
   "https://github.com/lw22336599-rgb/ledgerguard/blob/main/docs";
 /** Legacy demo default; never a real contract — wallet connect replaces this. */
@@ -52,7 +53,7 @@ export const guardRecipientDemoDefault =
   "0x2222222222222222222222222222222222222222";
 
 const footer = `<footer class="site-footer">
-  <div class="footer-primary">LedgerGuard &middot; Payment intent safety &middot; Arc Testnet Guard Links</div>
+  <div class="footer-primary">LedgerGuard &middot; Runtime authorization &amp; evidence gateway &middot; Arc Testnet demo</div>
   <div class="footer-links"><a href="/guard/create">Get paid</a> &middot; <a href="/pay">Pay a link</a> &middot; <a href="/payments">Check payments</a> &middot; <a href="/docs">Developers</a> &middot; <a href="/pilot">Design partner pilot</a> &middot; <a href="/status">Status</a> &middot; <a href="/testnet-help">Wallet setup</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="https://testnet.arcscan.app" rel="noreferrer">ArcScan</a> &middot; <a href="mailto:lw22336599@gmail.com">Email</a> &middot; <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a></div>
   <div class="footer-partners">Compatible with <a href="https://x402.org" rel="noreferrer">x402</a> &middot; <a href="https://www.arc.io/" rel="noreferrer">Arc</a> &middot; <a href="/canary">${baseMainnetLinkLabel}</a></div>
   <div class="footer-social"><a href="https://x.com/HuiLibaa" rel="me noreferrer">Follow on X @HuiLibaa</a></div>
@@ -415,8 +416,8 @@ export const payHtml = `${pageHead(
 </html>`;
 
 export const portalHtml = `${pageHead(
-  "LedgerGuard | Payment intent safety",
-  "Independent, open-source stablecoin payment safety on Arc Testnet. Review amount, recipient, and purpose before a wallet signs.",
+  "LedgerGuard | Authorization & evidence gateway for agent transactions",
+  "Deterministic policy checks, transaction simulation, and settlement evidence before a wallet, app, or AI agent signs. Non-custodial, protocol-neutral, open source.",
   "/",
 )}
 <body>
@@ -425,19 +426,20 @@ export const portalHtml = `${pageHead(
     <section class="hero portal-hero">
       <div class="portal-hero-grid">
         <div class="portal-hero-copy">
-          <p class="eyebrow">${arcPrimaryEyebrow}</p>
-          <h1>Review a stablecoin payment<br><span>before you sign.</span></h1>
-          <p class="lead">LedgerGuard checks who gets paid, how much, and why before a wallet approves. No signup, custody, private keys, or recovery phrases.</p>
+          <p class="eyebrow">${homeEyebrow}</p>
+          <h1>Runtime authorization<br><span>before an agent signs.</span></h1>
+          <p class="lead">LedgerGuard applies deterministic policy checks, transaction simulation, and post-settlement evidence — before a wallet, application, or AI agent signs. Non-custodial and protocol-neutral.</p>
           <p class="portal-network-note">${portalHeroNetworkNoteHtml}</p>
           <div class="portal-actions portal-dual-cta">
-            <a class="primary-action portal-primary-cta" href="/pay">Review a payment link</a>
-            <a class="secondary-action portal-secondary-cta" href="/guard/create">Create a test request</a>
+            <a class="primary-action portal-primary-cta" href="/docs">Read the API docs</a>
+            <a class="secondary-action portal-secondary-cta" href="/developer">Start the Sandbox</a>
           </div>
+          <p class="portal-trust-list">Try the <a href="/guard/create">Guard Link demo</a> — a visual example of the same preflight checks, using Arc Testnet USDC (no real money).</p>
           <p class="portal-trust-list"><strong>Independent open-source security project.</strong> Testnet by default. LedgerGuard is not affiliated with Ledger SAS or Ledger hardware wallets.</p>
           <p class="portal-trust-list"><a href="#how-it-works">New here? How it works</a> &middot; <a href="/about">Trust and project boundaries</a></p>
         </div>
         <figure class="portal-hero-visual">
-          <img src="/marketing/hero-guard-builder.png" alt="Payment link builder with QR code" width="640" height="360" loading="eager">
+          <img src="/marketing/hero-guard-builder.png" alt="Preflight check flow: intent, policy, ALLOW or BLOCK decision, evidence receipt" width="640" height="360" loading="eager">
         </figure>
       </div>
     </section>
@@ -476,7 +478,7 @@ export const portalHtml = `${pageHead(
     <section id="integrations" class="how-it-works" aria-label="Integration scenarios">
       <p class="eyebrow">INTEGRATION SCENARIOS</p>
       <h2 class="compact">One preflight call protects any payment flow.</h2>
-      <p class="muted">LedgerGuard sits in front of your stablecoin transaction. Check who gets paid, how much, and why — before anything is signed. Works with any wallet, any agent, any protocol.</p>
+      <p class="muted">LedgerGuard sits in front of your stablecoin transaction. Check who gets paid, how much, and why — before anything is signed. Verified today: Arc Testnet via Circle Gateway x402. In progress: Base Sepolia adapter. Planned: AP2 and TAP adapters.</p>
       <div class="how-steps">
         <article class="how-step-card">
           <p class="step">AGENTS</p>
@@ -730,6 +732,7 @@ export const developerDocsHtml = `${pageHead(
       <article class="doc-card"><span>POST</span><h2>/v1/preflight</h2><p>Parse, compare, and simulate an unsigned transaction before signing. Returns ALLOW, REVIEW, or BLOCK.</p></article>
       <article class="doc-card"><span>POST</span><h2>/v1/can-sign</h2><p>Thin wallet path: recipient, amount, purpose, and calldata.</p></article>
       <article class="doc-card"><span>POST</span><h2>/v1/evidence</h2><p>After confirmation, reconcile payer, recipient, asset, amount, and unexpected side effects.</p></article>
+      <article class="doc-card"><span>GET</span><h2>/v1/extensions</h2><p>Versioned, lifecycle-aware manifests for externally hosted adapters. Inclusion is not an endorsement.</p></article>
     </section>
     <section class="panel developer-panel">
       <div>
@@ -742,6 +745,8 @@ export const developerDocsHtml = `${pageHead(
           <li><a href="${specDocsBase}/GUARD_LINK_FORMAT.md" rel="noreferrer">Guard Link format</a></li>
           <li><a href="${specDocsBase}/OPEN_SOURCE_POLICY.md" rel="noreferrer">Open source policy</a></li>
           <li><a href="${specDocsBase}/WALLET_EXCHANGE_INTEGRATION.md" rel="noreferrer">Wallet / exchange integration</a></li>
+          <li><a href="${specDocsBase}/EXTENSION_AUTHORING.md" rel="noreferrer">Extension authoring and conformance</a></li>
+          <li><a href="${specDocsBase}/CANONICAL_CONTROL_ENVELOPE.md" rel="noreferrer">Canonical control envelope</a></li>
         </ul>
       </div>
       <div>
@@ -775,7 +780,7 @@ export const developerDocsHtml = `${pageHead(
   }'</pre>
     </section>
     <section class="notice"><strong>Decision boundary:</strong> ALLOW is returned only when every implemented rule passes and read-only simulation succeeds. Unknown calls, an undeclared payer, or missing simulation are never treated as safe to sign.</section>
-    <div class="links bottom-links"><a href="/developer">Developer console</a><a href="/openapi.json">Raw OpenAPI</a><a href="/.well-known/ledgerguard.json">Raw agent catalog</a><a href="/v1/networks">Raw network registry</a><a href="/docs/integration">Integration boundary</a></div>
+    <div class="links bottom-links"><a href="/developer">Developer console</a><a href="/openapi.json">Raw OpenAPI</a><a href="/.well-known/ledgerguard.json">Raw agent catalog</a><a href="/v1/networks">Raw network registry</a><a href="/v1/extensions">Extension registry</a><a href="/schemas/extension-manifest-v1.json">Manifest schema</a><a href="/schemas/control-intent-v2.json">Control Intent schema</a><a href="/docs/integration">Integration boundary</a></div>
     ${footer}
   </main>${portalPageScripts()}
 </body>

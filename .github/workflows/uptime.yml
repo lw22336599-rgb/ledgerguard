@@ -25,3 +25,6 @@ jobs:
         env:
           LEDGERGUARD_URL: https://ledgerguard-gules.vercel.app
           EXPECT_ARC_MAINNET_SHADOW: "true"
+      - run: npm run monitor:platform
+        env:
+          LEDGERGUARD_URL: https://ledgerguard-gules.vercel.app

@@ -539,9 +539,9 @@ describe("browser demo experience", () => {
 
   it("leads with a plain-language payment safety promise on the portal", () => {
 
-    expect(portalHtml).toContain("Review a stablecoin payment");
+    expect(portalHtml).toContain("Runtime authorization");
 
-    expect(portalHtml).toContain("before you sign");
+    expect(portalHtml).toContain("before an agent signs");
 
     expect(portalHtml).toContain("Independent open-source security project");
 
@@ -549,9 +549,9 @@ describe("browser demo experience", () => {
 
     expect(portalHtml).toContain('href="/pay"');
 
-    expect(portalHtml).toContain("Review a payment link");
+    expect(portalHtml).toContain("Guard Link demo");
 
-    expect(portalHtml).toContain("Create a test request");
+    expect(portalHtml).toContain("Start the Sandbox");
 
     expect(portalHtml).toContain("HOW IT WORKS");
 
@@ -559,7 +559,8 @@ describe("browser demo experience", () => {
 
     expect(portalHtml).toContain("/marketing/hero-guard-builder.png");
 
-    expect(portalHtml).toContain("USDC PAYMENT LINKS · ARC TESTNET");
+    expect(portalHtml).toContain("RUNTIME AUTHORIZATION · EVIDENCE GATEWAY");
+    expect(portalHtml).toContain("before an agent signs");
 
     expect(portalHtml).toContain("no real money");
 
@@ -706,7 +707,7 @@ describe("browser demo experience", () => {
 
       expect(html).toContain("footer-partners");
 
-      expect(html).toContain("Payment intent safety");
+      expect(html).toContain("Runtime authorization");
 
     }
 
@@ -716,7 +717,7 @@ describe("browser demo experience", () => {
 
   it("uses payment intent safety and x402-compatible docs positioning", () => {
 
-    expect(portalHtml).toContain("Payment intent safety");
+    expect(portalHtml).toContain("Authorization & evidence gateway");
 
     expect(developerDocsHtml).toContain("COMPATIBLE STANDARDS");
 

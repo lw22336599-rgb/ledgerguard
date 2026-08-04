@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "ledgerguard.extension.v1",
+  "id": "ledgerguard.reference-policy-http",
+  "name": "LedgerGuard reference remote policy adapter",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "LedgerGuard",
+    "url": "https://github.com/lw22336599-rgb/ledgerguard"
+  },
+  "source": {
+    "repository": "https://github.com/lw22336599-rgb/ledgerguard",
+    "commit": "cb156837a5911fbc49b1d623114ab7030b8eae0b",
+    "path": "examples/extensions/reference-policy-http"
+  },
+  "artifact": {
+    "digest": "sha256:5ac2773bdbd5ada86fc878b5378f04a019925922526162a27cc8a6354de774a2",
+    "path": "handler.ts"
+  },
+  "capability": "policy-pack",
+  "compatibility": {
+    "ledgerguardApi": "1",
+    "networks": ["eip155:5042002"],
+    "assets": ["eip155:5042002/erc20:0x3600000000000000000000000000000000000000"],
+    "protocols": ["custom"]
+  },
+  "runtime": {
+    "mode": "remote-http",
+    "endpoint": "https://reference.invalid/ledgerguard/adapter/v1/evaluate",
+    "timeoutMs": 2000,
+    "maxRequestBytes": 65536,
+    "maxResponseBytes": 65536,
+    "permissions": {
+      "outboundHosts": [],
+      "data": ["intent", "policy"]
+    }
+  },
+  "lifecycle": {
+    "maturity": "self-tested",
+    "publishedAt": "2026-08-05T00:00:00.000Z",
+    "expiresAt": "2027-02-05T00:00:00.000Z",
+    "maintainer": "LedgerGuard maintainers",
+    "supportUrl": "https://github.com/lw22336599-rgb/ledgerguard/issues"
+  },
+  "knownLimitations": [
+    "Reference contract only; the .invalid endpoint is intentionally not a hosted production service."
+  ],
+  "pricing": { "model": "free" }
+}

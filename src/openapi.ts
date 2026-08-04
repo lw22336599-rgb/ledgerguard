@@ -4,7 +4,7 @@ export const openApiDocument = {
     title: "LedgerGuard Preflight & Evidence API",
     version: "0.1.0",
     description:
-      "Non-custodial Arc transaction preflight and post-settlement evidence.",
+      "Protocol-neutral, non-custodial transaction intent control and post-settlement evidence. Network and payment rails are isolated adapters; LedgerGuard never signs or holds keys.",
   },
   tags: [
     {
@@ -255,6 +255,35 @@ export const openApiDocument = {
           "401": { description: "Missing, invalid, or revoked API key" },
           "503": { description: "Shared durable storage unavailable" },
         },
+      },
+    },
+    "/v1/extensions": {
+      get: {
+        summary: "Versioned, lifecycle-aware extension registry",
+        description:
+          "Lists external extension manifests and their active, expired, or revoked state. Inclusion is not an endorsement.",
+        responses: { "200": { description: "Extension registry snapshot" } },
+      },
+    },
+    "/v1/extensions/health": {
+      get: {
+        summary: "Extension registry integrity and lifecycle health",
+        responses: {
+          "200": { description: "Registry parses and reports lifecycle counts" },
+          "503": { description: "Registry is invalid and production readiness fails closed" },
+        },
+      },
+    },
+    "/schemas/extension-manifest-v1.json": {
+      get: {
+        summary: "LedgerGuard Extension Manifest v1 JSON Schema",
+        responses: { "200": { description: "JSON Schema document" } },
+      },
+    },
+    "/schemas/control-intent-v2.json": {
+      get: {
+        summary: "LedgerGuard protocol-neutral Control Intent v2 JSON Schema",
+        responses: { "200": { description: "JSON Schema document" } },
       },
     },
     "/v1/plans": {

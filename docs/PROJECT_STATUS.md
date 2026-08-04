@@ -1,6 +1,6 @@
 # Project status and claim register
 
-Snapshot: 2026-08-04. This file is the source for public product claims.
+Snapshot: 2026-08-05. This file is the source for public product claims.
 
 ## Confirmed
 
@@ -69,6 +69,26 @@ script may sign, fund, transfer, reconstruct keys, or be scheduled. These tests
 are project-party engineering evidence, not external adoption or revenue.
 
 ## Release provenance
+
+### Platform-kernel release candidate
+
+- A protocol-neutral Extension Manifest v1, isolated remote-adapter boundary,
+  immutable source/digest registry, conformance runner, lifecycle/revocation
+  metadata, and public machine-readable schemas are complete locally.
+- Canonical Control Intent v2 uses CAIP-2/CAIP-19 identifiers, explicit asset
+  decimals, atomic amounts, versioned migration, and fail-closed validation.
+- The local release candidate passes 223 automated tests, TypeScript checking,
+  conformance, production build, clean SDK and adapter-kit pack installs,
+  rollback checks, and production-dependency audit with zero reported
+  vulnerabilities. The full local UI acceptance run passes 78 checks with zero
+  issues across desktop/mobile routes and interactive error states.
+- The security-critical remote adapter boundary records 94.87% statement and
+  85.18% branch coverage; the canonical control envelope records 100% statement
+  and 97.87% branch coverage.
+- These are local release-candidate facts until the matching Git revision,
+  GitHub CI, deployment, production monitor, and production UI audit complete.
+  They are not adoption, endorsement, certification, revenue, or permission to
+  activate mainnet charging.
 
 - Code-bearing release commit `84db24f3eaf5ae6b8062bdee6d39728a967722d9`
   passes GitHub CI run `30911222063` and production smoke run `30911365837`.

@@ -9,6 +9,23 @@ The current strategy sources are:
 - `LedgerGuard-完整整合方案-2026-08-03.md`
 - `LedgerGuard-后续AI承接与战略审计-2026-08-04.md`
 - `LedgerGuard-开放生态与长期治理方案-2026-08-04.md`
+- `LedgerGuard-全量产品市场审计-2026-08-04.md`
+- `LedgerGuard-开放生态与多链平台总规划-2026-08-04.md`
+
+Development governance:
+
+- `docs/BATCH_DEVELOPMENT_MASTER_PLAN.md` is the locked scope and acceptance
+  source for the next platform-refactor batch.
+- Start every material release by completing
+  `docs/DEVELOPMENT_BATCH_TEMPLATE.md` before changing implementation code.
+- Work on one release branch with recoverable local checkpoints. Do not
+  repeatedly publish or deploy incomplete slices. Merge, publish, and deploy
+  once only after the full local acceptance gate passes.
+- A new idea is not implementation scope until buyer, pain, substitute,
+  acceptance test, failure mode, evidence gate, compatibility impact, and
+  rollback are recorded.
+- Do not hide uncertain or unfinished work in a large batch. Any scope change
+  must be recorded and re-reviewed before implementation continues.
 
 Safety boundaries:
 

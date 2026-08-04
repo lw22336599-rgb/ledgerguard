@@ -35,7 +35,7 @@ export type ExtensionManifest = {
   license: string;
   author: { name: string; url?: string };
   source: { repository: string; commit: string; path?: string };
-  artifact: { digest: `sha256:${string}` };
+  artifact: { digest: `sha256:${string}`; path: string };
   capability: ExtensionCapability;
   compatibility: {
     ledgerguardApi: "1";
@@ -47,6 +47,7 @@ export type ExtensionManifest = {
     mode: "remote-http";
     endpoint: string;
     timeoutMs: number;
+    maxRequestBytes: number;
     maxResponseBytes: number;
     permissions: {
       outboundHosts: string[];

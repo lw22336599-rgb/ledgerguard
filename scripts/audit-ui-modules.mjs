@@ -11,7 +11,7 @@ const baseUrl =
 const outDir = join(process.cwd(), "artifacts", "ui-audit");
 
 const pages = [
-  { path: "/", name: "home", marker: "Review a stablecoin payment" },
+  { path: "/", name: "home", marker: "Runtime authorization" },
   { path: "/guard/create", name: "guard-create", marker: "Create a payment link." },
   { path: "/pay", name: "pay", marker: "Pay with USDC" },
   { path: "/canary", name: "canary", marker: "Controlled Base Mainnet payment canary.", optional503: true },
@@ -55,6 +55,8 @@ const report = {
   at: new Date().toISOString(),
   http: [],
   assets: [],
+  internalLinks: [],
+  controls: [],
   layout: [],
   consoleErrors: [],
   issues: [],
@@ -64,6 +66,8 @@ const report = {
 function issue(severity, module, message) {
   report.issues.push({ severity, module, message });
 }
+
+const internalLinkPaths = new Set();
 
 function pass(message) {
   report.passes.push(message);
@@ -91,6 +95,15 @@ for (const page of pages) {
       hasHan: /\p{Script=Han}/u.test(html),
     };
     report.http.push(entry);
+    for (const match of html.matchAll(/href=["']([^"'#]+)["']/g)) {
+      try {
+        const decodedHref = match[1].replaceAll("&amp;", "&");
+        const target = new URL(decodedHref, `${baseUrl}${page.path}`);
+        if (target.origin === new URL(baseUrl).origin) internalLinkPaths.add(`${target.pathname}${target.search}`);
+      } catch {
+        issue("medium", page.name, `Invalid internal href: ${match[1]}`);
+      }
+    }
 
     if (page.expect404) {
       if (res.status !== 404) {
@@ -120,6 +133,23 @@ for (const page of pages) {
   } catch (error) {
     report.http.push({ path: page.path, error: String(error) });
     issue("high", page.name, `Fetch failed: ${error}`);
+  }
+}
+
+for (const path of [...internalLinkPaths].sort()) {
+  try {
+    const res = await fetch(`${baseUrl}${path}`, {
+      signal: AbortSignal.timeout(20_000),
+      redirect: "follow",
+    });
+    const allowedFailClosed =
+      (path.startsWith("/canary") || path.startsWith("/v1/shadow/arc-mainnet")) && res.status === 503;
+    report.internalLinks.push({ path, status: res.status });
+    if (!res.ok && !allowedFailClosed) issue("high", "internal-links", `${path} returned ${res.status}`);
+    else pass(`${path} internal destination reachable`);
+  } catch (error) {
+    report.internalLinks.push({ path, error: String(error) });
+    issue("high", "internal-links", `${path} failed: ${error}`);
   }
 }
 
@@ -217,6 +247,29 @@ async function auditViewport(label, viewport, isMobile, selectedPages = pages) {
       mobileMenuToggle: menuToggleVisible,
     };
     report.layout.push(layoutEntry);
+
+    if (label === "desktop") {
+      const controls = await page.locator("button:not([disabled]), input[type=submit]:not([disabled])").evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const element = node;
+          return {
+            label: (element.getAttribute("aria-label") || element.textContent || element.getAttribute("value") || "").trim(),
+            id: element.id,
+            type: element.getAttribute("type"),
+            inForm: Boolean(element.closest("form")),
+            ariaControls: element.getAttribute("aria-controls"),
+            hasDataHook: [...element.attributes].some((attribute) => attribute.name.startsWith("data-")),
+          };
+        }),
+      );
+      report.controls.push({ path: p.path, controls });
+      for (const control of controls) {
+        if (!control.label) issue("high", p.name, "Enabled interactive control has no accessible label");
+        if (!control.id && !control.inForm && !control.ariaControls && !control.hasDataHook) {
+          issue("medium", p.name, `Control lacks an explicit interaction hook: ${control.label}`);
+        }
+      }
+    }
 
     if (overflow.horizontalOverflow) {
       issue("medium", p.name, `${label}: horizontal scroll overflow (${overflow.scrollWidth}px > ${overflow.clientWidth}px)`);

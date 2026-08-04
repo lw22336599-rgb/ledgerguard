@@ -11,6 +11,7 @@ tmp/
 *.key
 *.tmp
 packages/sdk/*.tgz
+packages/adapter-kit/*.tgz
 
 # Local ops / promo artifacts (keep out of git)
 artifacts/guard-link-e2e/

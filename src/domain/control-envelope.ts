@@ -13,6 +13,14 @@ const caip2Schema = z
   .trim()
   .regex(/^[a-z0-9-]{3,8}:[A-Za-z0-9-]{1,32}$/, "Expected a CAIP-2 network identifier");
 
+const caip19Schema = z
+  .string()
+  .trim()
+  .regex(
+    /^[a-z0-9-]{3,8}:[A-Za-z0-9-]{1,32}\/[A-Za-z0-9-]{1,32}:[A-Za-z0-9.%_-]{1,128}$/,
+    "Expected a CAIP-19 asset identifier",
+  );
+
 const uintStringSchema = z
   .string()
   .regex(/^(0|[1-9][0-9]*)$/, "Expected an unsigned integer string");
@@ -80,6 +88,108 @@ export const controlIntentSchema = z
     }
   });
 
+const operationV2Schema = z.object({
+  kind: z.enum(["payment", "approval", "contract_call"]),
+  network: caip2Schema,
+  from: z.string().trim().min(1).max(256).optional(),
+  to: z.string().trim().min(1).max(256).optional(),
+  asset: caip19Schema.optional(),
+  assetDecimals: z.number().int().min(0).max(255).optional(),
+  amountAtomic: uintStringSchema.optional(),
+  purpose: z.string().trim().min(1).max(280),
+});
+
+/**
+ * Canonical multi-network intent. V1 remains accepted for compatibility; new
+ * integrations should use V2 so an amount can never be interpreted without an
+ * explicit CAIP-19 asset and decimal precision.
+ */
+export const controlIntentV2Schema = z
+  .object({
+    schemaVersion: z.literal("ledgerguard.intent.v2"),
+    id: identifierSchema,
+    createdAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime().optional(),
+    actor: z.object({
+      kind: z.enum(["human", "agent", "service"]),
+      id: identifierSchema,
+    }),
+    operation: operationV2Schema,
+    source: z
+      .object({
+        protocol: z.enum(["x402", "ap2", "acp", "a2a", "mcp", "custom"]),
+        reference: z.string().trim().min(1).max(256).optional(),
+      })
+      .optional(),
+  })
+  .superRefine((intent, context) => {
+    if (intent.expiresAt && Date.parse(intent.expiresAt) <= Date.parse(intent.createdAt)) {
+      context.addIssue({
+        code: "custom",
+        path: ["expiresAt"],
+        message: "expiresAt must be later than createdAt",
+      });
+    }
+    if (intent.operation.kind === "contract_call") {
+      if (!intent.operation.to) {
+        context.addIssue({ code: "custom", path: ["operation", "to"], message: "to is required for contract_call" });
+      }
+      return;
+    }
+    for (const field of ["to", "asset", "assetDecimals", "amountAtomic"] as const) {
+      if (intent.operation[field] === undefined) {
+        context.addIssue({
+          code: "custom",
+          path: ["operation", field],
+          message: `${field} is required for ${intent.operation.kind}`,
+        });
+      }
+    }
+    if (intent.operation.asset) {
+      const assetNetwork = intent.operation.asset.split("/")[0];
+      if (assetNetwork !== intent.operation.network) {
+        context.addIssue({
+          code: "custom",
+          path: ["operation", "asset"],
+          message: "CAIP-19 asset network must match operation.network",
+        });
+      }
+    }
+    if (intent.operation.kind === "payment" && intent.operation.amountAtomic === "0") {
+      context.addIssue({
+        code: "custom",
+        path: ["operation", "amountAtomic"],
+        message: "Payment amount must be greater than zero",
+      });
+    }
+  });
+
+export const controlIntentV2JsonSchema = {
+  ...z.toJSONSchema(controlIntentV2Schema),
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://ledgerguard-gules.vercel.app/schemas/control-intent-v2.json",
+  title: "LedgerGuard Control Intent v2",
+  description:
+    "Protocol-neutral transaction intent with CAIP-2 network, CAIP-19 asset, atomic amount, and explicit asset precision.",
+} as const;
+
+export function migrateControlIntentV1ToV2(
+  raw: unknown,
+  asset: { caip19: string; decimals: number },
+): ControlIntentV2 {
+  const v1 = controlIntentSchema.parse(raw);
+  return controlIntentV2Schema.parse({
+    ...v1,
+    schemaVersion: "ledgerguard.intent.v2",
+    operation: {
+      ...v1.operation,
+      ...(v1.operation.asset
+        ? { asset: asset.caip19, assetDecimals: asset.decimals }
+        : {}),
+    },
+  });
+}
+
 export const controlPolicySchema = z.object({
   schemaVersion: z.literal("ledgerguard.policy.v1"),
   id: identifierSchema,
@@ -145,6 +255,7 @@ export function canonicalDigest(value: unknown): `sha256:${string}` {
 }
 
 export type ControlIntent = z.infer<typeof controlIntentSchema>;
+export type ControlIntentV2 = z.infer<typeof controlIntentV2Schema>;
 export type ControlPolicy = z.infer<typeof controlPolicySchema>;
 export type ControlDecision = z.infer<typeof controlDecisionSchema>;
 export type ControlReceipt = z.infer<typeof controlReceiptSchema>;

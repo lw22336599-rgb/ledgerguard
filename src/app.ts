@@ -32,6 +32,12 @@ import {
 } from "./middleware/request-telemetry.js";
 import { paidEvidencePrecheck } from "./middleware/paid-evidence-precheck.js";
 import { openApiDocument } from "./openapi.js";
+import { extensionManifestJsonSchema } from "./extensions/manifest.js";
+import { controlIntentV2JsonSchema } from "./domain/control-envelope.js";
+import {
+  getExtensionRegistryHealth,
+  listExtensionRegistry,
+} from "./extensions/registry.js";
 import {
   cctpEvidenceSchema,
   canSignSchema,
@@ -584,6 +590,9 @@ app.get("/.well-known/ledgerguard.json", (context) => {
     guardLinkTemplate: `${getPublicBaseUrl()}/guard?issuer={urlEncodedName}&recipient={publicAddress}&amount={decimalUsdc}&limit={decimalUsdc}&purpose={urlEncodedPurpose}&expires={isoTimestamp}`,
     integrationBoundary: `${getPublicBaseUrl()}/docs/integration`,
     protocolAdapters: `${getPublicBaseUrl()}/v1/adapters`,
+    extensionRegistry: `${getPublicBaseUrl()}/v1/extensions`,
+    extensionManifestSchema: `${getPublicBaseUrl()}/schemas/extension-manifest-v1.json`,
+    controlIntentSchema: `${getPublicBaseUrl()}/schemas/control-intent-v2.json`,
     social: {
       x: "https://x.com/HuiLibaa",
       handle: "@HuiLibaa",
@@ -672,6 +681,29 @@ app.get("/v1/adapters", (context) =>
   }),
 );
 
+app.get("/v1/extensions", (context) =>
+  context.json({
+    schemaVersion: "ledgerguard.extension-registry.v1",
+    generatedAt: new Date().toISOString(),
+    entries: listExtensionRegistry(),
+    boundary:
+      "Community extensions run outside the LedgerGuard production process. Registry inclusion is not an endorsement, warranty, custody service, or permission to sign.",
+  }),
+);
+
+app.get("/v1/extensions/health", (context) => {
+  const health = getExtensionRegistryHealth();
+  return context.json(health, health.ok ? 200 : 503);
+});
+
+app.get("/schemas/extension-manifest-v1.json", (context) =>
+  context.json(extensionManifestJsonSchema),
+);
+
+app.get("/schemas/control-intent-v2.json", (context) =>
+  context.json(controlIntentV2JsonSchema),
+);
+
 app.get("/v1/plans", (context) =>
   context.json({
     plans: listPublicPlans(),
@@ -699,6 +731,9 @@ app.get("/v1/meta", (context) =>
     guardLinkBuilder: "/guard/create",
     developerConsole: "/developer",
     mcp: "/mcp",
+    extensions: "/v1/extensions",
+    extensionManifestSchema: "/schemas/extension-manifest-v1.json",
+    controlIntentSchema: "/schemas/control-intent-v2.json",
     commercialCandidate: "/v1/commercial-candidate",
     tenantApi:
       getTenantStore() && selfServiceEnabled() ? "enabled" : "disabled",
@@ -1093,6 +1128,10 @@ app.get("/health", (context) =>
 
 app.get("/ready", async (context) => {
   try {
+    const extensionRegistry = getExtensionRegistryHealth();
+    if (!extensionRegistry.ok) {
+      return context.json(extensionRegistry, 503);
+    }
     const tenantStore = getTenantStore();
     if (
       selfServiceEnabled() &&
@@ -1126,6 +1165,12 @@ app.get("/ready", async (context) => {
       blockNumber: blockNumber.toString(),
       developerSelfService:
         selfServiceEnabled() && tenantStore ? "ready" : "disabled",
+      extensionRegistry: {
+        status: "ready",
+        active: extensionRegistry.active,
+        expired: extensionRegistry.expired,
+        revoked: extensionRegistry.revoked,
+      },
     });
   } catch (error) {
     console.error("Readiness RPC probe failed", {

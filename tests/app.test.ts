@@ -14,7 +14,7 @@ describe("HTTP API", () => {
     expect(page.status).toBe(200);
     expect(page.headers.get("content-type")).toContain("text/html");
     const homeHtml = await page.text();
-    expect(homeHtml).toContain("Review a stablecoin payment");
+    expect(homeHtml).toContain("Runtime authorization");
     expect(homeHtml).toContain("not affiliated with Ledger SAS");
     expect(homeHtml).not.toContain('id="nav-connect"');
     expect(homeHtml).toContain('href="/pay"');
