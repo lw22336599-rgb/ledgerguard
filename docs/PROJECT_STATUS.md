@@ -39,9 +39,11 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
 - CDP Bazaar indexing is false in the live candidate response.
 - The Circle/Questbook page evidence does not verify a submitted proposal.
 - npm Trusted Publishing is not yet proven by a successful release. The
-  repository contains the intended `publish-sdk.yml` workflow, but npm package
-  settings and the GitHub `npm-production` environment must match it before the
-  next version can validate OIDC publication.
+  repository contains the intended `publish-sdk.yml` workflow and the GitHub
+  `npm-production` environment. Saving the matching npm Trusted Publisher
+  connection reached npm's required security-key challenge on 2026-08-04 and
+  remains owner-authentication gated. The next intentional version must still
+  validate OIDC publication and provenance.
 - There are no verified external integrations, paying customers, recurring
   revenue, or official endorsement in the checked evidence.
 - No proprietary threat-data flywheel, independent conformance program,
