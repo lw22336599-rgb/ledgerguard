@@ -9,6 +9,8 @@ const TARGET_URL =
   "https://ledgerguard-gules.vercel.app/v1/paid/network-risk";
 const SECRET_FILE = resolve(".env.x402-buyer.local");
 const EVIDENCE_FILE = resolve("tmp/x402-payment-evidence.json");
+const ARC_TESTNET_CHAIN_ID = 5_042_002;
+const PRIVATE_KEY_PATTERN = /^0x[0-9a-fA-F]{64}$/;
 
 export const EXPECTED = Object.freeze({
   network: "eip155:5042002",
@@ -42,6 +44,23 @@ export function assertRequirements(requirements) {
   }
 }
 
+export function parseBuyerSecret(contents) {
+  const match = /^X402_BUYER_PRIVATE_KEY=(0x[0-9a-fA-F]{64})\r?\n?$/.exec(
+    contents,
+  );
+  if (!match || !PRIVATE_KEY_PATTERN.test(match[1])) {
+    fail("Buyer secret file is malformed.");
+  }
+  return match[1];
+}
+
+export async function assertArcTestnetClient(client) {
+  const chainId = await client.publicClient.getChainId();
+  if (chainId !== ARC_TESTNET_CHAIN_ID || client.chainName !== "arcTestnet") {
+    fail("Buyer RPC is not Arc Testnet; refusing to continue.");
+  }
+}
+
 async function getRequirements() {
   const response = await fetch(TARGET_URL, { redirect: "error" });
   if (response.status !== 402) fail(`Expected HTTP 402, received ${response.status}.`);
@@ -58,9 +77,7 @@ async function getRequirements() {
 
 function initializeWallet() {
   if (existsSync(SECRET_FILE)) {
-    const line = readFileSync(SECRET_FILE, "utf8").trim();
-    const privateKey = line.split("=", 2)[1];
-    if (!privateKey) fail("Existing buyer secret file is malformed.");
+    const privateKey = parseBuyerSecret(readFileSync(SECRET_FILE, "utf8"));
     return { created: false, address: privateKeyToAccount(privateKey).address };
   }
   const privateKey = generatePrivateKey();
@@ -78,6 +95,9 @@ function getClient() {
     fail(
       "Buyer key is unavailable. Run `npm run x402:buyer:init`, then rerun with the local env file.",
     );
+  }
+  if (!PRIVATE_KEY_PATTERN.test(privateKey)) {
+    fail("Buyer key is malformed.");
   }
   return new GatewayClient({
     chain: "arcTestnet",
@@ -113,6 +133,7 @@ async function main() {
   }
 
   const client = getClient();
+  await assertArcTestnetClient(client);
   const before = await client.getBalances();
   const nativeBalance = await client.publicClient.getBalance({
     address: client.address,

@@ -20,6 +20,11 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
   validation. It has not been published because Registry login and acceptance
   of its terms remain owner-controlled actions.
 - The public repository is MIT licensed.
+- A project-party Arc Testnet x402 run on 2026-08-04 completed the `402` challenge,
+  Circle Gateway test settlement, paid resource delivery, and durable ledger
+  write. The sanitized evidence is recorded at
+  `artifacts/verification/x402-payment-evidence-2026-08-04.json`. This is
+  valueless testnet engineering evidence, not a customer payment or revenue.
 - A protocol-neutral control envelope, Risk Signal Profile v1 draft,
   machine-readable self-test fixtures, and privacy-safe telemetry schema exist.
 - A project-party Base Mainnet self-test recorded four successful transactions
@@ -36,6 +41,9 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
   `0xA0Fef5776E934ad8798298cc53de1749B62Ca0b9` has not been reconciled here with
   the owner's declared settlement address. Do not market revenue until control
   and accounting ownership are confirmed.
+- The same configured seller address was used by the 2026-08-04 Arc Testnet
+  payment proof. Successful delivery does not establish who controls that
+  address; production charging remains gated on address-control reconciliation.
 - CDP Bazaar indexing is false in the live candidate response.
 - The Circle/Questbook page evidence does not verify a submitted proposal.
 - npm Trusted Publishing is not yet proven by a successful release. The
