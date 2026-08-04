@@ -1,21 +1,29 @@
 /**
  * LedgerGuard 15-Scene Integration Library (master demo).
  * Each scene: build real calldata -> call engine preflight -> print decision.
- * Scenes 1-3 live in their own dirs (agent-mcp / ecommerce-checkout /
- * subscription-billing). Scenes 4-15 are here. All call the REAL engine.
- * VERIFIED: runs against live engine (2026-08-04).
+ * All scenes call the real engine. The default is Arc Testnet so the example
+ * remains runnable while Base Mainnet is deliberately fail-closed.
  *
  * Run:  node examples/integrations/run-all-scenarios.mjs
  * Env:  LEDGERGUARD_URL (default http://localhost:3000)
+ *       LEDGERGUARD_NETWORK (arcTestnet or baseMainnet)
  */
 import { LedgerGuardClient } from "@ledgerguard1/sdk";
 import { getAddress } from "viem";
 
 const baseUrl = process.env.LEDGERGUARD_URL ?? "http://localhost:3000";
 const guard = new LedgerGuardClient({ baseUrl });
+const network = process.env.LEDGERGUARD_NETWORK ?? "arcTestnet";
+const assets = {
+  arcTestnet: "0x3600000000000000000000000000000000000000",
+  baseMainnet: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+};
+if (!(network in assets)) {
+  throw new Error(`Unsupported LEDGERGUARD_NETWORK: ${network}`);
+}
 
 const BUYER = getAddress("0xF1437d9CD304aE49f2ec005AC967813B3a7c466c");
-const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const USDC = assets[network];
 const MERCHANT = getAddress("0x4732d748a7dA766A0192adC2BBefC6041AAF9056");
 
 function transferData(to, amountMicroUsdc) {
@@ -28,7 +36,7 @@ function transferData(to, amountMicroUsdc) {
 
 async function check(name, to, amountMicroUsdc, purpose, extra = {}) {
   const result = await guard.preflight({
-    network: "baseMainnet",
+    network,
     from: BUYER,
     to: USDC,
     data: transferData(to, amountMicroUsdc),
@@ -53,7 +61,16 @@ async function check(name, to, amountMicroUsdc, purpose, extra = {}) {
   return result;
 }
 
-console.log("=== LedgerGuard 15-Scene Integration Library (live engine) ===\n");
+console.log(`=== LedgerGuard 15-Scene Integration Library (${network}) ===\n`);
+
+// 1. AI agent payment
+await check("1.agent-payment", MERCHANT, 150000, "agent tool payment");
+
+// 2. Ecommerce checkout
+await check("2.ecommerce", MERCHANT, 3_500_000, "checkout order 1001");
+
+// 3. Subscription billing
+await check("3.subscription", MERCHANT, 1_200_000, "monthly subscription");
 
 // 4. Content Paywall
 await check("4.content-paywall", MERCHANT, 250000, "unlock article");
@@ -91,14 +108,14 @@ await check("14.auction-deposit", MERCHANT, 2_000_000, "auction deposit");
 // 15. Payroll / streaming
 await check("15.payroll-stream", MERCHANT, 8_000_000, "payroll streaming");
 
-console.log("\n--- Security cases (must BLOCK) ---");
+console.log("\n--- Security cases (must not ALLOW) ---");
 // Zero address recipient — must block
 await check("zero-address", "0x0000000000000000000000000000000000000000", 100000, "burn");
 // Seed blacklist check
-await check("seed-address", "0xdead00000000000000000000000000000000dead", 100000, "seed test");
+await check("burn-address", "0x000000000000000000000000000000000000dEaD", 100000, "burn-address test");
 // Mismatched intent (claims A but pays B)
 const mismatch = await guard.preflight({
-  network: "baseMainnet",
+  network,
   from: BUYER,
   to: USDC,
   data: transferData(MERCHANT, 1000000),

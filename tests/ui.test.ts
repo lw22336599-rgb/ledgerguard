@@ -123,6 +123,8 @@ describe("browser demo experience", () => {
 
     expect(portalHtml).toContain("https://x.com/HuiLibaa");
 
+    expect(portalHtml).not.toMatch(/\sstyle=/);
+
     expect(developerDocsHtml).toContain('href="/developer"');
 
     expect(developerDocsHtml).toContain('href="/docs/integration"');

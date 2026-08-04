@@ -1,15 +1,21 @@
 /**
- * Tip Jar integration — creator receives tips, engine checks recipient safety.
- * Real engine call. VERIFIED 2026-08-04.
+ * Tip Jar integration — check recipient safety before a creator tip is signed.
+ * Defaults to Arc Testnet while production networks remain fail-closed.
  */
 import { LedgerGuardClient } from "@ledgerguard1/sdk";
 import { getAddress } from "viem";
 
 const baseUrl = process.env.LEDGERGUARD_URL ?? "http://localhost:3000";
 const guard = new LedgerGuardClient({ baseUrl });
+const network = process.env.LEDGERGUARD_NETWORK ?? "arcTestnet";
+const assets = {
+  arcTestnet: "0x3600000000000000000000000000000000000000",
+  baseMainnet: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+};
+if (!(network in assets)) throw new Error(`Unsupported network: ${network}`);
 
 const TIPPER = getAddress("0xF1437d9CD304aE49f2ec005AC967813B3a7c466c");
-const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const USDC = assets[network];
 const CREATOR = getAddress("0x4732d748a7dA766A0192adC2BBefC6041AAF9056");
 
 async function sendTip(creator, amountMicroUsdc) {
@@ -19,7 +25,7 @@ async function sendTip(creator, amountMicroUsdc) {
     amountMicroUsdc.toString(16).padStart(64, "0");
 
   const result = await guard.preflight({
-    network: "baseMainnet",
+    network,
     from: TIPPER,
     to: USDC,
     data,

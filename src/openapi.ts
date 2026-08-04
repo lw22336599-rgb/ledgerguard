@@ -353,6 +353,19 @@ export const openApiDocument = {
         },
       },
     },
+    "/v1/bazaar-candidate": {
+      get: {
+        summary: "Inspect the Base Sepolia x402 Bazaar discovery candidate",
+        description:
+          "Reports fail-closed configuration, settlement, and indexing evidence. A ready endpoint is not claimed as indexed until a real testnet settlement and Bazaar search proof exist.",
+        responses: {
+          "200": {
+            description:
+              "Public discovery-candidate metadata without credentials or secrets",
+          },
+        },
+      },
+    },
     "/v1/paid/evidence": {
       post: {
         summary: "Purchase a strict Arc transaction evidence receipt with x402",

@@ -463,7 +463,7 @@ export const portalHtml = `${pageHead(
           <p class="muted">Metered billing, paywalls, NFT mints, game items — every transfer passes the same safety review.</p>
         </article>
       </div>
-      <p class="portal-trust-list" style="margin-top: 1.25rem"><a href="https://github.com/lw22336599-rgb/ledgerguard/tree/main/examples/integrations">See the 15-scene integration library on GitHub</a> &middot; <a href="/docs">API docs</a> &middot; <a href="/catalog">Pricing</a></p>
+      <p class="portal-trust-list portal-trust-list-spaced"><a href="https://github.com/lw22336599-rgb/ledgerguard/tree/main/examples/integrations">See the 15-scene integration library on GitHub</a> &middot; <a href="/docs">API docs</a> &middot; <a href="/catalog">Pricing</a></p>
     </section>
     ${footer}
   </main>${portalPageScripts()}
@@ -932,6 +932,7 @@ nav{min-height:80px;gap:24px;border-color:var(--line)}
 .portal-network-note{max-width:640px;margin:0 0 22px;color:var(--muted);line-height:1.65;font-size:15px}
 .portal-network-note a{color:var(--link)}
 .portal-trust-list{margin:16px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+.portal-trust-list-spaced{margin-top:1.25rem}
 .portal-primary-cta{display:inline-flex;align-items:center;justify-content:center;min-width:240px;padding:16px 24px;font-size:17px;font-weight:800;text-decoration:none;background:var(--brand);color:#fff;box-shadow:0 12px 32px #2563eb33;border-radius:10px}
 .portal-primary-cta:hover{filter:brightness(1.05)}
 .portal-dual-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}

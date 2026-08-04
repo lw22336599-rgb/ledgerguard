@@ -14,11 +14,16 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
 - The public repository is MIT licensed.
 - A protocol-neutral control envelope, Risk Signal Profile v1 draft,
   machine-readable self-test fixtures, and privacy-safe telemetry schema exist.
+- A project-party Base Mainnet self-test recorded four successful transactions
+  and returned its test USDC. This proves only that the preflight and ordinary
+  onchain transfer path can be exercised; it is not an x402 settlement,
+  customer payment, or revenue.
 
 ## Not yet proven
 
-- No verified Base Mainnet settle-deliver-reconcile run is recorded in this
-  repository. A 402 response alone is not settlement proof.
+- No verified Base Mainnet x402 settle-deliver-reconcile run is recorded in
+  this repository. A 402 response and a separate wallet self-transfer are not
+  settlement proof.
 - The configured Base seller address
   `0xA0Fef5776E934ad8798298cc53de1749B62Ca0b9` has not been reconciled here with
   the owner's declared settlement address. Do not market revenue until control
@@ -32,19 +37,21 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
   upstream x402 standard acceptance, or enforceable certification mark has
   been proven.
 
-## Local real-fund incident
+## Real-fund test incident and quarantine
 
-Untracked local files record a project-wallet Base Mainnet self-transfer run on
-2026-08-04. Read-only RPC checks confirmed that the five listed transaction
-receipts succeeded. The run was project-party testing, not an external customer
-payment, and its own record reports 1 USDC stranded after an ephemeral test key
-was lost. The real-fund scripts are quarantined by `.gitignore` and must not be
-run, committed, scheduled, or used as commercial evidence.
+Repository evidence records project-wallet Base Mainnet self-transfer tests on
+2026-08-04. The latest run returned its test USDC, but the evidence also reports
+historical stranded funds. The v3 helper derived a temporary key from public
+inputs, so that temporary address is permanently unsafe after publication and
+must never receive assets. The tracked helper is now read-only; no repository
+script may sign, fund, transfer, reconstruct keys, or be scheduled. These tests
+are project-party engineering evidence, not external adoption or revenue.
 
 ## Release provenance
 
 - GitHub `main` and the reviewed local code revision were synchronized at
-  `ddfde4467cff89a2d931b895cbed7721175f132a` on 2026-08-04.
+  `0875f8659516ee23cb19e8ec1742d2bdb8590c6e` before the current remediation
+  batch on 2026-08-04.
 - GitHub CI run `30887364243` completed successfully for that revision.
 - Production smoke run `30887375752` completed successfully. Its Arc 5042
   shadow observation was degraded and safely closed because an official or

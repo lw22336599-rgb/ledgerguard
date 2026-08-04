@@ -51,6 +51,18 @@ describe("threat-intel pure checks", () => {
     expect(hasValidEip55(canonical)).toBe(true);
   });
 
+  it("accepts valid mixed-case checksums produced by viem", () => {
+    const addresses = [
+      getAddress("0xf1437d9cd304ae49f2ec005ac967813b3a7c466c"),
+      getAddress("0x4732d748a7da766a0192adc2bbefc6041aaf9056"),
+    ];
+
+    for (const address of addresses) {
+      expect(hasValidEip55(address)).toBe(true);
+      expect(checkAddressThreats(address).some((finding) => finding.code === "EIP55_CHECKSUM_INVALID")).toBe(false);
+    }
+  });
+
   it("rejects a mixed-case address with an invalid EIP-55 checksum", () => {
     expect(hasValidEip55("0x52908400098527886E0F7030069857D2E4169Ee7")).toBe(false);
   });

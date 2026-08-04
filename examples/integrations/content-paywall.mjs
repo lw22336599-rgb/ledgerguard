@@ -1,16 +1,21 @@
 /**
- * Content Paywall integration — unlock paid article/video after preflight passes.
- * Real engine call against localhost:3000 (or deployed URL).
- * VERIFIED: runs against live engine (2026-08-04).
+ * Content Paywall integration — check an article/video payment before signing.
+ * Defaults to Arc Testnet while production networks remain fail-closed.
  */
 import { LedgerGuardClient } from "@ledgerguard1/sdk";
 import { getAddress } from "viem";
 
 const baseUrl = process.env.LEDGERGUARD_URL ?? "http://localhost:3000";
 const guard = new LedgerGuardClient({ baseUrl });
+const network = process.env.LEDGERGUARD_NETWORK ?? "arcTestnet";
+const assets = {
+  arcTestnet: "0x3600000000000000000000000000000000000000",
+  baseMainnet: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+};
+if (!(network in assets)) throw new Error(`Unsupported network: ${network}`);
 
 const BUYER = getAddress("0xF1437d9CD304aE49f2ec005AC967813B3a7c466c");
-const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const USDC = assets[network];
 const CONTENT_WALLET = getAddress("0x4732d748a7dA766A0192adC2BBefC6041AAF9056");
 
 async function unlockContent(articleId, priceMicroUsdc) {
@@ -20,7 +25,7 @@ async function unlockContent(articleId, priceMicroUsdc) {
     priceMicroUsdc.toString(16).padStart(64, "0");
 
   const result = await guard.preflight({
-    network: "baseMainnet",
+    network,
     from: BUYER,
     to: USDC,
     data,
