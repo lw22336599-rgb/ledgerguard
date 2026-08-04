@@ -116,6 +116,11 @@ Content-Type: application/json
 
 LedgerGuard POSTs `preflight.completed` events with `X-LedgerGuard-Request-Id`. Evidence webhooks are planned for a future release.
 
+Outbound delivery is fail-closed. The operator must add the exact hostname to
+`DEVELOPER_WEBHOOK_ALLOWED_HOSTS`; an empty allowlist disables registration and
+delivery. This prevents tenant-controlled URLs from becoming an unrestricted
+server-side request primitive.
+
 ## Base USDC (Plan B, API only)
 
 When `BASE_PREFLIGHT_ENABLED=true`, `baseMainnet` appears in `/v1/network-adapters`. Guard Link UI stays Arc-only.

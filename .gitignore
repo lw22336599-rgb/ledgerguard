@@ -33,3 +33,9 @@ scripts/start-chrome-debug.ps1
 # Real-fund self-test material is local quarantine, never a release artifact.
 scripts/mainnet-self-test*.mjs
 artifacts/verification/mainnet-self-test-*.json
+private/
+scripts/launch-grant-community.mjs
+scripts/post-r1-tweet.mjs
+scripts/run-promo-launch.ps1
+scripts/open-desktop-chrome-ops.ps1
+scripts/open-promo-pages.ps1

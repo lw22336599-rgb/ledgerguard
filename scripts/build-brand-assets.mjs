@@ -101,6 +101,13 @@ const faviconPng = await sharp(brandCanvas)
   })
   .png({ compressionLevel: 9, palette: true })
   .toBuffer();
+const brandMark64 = await sharp(brandCanvas)
+  .resize(64, 64, {
+    fit: "contain",
+    background: { r: 255, g: 255, b: 255, alpha: 1 },
+  })
+  .png({ compressionLevel: 9, palette: true })
+  .toBuffer();
 const faviconIco = await sharp(brandCanvas)
   .resize(32, 32, {
     fit: "contain",
@@ -130,6 +137,7 @@ export const faviconPngBase64 = ${JSON.stringify(faviconPng.toString("base64"))}
 export const faviconIcoBase64 = ${JSON.stringify(faviconIco.toString("base64"))};
 export const faviconSvg = ${JSON.stringify(faviconSvg)};
 export const brandMarkBase64 = ${JSON.stringify(faviconPng.toString("base64"))};
+export const brandMark64Base64 = ${JSON.stringify(brandMark64.toString("base64"))};
 `;
 await writeFile(join(generatedDir, "brand-assets.ts"), generated, "utf8");
 

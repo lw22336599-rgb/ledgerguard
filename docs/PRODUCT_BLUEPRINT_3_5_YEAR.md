@@ -49,7 +49,7 @@ Ordinary users should not type raw addresses and policy limits. A merchant,
 wallet, or agent pre-fills the intent; the user reviews plain language and opens
 technical evidence only when needed.
 
-## Five durable assets
+## Eight durable assets
 
 1. A stable, protocol-neutral control envelope.
 2. Deterministic policy and evidence conformance tests.
@@ -57,6 +57,12 @@ technical evidence only when needed.
 4. Hosted operational data and evidence history.
 5. Distribution through wallets, agent frameworks, payment providers, and
    implementation partners.
+6. An opt-in, privacy-safe data flywheel with provenance, labels, corrections,
+   and measured false-positive and false-negative rates.
+7. A versioned risk-signal profile, public conformance fixtures, and upstream
+   protocol-extension participation earned through independent adoption.
+8. An enforceable LedgerGuard brand and certification program introduced only
+   after independent testing and governance gates exist.
 
 ## Phased execution
 
@@ -66,6 +72,8 @@ technical evidence only when needed.
 - remove contradictory claims and quarantine invalid evidence;
 - restore green tests, build, dependency audit, smoke, and release provenance;
 - publish the canonical envelope and contribution rules;
+- publish the risk-signal draft, self-test fixtures, and privacy-safe telemetry
+  contract without claiming standard ownership or certification;
 - obtain three external developer integrations, one repeat user, and one
   written paid-pilot signal.
 
@@ -78,6 +86,8 @@ Gate: remain public preview / HOLD if external use and payment intent are absent
 - durable tenant, usage, evidence, and billing records;
 - two production-quality adapters chosen by buyer demand, not hype;
 - measured activation, protected transactions, repeat use, and conversion.
+- opt-in outcome feedback with data provenance, deletion, correction, and
+  baseline precision/recall reporting.
 
 Gate: no broad mainnet marketing until a bounded settlement, rollback, and
 reconciliation test is independently reproducible.
@@ -88,6 +98,8 @@ reconciliation test is independently reproducible.
 - adapter conformance kit and partner implementation program;
 - threat-data and identity integrations with provenance and freshness controls;
 - paid OEM pilots with wallets, agents, or payment platforms.
+- prototype a thin x402 risk-signal extension and seek upstream review; claim
+  standards influence only after public acceptance and independent use.
 
 Gate: add a new rail only when an integration partner or repeated inbound demand
 justifies its maintenance cost.
@@ -98,6 +110,8 @@ justifies its maintenance cost.
 - paid certification, managed hosting, and OEM distribution;
 - cash bounties and implementation-partner revenue for contributors;
 - protocol mappings maintained as thin adapters around the stable core.
+- launch a LedgerGuard Conformant mark only after the gates in
+  `CONFORMANCE.md` pass.
 
 ### Horizon 4: 3-5 year option
 

@@ -22,6 +22,8 @@ import {
 
   integrationStackHtml,
 
+  mainnetCanaryHtml,
+
   portalHtml,
 
   siteCss,
@@ -47,6 +49,13 @@ import {
 
 
 describe("browser demo experience", () => {
+
+  it("labels the real-fund canary as experimental without production claims", () => {
+    expect(mainnetCanaryHtml).toContain("CONTROLLED CANARY");
+    expect(mainnetCanaryHtml).toContain("EXPERIMENTAL");
+    expect(mainnetCanaryHtml).not.toContain("PRODUCTION READY");
+    expect(mainnetCanaryHtml).not.toContain("All production gates");
+  });
 
   it("invalidates the displayed result when inputs change", () => {
 
@@ -596,9 +605,11 @@ describe("browser demo experience", () => {
 
     expect(aboutHtml).toContain("Arc-first");
 
-    expect(aboutHtml).toContain("live and operational");
+    expect(aboutHtml).toContain("separately gated canary");
 
-    expect(aboutHtml).not.toContain("bounded x402 capability demo");
+    expect(aboutHtml).toContain("disabled by default");
+
+    expect(aboutHtml).not.toContain("live and operational");
 
     expect(aboutHtml).toContain("independent developer project");
 

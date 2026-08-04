@@ -29,6 +29,13 @@ into the public reference deployment:
 - managed adapter updates, reliability targets, support, and OEM integration;
 - independently reviewed conformance and certification services.
 
+New enterprise policy, private threat graphs, licensed or consented data,
+proprietary features and models, customer-specific configuration, and hosted
+operations must be developed in a separate private repository and data plane.
+They must not be committed to this MIT repository. Interoperability schemas,
+SDKs, receipt verification, public fixtures, and conformance tests remain open
+so that integrations can be independently verified.
+
 The moat is service quality, maintained data, integrations, evidence, and
 distribution. It is not a false claim that deterministic rules already visible
 in this MIT repository are closed source.
@@ -43,9 +50,9 @@ closed when the configured policy requires certainty.
 ## Contribution and certification
 
 Community adapters can be proposed through pull requests. Inclusion in the
-reference repository requires tests and review. “LedgerGuard Conformant” or
-“LedgerGuard Certified” labels are separate claims and require the criteria in
-`GOVERNANCE.md`; self-publishing a plugin does not grant either label.
+reference repository requires tests and review. `LedgerGuard Conformant` and
+`LedgerGuard Certified` remain reserved; the current program permits only the
+exact self-test wording defined in `CONFORMANCE.md`.
 
 ## Honest claims
 

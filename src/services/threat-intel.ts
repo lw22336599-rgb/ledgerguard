@@ -10,8 +10,9 @@
  * - No fabricated data: the seed blacklist only contains publicly known
  *   malicious addresses added via documented sources.
  *
- * @see docs/OPEN_SOURCE_POLICY.md — engine layer stays closed-source;
- * this module is part of the hosted oracle engine.
+ * This deterministic baseline is part of the public MIT reference core.
+ * Maintained private datasets, customer policy, and hosted scoring models are
+ * separate commercial assets and are not claimed to exist in this module.
  */
 
 import { getAddress, keccak256, toBytes } from "viem";

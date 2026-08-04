@@ -12,6 +12,8 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
   gates enabled.
 - npm package `@ledgerguard1/sdk` version `0.1.0` exists.
 - The public repository is MIT licensed.
+- A protocol-neutral control envelope, Risk Signal Profile v1 draft,
+  machine-readable self-test fixtures, and privacy-safe telemetry schema exist.
 
 ## Not yet proven
 
@@ -26,6 +28,9 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
 - npm version `0.1.1` was not published by the recorded automation.
 - There are no verified external integrations, paying customers, recurring
   revenue, or official endorsement in the checked evidence.
+- No proprietary threat-data flywheel, independent conformance program,
+  upstream x402 standard acceptance, or enforceable certification mark has
+  been proven.
 
 ## Local real-fund incident
 
@@ -46,6 +51,6 @@ clean, reproducible, reviewed, pushed, and deployed with provenance.
 ## Allowed public wording
 
 > LedgerGuard is a non-custodial transaction-intent control layer in public
-> preview. Arc Testnet preflight and evidence are live. A bounded Base Mainnet
-> x402 challenge is enabled, while independently reproducible settlement and
-> external commercial adoption remain unproven.
+> preview. Arc Testnet preflight and evidence are live. A Base Mainnet adapter
+> exists behind separate fail-closed gates, while independently reproducible
+> settlement and external commercial adoption remain unproven.

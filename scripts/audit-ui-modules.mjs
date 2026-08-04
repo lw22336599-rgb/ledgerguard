@@ -14,7 +14,7 @@ const pages = [
   { path: "/", name: "home", marker: "Send and receive USDC" },
   { path: "/guard/create", name: "guard-create", marker: "Create a payment link." },
   { path: "/pay", name: "pay", marker: "Pay with USDC" },
-  { path: "/canary", name: "canary", marker: "Pay with Base Mainnet USDC." },
+  { path: "/canary", name: "canary", marker: "Controlled Base Mainnet payment canary.", optional503: true },
   { path: "/docs", name: "docs", marker: "API documentation" },
   { path: "/developer", name: "developer", marker: "Developer Console" },
   { path: "/status", name: "status", marker: "LIVE STATUS" },
@@ -37,6 +37,8 @@ const assets = [
   "/pay.js",
   "/mainnet-canary.js",
   "/favicon.svg",
+  "/brand/logo-64.png",
+  "/brand/logo-192.png",
   "/marketing/hero-guard-builder.png",
   "/marketing/step-create.png",
   "/marketing/step-payment.png",
@@ -73,7 +75,11 @@ for (const page of pages) {
     const entry = {
       path: page.path,
       status: res.status,
-      ok: page.expect404 ? res.status === 404 : res.status === 200,
+      ok: page.expect404
+        ? res.status === 404
+        : page.optional503
+          ? res.status === 200 || res.status === 503
+          : res.status === 200,
       hasPortalNav: html.includes('class="portal-nav"'),
       hasFooter: html.includes("site-footer"),
       hasMarker: page.marker ? html.includes(page.marker) : null,
@@ -87,6 +93,10 @@ for (const page of pages) {
       } else {
         pass(`${page.path} correctly missing (404)`);
       }
+      continue;
+    }
+    if (page.optional503 && res.status === 503) {
+      pass(`${page.path} safely disabled (503)`);
       continue;
     }
     if (res.status !== 200) {
@@ -140,15 +150,37 @@ async function auditViewport(label, viewport, isMobile) {
     deviceScaleFactor: 2,
   });
   const page = await context.newPage();
+  if (baseUrl.startsWith("http://127.0.0.1") || baseUrl.startsWith("http://localhost")) {
+    await page.route("**/_vercel/insights/**", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/javascript",
+        body: "/* Vercel Insights is unavailable in local audits. */",
+      }),
+    );
+  }
   const errors = [];
   page.on("console", (msg) => {
-    if (msg.type() === "error") errors.push({ page: label, text: msg.text() });
+    if (msg.type() === "error" && !msg.text().includes("Failed to load resource")) {
+      errors.push({ page: label, text: msg.text() });
+    }
+  });
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push({
+        page: label,
+        text: `HTTP ${response.status()} ${response.url()}`,
+      });
+    }
   });
   page.on("pageerror", (err) => {
     errors.push({ page: label, text: err.message });
   });
 
-  for (const p of pages.filter((x) => !x.expect404)) {
+  const availablePaths = new Set(
+    report.http.filter((entry) => entry.status === 200).map((entry) => entry.path),
+  );
+  for (const p of pages.filter((x) => !x.expect404 && availablePaths.has(x.path))) {
     await page.goto(`${baseUrl}${p.path}`, {
       waitUntil: "networkidle",
       timeout: 90_000,

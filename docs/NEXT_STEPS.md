@@ -1,56 +1,52 @@
-# Next steps (English checklist)
+# Verified next steps
 
-Last updated: 2026-07-31
+Last updated: 2026-08-04
 
-## Phase A — Remediation package (repository)
+LedgerGuard remains a testnet product and a production candidate. No public document or UI may imply that a mainnet payment loop, customer demand, revenue, ecosystem endorsement, certification, or grant has been verified unless reproducible evidence is linked.
 
-- [x] P0+P1 product scope shipped and deployed  
-- [x] `@ledgerguard1/sdk@0.1.1` code ready on main (hosted-API client; see OPEN_SOURCE_POLICY) — **npm publish pending 2FA**  
-- [x] **150** automated tests passing  
-- [x] `/integrations`, `/v1/can-sign`, webhooks, integration docs live  
-- [x] `examples/quickstart.mjs` uses `@ledgerguard1/sdk`  
-- [x] `docs/PREFLIGHT_RECORD_MAPPING.md` (x402 draft compatibility)  
-- [x] `docs/NETWORK_ADAPTER_SPEC.md`  
-- [x] `docs/GUARD_LINK_FORMAT.md`  
-- [x] `docs/OPEN_SOURCE_POLICY.md`  
-- [x] `docs/WALLET_EXCHANGE_INTEGRATION.md`  
-- [x] Footer partners row (x402 / Arc / Base demo); homepage + `/docs` narrative  
-- [x] `docs/MESSAGING_AND_CLAIMS.md` aligned to payment intent safety API  
+## Release gate
 
-## Phase B — You must do manually (security + traffic)
+- [x] Deterministic preflight and evidence core
+- [x] Fail-closed network configuration
+- [x] Privacy-safe opt-in telemetry schema
+- [x] Public Risk Signal Profile draft and self-test fixtures
+- [x] SDK pack and conformance checks in CI
+- [ ] Independent security review with no unresolved critical findings
+- [ ] One complete testnet settle-deliver-reconcile trace
+- [ ] Three independent developer integrations
+- [ ] One integration repeats use on at least two separate days
+- [ ] One written paid-pilot or subscription commitment
 
-- [ ] Revoke exposed npm tokens; regenerate 2FA recovery codes — see `docs/SECURITY_CREDENTIAL_ROTATION.md`  
-- [ ] Publish `@ledgerguard1/sdk@0.1.1` — `node scripts/publish-sdk.mjs` (needs npm 2FA OTP in browser, or granular `NPM_TOKEN`)  
-- [ ] Submit Circle Grant — **Cohort 2 Open** — direct URL in `docs/QUESTBOOK_GRANT_URL.md` (wallet connect + onchain sign required)  
-- [ ] Post outreach — copy from `docs/outreach/`  
+Until all unchecked items are evidenced, status is **HOLD for public mainnet activation**.
 
-## Phase C — Primary goal: first external integration
+## Product priorities
 
-- [ ] Send `docs/DEVELOPER_INTEGRATION_INVITE.md` to 3–5 Arc / agent / x402 builders  
-- [ ] Receive one GitHub issue via **Independent integration evidence** template  
-- [ ] Update public claim from 0 → 1 verified integration (after issue review)  
+1. Make Guard Link understandable without blockchain expertise.
+2. Produce signed, replay-resistant evidence receipts.
+3. Collect only consented, derived telemetry; never store raw addresses or transaction payloads in the shared learning dataset.
+4. Publish a versioned, vendor-neutral risk vocabulary and conformance fixtures.
+5. Validate distribution through wallet, agent, merchant, and x402 integrations.
 
-## Optional engineering
+## Moat gates
 
-- [ ] Enable Base preflight on Vercel: `BASE_PREFLIGHT_ENABLED=true` (API only)  
-- [ ] Review GitHub Dependabot alerts (2 open on default branch)  
-- [ ] Bump SDK to `0.1.1` when API changes ship  
+- **Data flywheel:** no claim until opt-in records improve a measured benchmark against a fixed holdout set.
+- **Standards position:** no claim of authority; require a public proposal, independent implementation, and upstream or ecosystem review.
+- **Brand conformance:** use only “self-tested against LedgerGuard Risk Signal Profile v1” until trademark rules, independent testing, issuance, expiry, and revocation exist.
+- **Closed-source assets:** enterprise controls, proprietary datasets, trained models, hosted operations, and SLA tooling belong in a separate private repository. Interoperability specifications, SDKs, adapters, and conformance fixtures remain public.
 
 ## Explicitly not now
 
-- Domain purchase  
-- Billing / cashier  
-- Guard Link multi-chain  
-- Claims of paying customers, 0.5% platform fee, or “verified merchant” badges  
-- Private “LedgerGuard standard” parallel to x402 PR #2792  
+- Public mainnet activation or real-fund automation
+- Token issuance
+- Custody or transaction signing
+- Paid certification labels
+- Claims of customers, revenue, official support, or protocol ownership
+- Publishing packages, posting publicly, submitting grants, or changing accounts without action-time approval
 
-## Reference links
+## Evidence links
 
-| Resource | URL |
-| --- | --- |
-| Demo | https://ledgerguard-gules.vercel.app |
-| Developer keys | https://ledgerguard-gules.vercel.app/developer |
-| npm SDK | https://www.npmjs.com/package/@ledgerguard1/sdk |
-| Integration issue | https://github.com/lw22336599-rgb/ledgerguard/issues/new?template=integration-test.yml |
-| Grant copy-paste | `docs/GRANT_APPLICATION_COPYPASTE.md` |
-| x402 draft mapping | `docs/PREFLIGHT_RECORD_MAPPING.md` |
+- Project truth: `docs/PROJECT_STATUS.md`
+- Claims policy: `docs/MESSAGING_AND_CLAIMS.md`
+- Conformance policy: `docs/CONFORMANCE.md`
+- Data policy: `docs/DATA_FLYWHEEL_POLICY.md`
+- Open-source boundary: `docs/OPEN_SOURCE_POLICY.md`

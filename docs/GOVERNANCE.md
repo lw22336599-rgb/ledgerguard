@@ -37,10 +37,12 @@ tokens, equity, permanent revenue share, or multi-level commissions.
 
 ## Certification
 
-“Community” means published by its author. “Conformant” means automated tests
-passed for an identified version. “Certified” is reserved for a documented
-security and operational review. Certification can expire when dependencies,
-networks, or protocols change.
+`Community` means published by its author. The current public suite supports
+only `Self-tested against LedgerGuard Risk Signal Profile v1` for a pinned
+commit. `LedgerGuard Conformant` and `LedgerGuard Certified` are reserved until
+the legal, independent-runner, issuance, expiry, appeal, revocation, and
+conflict-of-interest gates in `CONFORMANCE.md` are complete. A test pass alone
+does not grant a brand mark.
 
 ## Release truth
 

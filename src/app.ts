@@ -41,6 +41,7 @@ import { canSignToPreflight } from "./services/can-sign.js";
 import { listNetworkAdapters } from "./adapters/network-adapter.js";
 import {
   deliverDeveloperWebhook,
+  isDeveloperWebhookAllowed,
   type DeveloperWebhookEvent,
 } from "./services/developer-webhook.js";
 import { walletBundle } from "./generated/wallet-bundle.js";
@@ -117,6 +118,8 @@ import {
   faviconIcoBase64,
   faviconPngBase64,
   faviconSvg as generatedFaviconSvg,
+  brandMarkBase64,
+  brandMark64Base64,
 } from "./generated/brand-assets.js";
 import { testnetHelpBundle } from "./generated/testnet-help-bundle.js";
 import { paymentsCheckBundle } from "./generated/payments-check-bundle.js";
@@ -472,6 +475,8 @@ for (const [route, body, contentType] of [
   ["/favicon.svg", generatedFaviconSvg, "image/svg+xml; charset=utf-8"],
   ["/favicon.png", Buffer.from(faviconPngBase64, "base64"), "image/png"],
   ["/favicon.ico", Buffer.from(faviconIcoBase64, "base64"), "image/png"],
+  ["/brand/logo-64.png", Buffer.from(brandMark64Base64, "base64"), "image/png"],
+  ["/brand/logo-192.png", Buffer.from(brandMarkBase64, "base64"), "image/png"],
 ] as const) {
   app.get(route, (context) =>
     context.body(body, 200, {
@@ -764,6 +769,16 @@ app.put("/v1/developer/webhook", async (context) => {
   if (!parsed.success) {
     return context.json(
       { error: "INVALID_REQUEST", issues: parsed.error.issues },
+      400,
+    );
+  }
+  if (parsed.data.url && !isDeveloperWebhookAllowed(parsed.data.url)) {
+    return context.json(
+      {
+        error: "WEBHOOK_DESTINATION_NOT_ALLOWED",
+        message:
+          "This webhook hostname is not in the operator-managed outbound allowlist.",
+      },
       400,
     );
   }

@@ -1,8 +1,0 @@
-{
-  "published": false,
-  "authUrl": "https://www.npmjs.com/auth/cli/***",
-  "doneUrl": "https://registry.npmjs.org/-/v1/done?authId=***",
-  "notes": [
-    "Opened npm OTP auth in existing Chrome — complete 2FA in browser window."
-  ]
-}

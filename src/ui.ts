@@ -584,23 +584,23 @@ export const developerDocsHtml = `${pageHead(
 </html>`;
 
 export const mainnetCanaryHtml = `${pageHead(
-  "LedgerGuard | Base Mainnet x402",
-  "Pay 0.001 USDC on Base Mainnet through live x402 settlement. All production activation gates passed.",
+  "LedgerGuard | Controlled Base Mainnet x402 canary",
+  "A separately approved, bounded real-fund x402 experiment. This is not a production-readiness or revenue claim.",
 )}
 <body>
   <main>
-    ${portalNavHtml("BASE MAINNET LIVE")}
+    ${portalNavHtml("CONTROLLED CANARY", { danger: true })}
     <section class="subhero">
-      <p class="eyebrow">REAL USDC · X402 · PRODUCTION READY</p>
-      <h1 class="compact">Pay with Base Mainnet USDC.</h1>
-      <p class="lead">Connect a Base Mainnet wallet with USDC and ETH for gas. LedgerGuard runs live x402 settlement on Base (0.001 USDC) and delivers a strict evidence receipt. All production gates are enabled and operational.</p>
-      <p class="lead"><strong>Important:</strong> do not use the settlement recipient wallet (<code>0xA0Fef5…Ca0b9</code>) as the payer. Use a different Base Mainnet account that holds USDC and ETH for gas.</p>
+      <p class="eyebrow">REAL USDC &middot; X402 &middot; EXPERIMENTAL</p>
+      <h1 class="compact">Controlled Base Mainnet payment canary.</h1>
+      <p class="lead">This separately approved page tests a bounded x402 payment and evidence response. It does not prove production readiness, customer demand, revenue, or independent security review.</p>
+      <p class="lead"><strong>Important:</strong> use only a separately controlled payer account and verify the exact recipient, amount, network, and gas in the wallet before signing.</p>
     </section>
     <section class="panel builder-panel">
       <div class="wallet-buttons">
         <button id="canary-switch" type="button" class="secondary">Switch to Base Mainnet</button>
         <button id="canary-connect" type="button" class="secondary">Connect Base wallet</button>
-        <button id="canary-pay" type="button" disabled>Pay 0.001 USDC on Base Mainnet</button>
+        <button id="canary-pay" type="button" disabled>Run bounded real-USDC canary</button>
       </div>
       <p id="canary-status" class="muted">Start by switching MetaMask from Base Sepolia to Base Mainnet. LedgerGuard never receives your private key.</p>
       <section id="canary-result" class="result neutral" hidden aria-live="polite"></section>
@@ -826,7 +826,7 @@ export const termsHtml = legalPageHtml(
       <h2>Networks and real funds</h2>
       <ul>
         <li><strong>Arc Testnet Guard Links</strong> are the primary product path and use test assets with no financial value.</li>
-        <li><strong>Base Mainnet x402 at <a href="/canary">/canary</a></strong> is live and operational (production gates passed) and can charge real USDC plus gas when you explicitly approve a wallet transaction. It is not a Guard Link.</li>
+        <li><strong>Base Mainnet x402 at <a href="/canary">/canary</a></strong> is a separately gated real-fund experiment and is unavailable by default. A challenge or self-test is not production, revenue, or customer evidence.</li>
         <li>Do not treat testnet activity as revenue, escrow, or production settlement unless a separate written agreement says otherwise.</li>
       </ul>
       <h2>Self-declared identity on Guard Links</h2>
@@ -848,7 +848,7 @@ export const aboutHtml = legalPageHtml(
       <h2>Arc-first product path</h2>
       <p>Our primary battlefield is <strong>Arc Testnet</strong> today. Guard Link creation, sharing, wallet review, and onchain verification all run on Arc. We align with Circle&apos;s Arc and USDC ecosystem rather than spreading effort across every chain at once.</p>
       <h2>Where Base fits</h2>
-      <p><strong>Base Mainnet</strong> x402 USDC is <strong>live and operational</strong> at <a href="/canary">/canary</a> (production gates passed, real USDC settlement). That path is an x402 capability demo, <em>not</em> a Base Guard Link product. We are not building Base Mainnet Guard Links until Arc has real usage and a credible mainnet path.</p>
+      <p><strong>Base Mainnet</strong> x402 is implemented as a separately gated canary at <a href="/canary">/canary</a>, but the public real-fund page is disabled by default. It is an experimental adapter, <em>not</em> a production Guard Link or proof of customer demand.</p>
       <h2>Who we are</h2>
       <p>LedgerGuard is an independent developer project, not a registered company. There is no token, no platform fee on Guard Link transfers, and no claim of paying customers until external evidence exists. Source code is public on <a href="https://github.com/lw22336599-rgb/ledgerguard" rel="noreferrer">GitHub</a>.</p>
       <h2>Contact</h2>

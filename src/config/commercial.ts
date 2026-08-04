@@ -50,6 +50,8 @@ export function getBaseMainnetPriceMicroUsdc(): string {
 
 export function getCommercialCandidate(): CommercialCandidate {
   const requested = process.env.BASE_MAINNET_X402_ENABLED === "true";
+  const publicCanaryApproved =
+    process.env.BASE_MAINNET_PUBLIC_CANARY_ENABLED === "true";
   const releaseApproved =
     process.env.BASE_MAINNET_RELEASE_APPROVAL ===
     "APPROVE_BASE_MAINNET_CANARY";
@@ -83,6 +85,12 @@ export function getCommercialCandidate(): CommercialCandidate {
       id: "explicit-enable",
       passed: requested,
       description: "BASE_MAINNET_X402_ENABLED is explicitly true.",
+    },
+    {
+      id: "public-canary-enable",
+      passed: publicCanaryApproved,
+      description:
+        "BASE_MAINNET_PUBLIC_CANARY_ENABLED separately exposes the real-fund public canary.",
     },
     {
       id: "real-funds-approval",

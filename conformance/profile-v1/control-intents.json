@@ -1,0 +1,58 @@
+{
+  "profile": "ledgerguard-risk-signal-profile-v1",
+  "cases": [
+    {
+      "id": "valid-payment",
+      "valid": true,
+      "intent": {
+        "schemaVersion": "ledgerguard.intent.v1",
+        "id": "intent_conformance_valid",
+        "createdAt": "2026-08-04T00:00:00.000Z",
+        "actor": { "kind": "agent", "id": "conformance-runner" },
+        "operation": {
+          "kind": "payment",
+          "network": "eip155:8453",
+          "to": "0x2222222222222222222222222222222222222222",
+          "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "amountAtomic": "1000",
+          "purpose": "Conformance fixture"
+        }
+      }
+    },
+    {
+      "id": "zero-payment-blocked-at-schema",
+      "valid": false,
+      "intent": {
+        "schemaVersion": "ledgerguard.intent.v1",
+        "id": "intent_conformance_zero",
+        "createdAt": "2026-08-04T00:00:00.000Z",
+        "actor": { "kind": "agent", "id": "conformance-runner" },
+        "operation": {
+          "kind": "payment",
+          "network": "eip155:8453",
+          "to": "0x2222222222222222222222222222222222222222",
+          "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "amountAtomic": "0",
+          "purpose": "Invalid zero payment"
+        }
+      }
+    },
+    {
+      "id": "missing-recipient",
+      "valid": false,
+      "intent": {
+        "schemaVersion": "ledgerguard.intent.v1",
+        "id": "intent_conformance_missing_to",
+        "createdAt": "2026-08-04T00:00:00.000Z",
+        "actor": { "kind": "agent", "id": "conformance-runner" },
+        "operation": {
+          "kind": "payment",
+          "network": "eip155:8453",
+          "asset": "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "amountAtomic": "1000",
+          "purpose": "Missing recipient"
+        }
+      }
+    }
+  ]
+}

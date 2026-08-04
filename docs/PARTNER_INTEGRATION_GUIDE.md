@@ -202,7 +202,7 @@ npm run x402:buyer -- pay
 
 Evidence: `docs/X402_E2E_EVIDENCE.md`.
 
-**Separate:** Base Mainnet x402 is **live** at `/canary` (real USDC, production gates passed) — not an Arc Guard Link product.
+**Separate:** the repository contains a controlled Base Mainnet x402 canary. It is disabled unless every mainnet and public-canary gate is explicitly enabled. Its presence is not evidence of production readiness, demand, revenue, or a completed payment loop.
 
 ---
 

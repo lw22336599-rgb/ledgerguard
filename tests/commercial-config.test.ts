@@ -3,6 +3,7 @@ import { getCommercialCandidate } from "../src/config/commercial.js";
 
 const keys = [
   "BASE_MAINNET_X402_ENABLED",
+  "BASE_MAINNET_PUBLIC_CANARY_ENABLED",
   "BASE_MAINNET_RELEASE_APPROVAL",
   "BASE_MAINNET_CONFIG_APPROVED_SHA256",
   "BASE_MAINNET_PRICE_MICRO_USDC",
@@ -47,6 +48,7 @@ describe("commercial production candidate", () => {
 
     process.env.BASE_MAINNET_RELEASE_APPROVAL =
       "APPROVE_BASE_MAINNET_CANARY";
+    process.env.BASE_MAINNET_PUBLIC_CANARY_ENABLED = "true";
     process.env.CDP_API_KEY_ID = "organizations/example/apiKeys/example";
     process.env.CDP_API_KEY_SECRET = "sensitive";
     process.env.SELLER_ADDRESS =

@@ -24,7 +24,8 @@ Before a one-request real-funds canary:
    route, and adapter version, then copy `configFingerprint` to
    `BASE_MAINNET_CONFIG_APPROVED_SHA256`.
 5. Obtain action-time approval for a real-funds canary and only then set
-   `BASE_MAINNET_RELEASE_APPROVAL=APPROVE_BASE_MAINNET_CANARY` and
+   `BASE_MAINNET_RELEASE_APPROVAL=APPROVE_BASE_MAINNET_CANARY`,
+   `BASE_MAINNET_PUBLIC_CANARY_ENABLED=true`, and
    `BASE_MAINNET_X402_ENABLED=true`.
 6. Execute one bounded buyer request, confirm delivery plus the facilitator
    settlement receipt, and immediately review logs and the recipient balance.

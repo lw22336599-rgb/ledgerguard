@@ -20,6 +20,9 @@ identity.
 | Arc | Arc Testnet preview is live; Arc Mainnet remains disabled. | Arc Mainnet production support or official endorsement. |
 | Base | A Base Mainnet x402 endpoint can issue a payment challenge. | Reproducible settlement, revenue, or production billing. |
 | x402 | LedgerGuard has x402 adapters and testnet delivery evidence. | That LedgerGuard owns the standard or is Bazaar indexed. |
+| Profile | A public LedgerGuard Risk Signal Profile v1 draft and self-test fixtures exist. | That it is an x402 Foundation standard or grants certification. |
+| Data | A privacy-safe opt-in telemetry contract exists. | That a proprietary threat graph, trained model, or accuracy advantage has already been proven. |
+| Brand | LedgerGuard is the project and hosted-service brand. | `LedgerGuard Conformant`, `Certified`, or third-party endorsement before governance gates pass. |
 | Guard Link | A human-readable, time-bounded testnet payment request and review flow exists. | Verified merchant identity, guaranteed safety, or a platform fee. |
 | Evidence | Strict reconciliation can return VERIFIED, MISMATCH, or REVIEW. | That every test transaction reconciled successfully. |
 | Customers | Public preview and self-service developer surfaces exist. | Paying customers, recurring revenue, or enterprise adoption. |
