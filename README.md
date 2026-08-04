@@ -5,8 +5,9 @@ It normalizes a declared payment or transaction intent, applies deterministic po
 before signing, and produces normalized evidence after settlement. Arc, Base, x402,
 MCP, and future payment protocols are adapters around the same core.
 
-Current status: **public preview / Arc Testnet live / Base Mainnet x402 challenge
-enabled but independently reproducible settlement unproven / Arc Mainnet disabled**.
+Current status: **public preview / Arc Testnet live / Base Mainnet adapter
+fail-closed / independently reproducible settlement unproven / Arc Mainnet
+disabled**.
 
 Public demo: **https://ledgerguard-gules.vercel.app**
 

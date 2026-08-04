@@ -42,6 +42,14 @@ describe("developer self-service", () => {
     expect(Date.parse(registration.tenant.expiresAt)).toBeGreaterThan(Date.now());
   });
 
+  it("rejects a missing API key before disclosing durable-store availability", async () => {
+    delete process.env.LEDGERGUARD_STORAGE_BACKEND;
+    resetTenantStoreForTests();
+    const response = await app.request("/v1/developer/integration-proof");
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({ error: "API_KEY_REQUIRED" });
+  });
+
   it("rate limits registration per privacy-preserving client fingerprint", async () => {
     process.env.DEVELOPER_REGISTRATIONS_PER_DAY = "1";
     resetTenantStoreForTests();
@@ -269,7 +277,7 @@ describe("developer self-service", () => {
         })
       ).status,
     ).toBe(503);
-    expect((await app.request("/v1/developer/account")).status).toBe(503);
+    expect((await app.request("/v1/developer/account")).status).toBe(401);
 
     process.env.LEDGERGUARD_STORAGE_BACKEND = "memory";
     resetTenantStoreForTests();

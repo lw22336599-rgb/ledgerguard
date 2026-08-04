@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.lw22336599-rgb/ledgerguard",
+  "title": "LedgerGuard",
+  "description": "Non-custodial intent control and settlement evidence for apps and AI agents.",
+  "repository": {
+    "url": "https://github.com/lw22336599-rgb/ledgerguard",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://ledgerguard-gules.vercel.app/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer followed by the free Sandbox API key created at https://ledgerguard-gules.vercel.app/developer",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

@@ -103,7 +103,8 @@ Use an npm **Granular Access Token** with publish scope, stored as `NPM_TOKEN`:
 
 ## Current status
 
-- Package name: `@ledgerguard1/sdk@0.1.0`
+- Registry version: `@ledgerguard1/sdk@0.1.0`
+- Release candidate: `@ledgerguard1/sdk@0.1.1`
 - npm org: `@ledgerguard1` (owner: `ledgerguard`)
-- npm registry: publish after `npm login` on this machine
-- Local `npm pack` install: **passed** (`npm run test:sdk-pack`)
+- npm registry: **HOLD** until `npm whoami` succeeds on this machine
+- Local `npm pack --dry-run`: **passed** for `0.1.1` on 2026-08-04; package contains only README, package metadata, JavaScript, and declarations

@@ -170,6 +170,33 @@ if (
     `/v1/meta: developer self-service is not durably ready ${JSON.stringify({ meta, ready })}`,
   );
 }
+
+const { body: plans } = await request("/v1/plans");
+const sandboxPlan = plans.plans?.find((plan) => plan.id === "sandbox");
+if (
+  sandboxPlan?.monthlyOperations !== 500 ||
+  sandboxPlan?.monthlyPriceUsd !== 0 ||
+  sandboxPlan?.selfService !== true ||
+  plans.billingStatus !== "validation"
+) {
+  throw new Error(`/v1/plans: public entitlements drifted ${JSON.stringify(plans)}`);
+}
+
+const protectedProof = await fetch(`${baseUrl}/v1/developer/integration-proof`, {
+  signal: AbortSignal.timeout(20_000),
+});
+if (protectedProof.status !== 401) {
+  throw new Error(
+    `/v1/developer/integration-proof: expected unauthenticated request to fail with 401, got ${protectedProof.status}`,
+  );
+}
+
+const canary = await fetch(`${baseUrl}/canary`, {
+  signal: AbortSignal.timeout(20_000),
+});
+if (canary.status !== 503) {
+  throw new Error(`/canary: real-fund public route must fail closed with 503, got ${canary.status}`);
+}
 const shadow = networks.shadows?.find(
   (entry) => entry.name === "arcMainnet5042",
 );

@@ -11,6 +11,11 @@ Snapshot: 2026-08-04. This file is the source for public product claims.
   challenge and the production-candidate endpoint reports its configuration
   gates enabled.
 - npm package `@ledgerguard1/sdk` version `0.1.0` exists.
+- The `0.1.1` SDK candidate passes package dry-run and clean-room installation,
+  but npm authentication is not available in the current release environment.
+- Official MCP Registry metadata in `server.json` passes the Registry publisher
+  validation. It has not been published because Registry login and acceptance
+  of its terms remain owner-controlled actions.
 - The public repository is MIT licensed.
 - A protocol-neutral control envelope, Risk Signal Profile v1 draft,
   machine-readable self-test fixtures, and privacy-safe telemetry schema exist.
@@ -47,21 +52,18 @@ must never receive assets. The tracked helper is now read-only; no repository
 script may sign, fund, transfer, reconstruct keys, or be scheduled. These tests
 are project-party engineering evidence, not external adoption or revenue.
 
-## Release provenance
+## Current release candidate
 
-- GitHub `main`, the reviewed local code, and the production deployment were
-  synchronized at remediation revision
-  `0889384e380b8b41b8886e4fd0f93ad162476706` on 2026-08-04.
-- GitHub CI run `30893216063` completed successfully for that revision.
-- Production smoke run `30893461298` completed successfully. Its Arc 5042
-  shadow observation was degraded and safely closed because an official or
-  independently verified Arc Mainnet RPC/observer was unavailable.
-- The local brand image `artifacts/brand/logo-selected-bold-lg.png` remains a
-  user-owned uncommitted change and is not part of the reviewed release.
+- The candidate passes 194 automated tests, conformance tests, TypeScript
+  checking, production build, SDK clean-room installation, local smoke, and
+  production-dependency audit with zero reported vulnerabilities.
+- The browser acceptance suite passes 31 checks with zero reported UI issues.
+- The release is not considered synchronized until the candidate commit passes
+  GitHub CI and the resulting production deployment passes production smoke.
 
-This removes the earlier source-control drift, but it does not change the
-product gate: public mainnet activation and commercial claims remain **HOLD**
-until the evidence in `docs/NEXT_STEPS.md` exists.
+These checks do not change the product gate: public mainnet activation and
+commercial claims remain **HOLD** until the evidence in `docs/NEXT_STEPS.md`
+exists.
 
 ## Allowed public wording
 

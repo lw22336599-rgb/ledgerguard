@@ -718,12 +718,12 @@ async function authenticatedTenant(
   | { ok: true; tenant: Tenant; apiKey: string }
   | { ok: false; status: 401 | 503; error: string }
 > {
+  const apiKey = bearerApiKey(authorization);
+  if (!apiKey) return { ok: false, status: 401, error: "API_KEY_REQUIRED" };
   const store = getTenantStore();
   if (!store) {
     return { ok: false, status: 503, error: "DURABLE_STORE_UNAVAILABLE" };
   }
-  const apiKey = bearerApiKey(authorization);
-  if (!apiKey) return { ok: false, status: 401, error: "API_KEY_REQUIRED" };
   const tenant = await store.authenticate(apiKey);
   return tenant
     ? { ok: true, tenant, apiKey }
