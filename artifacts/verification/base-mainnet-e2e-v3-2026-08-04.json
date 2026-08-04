@@ -1,0 +1,19 @@
+{
+  "test": "base-mainnet-e2e-loop-v3",
+  "date": "2026-08-04",
+  "network": "baseMainnet (eip155:8453)",
+  "asset": "USDC 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "nature": "project-party real-fund self-test, NOT an external customer payment. Every step executed for real.",
+  "tempWallet": "0xC940A0313955CcAD0d59BE41Af43bE53637CC4F5 (deterministic key, recoverable)",
+  "steps": [
+    { "step": 1, "action": "preflight review", "endpoint": "/v1/preflight", "real": true },
+    { "step": 2, "action": "gas to temp", "txHash": "0x581e59ac5cbc73f2971eb8ad868e9fbf45f399123cd2dcce1298299dffa9c5c0", "status": "success" },
+    { "step": 3, "action": "0.5 USDC source -> temp", "txHash": "0x00bc8432271964b80cc1f412bf2196fe585db0863f6a2a33b09a069b0aad0c11", "status": "success" },
+    { "step": 4, "action": "0.5 USDC temp -> source (return)", "txHash": "0x8fae98ffd0c8a899c71773f5df6ea9da39e2af35625e2bbb170496dfe7476f73", "status": "success", "decoded": "transfer(0xF1437d9C..., 500000)" },
+    { "step": 5, "action": "temp leftover 0.5 USDC -> source (cleanup)", "txHash": "0x934216d18e73139d8fbd95e416d859ca5477c7e85d1673b2608f2e65265f83d0", "status": "success" }
+  ],
+  "result": "REAL-FUND LOOP VERIFIED: preflight -> signed onchain transfer -> confirmed -> funds fully returned to project wallet.",
+  "finalSourceUsdc": "5.5",
+  "finalTempUsdc": "0",
+  "remainingStranded": "1.5 USDC total historical test loss (v1 1.0 to lost ephemeral key + 0.5 to 0x4732d748... no known key), project-assumed."
+}
