@@ -55,17 +55,21 @@ const portalNavLinks = `<a href="/guard/create">Get paid</a><a href="/pay">Pay a
 
 export function portalNavHtml(
   badge = "ARC TESTNET",
-  options?: { danger?: boolean },
+  options?: { danger?: boolean; wallet?: boolean },
 ): string {
   const badgeClass = options?.danger ? "badge danger" : "badge";
+  const walletControls =
+    options?.wallet === false
+      ? ""
+      : `<button id="nav-connect" class="nav-wallet-btn" type="button">Connect Wallet</button>
+        <span id="nav-wallet-display" class="nav-wallet-display"></span>`;
   return `<nav class="portal-nav">
       <a class="brand" href="/"><img class="brand-mark" src="${brandMarkSrc}" alt="" width="44" height="44" decoding="async">LedgerGuard</a>
       <button id="nav-menu-toggle" class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-mobile-panel">Menu</button>
       <div class="portal-nav-links">${portalNavLinks}</div>
       <div id="nav-mobile-panel" class="nav-mobile-panel" aria-label="Mobile navigation">${portalNavLinks}</div>
       <div class="portal-nav-actions">
-        <button id="nav-connect" class="nav-wallet-btn" type="button">Connect Wallet</button>
-        <span id="nav-wallet-display" class="nav-wallet-display"></span>
+        ${walletControls}
         <span class="${badgeClass}">${badge}</span>
       </div>
     </nav>`;
@@ -405,24 +409,25 @@ export const payHtml = `${pageHead(
 
 export const portalHtml = `${pageHead(
   "LedgerGuard | Payment intent safety",
-  "Non-custodial stablecoin payment intent safety on Arc Testnet. Review amount, recipient, and purpose before you sign.",
+  "Independent, open-source stablecoin payment safety on Arc Testnet. Review amount, recipient, and purpose before a wallet signs.",
   "/",
 )}
 <body>
   <main>
-    ${portalNavHtml()}
+    ${portalNavHtml("ARC TESTNET", { wallet: false })}
     <section class="hero portal-hero">
       <div class="portal-hero-grid">
         <div class="portal-hero-copy">
           <p class="eyebrow">${arcPrimaryEyebrow}</p>
-          <h1>Send and receive USDC<br><span>with a simple link.</span></h1>
-          <p class="lead">Payment intent safety: check who gets paid, how much, and why before you approve. No signup. Non-custodial.</p>
+          <h1>Review a stablecoin payment<br><span>before you sign.</span></h1>
+          <p class="lead">LedgerGuard checks who gets paid, how much, and why before a wallet approves. No signup, custody, private keys, or recovery phrases.</p>
           <p class="portal-network-note">${portalHeroNetworkNoteHtml}</p>
           <div class="portal-actions portal-dual-cta">
-            <a class="primary-action portal-primary-cta" href="/guard/create">Get paid</a>
-            <a class="secondary-action portal-secondary-cta" href="/pay">Pay a link</a>
+            <a class="primary-action portal-primary-cta" href="/pay">Review a payment link</a>
+            <a class="secondary-action portal-secondary-cta" href="/guard/create">Create a test request</a>
           </div>
-          <p class="portal-trust-list"><a href="#how-it-works">New here? How it works</a> &middot; <a href="/testnet-help#arc">No wallet yet?</a></p>
+          <p class="portal-trust-list"><strong>Independent open-source security project.</strong> Testnet by default. LedgerGuard is not affiliated with Ledger SAS or Ledger hardware wallets.</p>
+          <p class="portal-trust-list"><a href="#how-it-works">New here? How it works</a> &middot; <a href="/about">Trust and project boundaries</a></p>
         </div>
         <figure class="portal-hero-visual">
           <img src="/marketing/hero-guard-builder.png" alt="Payment link builder with QR code" width="640" height="360" loading="eager">

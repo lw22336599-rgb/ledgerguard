@@ -95,7 +95,7 @@ describe("browser demo experience", () => {
 
     expect(portalHtml).not.toContain('href="/routes"');
 
-    expect(portalHtml).toContain('id="nav-connect"');
+    expect(portalHtml).not.toContain('id="nav-connect"');
 
     expect(portalHtml).toContain('href="/privacy"');
 
@@ -503,15 +503,21 @@ describe("browser demo experience", () => {
 
 
 
-  it("leads with a plain-language payment link promise on the portal", () => {
+  it("leads with a plain-language payment safety promise on the portal", () => {
 
-    expect(portalHtml).toContain("Send and receive USDC");
+    expect(portalHtml).toContain("Review a stablecoin payment");
+
+    expect(portalHtml).toContain("before you sign");
+
+    expect(portalHtml).toContain("Independent open-source security project");
+
+    expect(portalHtml).toContain("not affiliated with Ledger SAS");
 
     expect(portalHtml).toContain('href="/pay"');
 
-    expect(portalHtml).toContain("Get paid");
+    expect(portalHtml).toContain("Review a payment link");
 
-    expect(portalHtml).toContain("Pay a link");
+    expect(portalHtml).toContain("Create a test request");
 
     expect(portalHtml).toContain("HOW IT WORKS");
 
