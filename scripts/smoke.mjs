@@ -23,7 +23,7 @@ const home = await fetch(`${baseUrl}/`, { signal: AbortSignal.timeout(20_000) })
 const homeHtml = await home.text();
 if (
   home.status !== 200 ||
-  !homeHtml.includes("Review a stablecoin payment") ||
+  !homeHtml.includes("RUNTIME AUTHORIZATION") ||
   !homeHtml.includes("not affiliated with Ledger SAS") ||
   !homeHtml.includes('href="/pay"') ||
   !homeHtml.includes("https://x.com/HuiLibaa") ||
