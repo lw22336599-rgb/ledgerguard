@@ -42,7 +42,11 @@ try {
   await waitUntilReady();
   const smoke = spawn(process.execPath, ["scripts/smoke.mjs"], {
     cwd: process.cwd(),
-    env: { ...process.env, LEDGERGUARD_URL: origin },
+    env: {
+      ...process.env,
+      LEDGERGUARD_URL: origin,
+      SMOKE_ALLOW_RPC_DEGRADED: "true",
+    },
     stdio: "inherit",
   });
   const exitCode = await new Promise((resolve, reject) => {

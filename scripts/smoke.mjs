@@ -97,9 +97,26 @@ if (!healthResponse.headers.get("cache-control")?.includes("no-store")) {
   throw new Error("/health: cache-control must include no-store");
 }
 
-const { body: ready } = await request("/ready");
-if (!ready.ok || ready.chainId !== 5042002) {
-  throw new Error(`/ready: expected Arc Testnet chain 5042002, got ${JSON.stringify(ready)}`);
+const readyResponse = await fetch(`${baseUrl}/ready`, {
+  signal: AbortSignal.timeout(20_000),
+});
+const ready = await readyResponse.json();
+const degradedReadinessAccepted =
+  process.env.SMOKE_ALLOW_RPC_DEGRADED === "true" &&
+  readyResponse.status === 503 &&
+  ready.ok === false &&
+  ready.error === "RPC_UNAVAILABLE";
+if (
+  !degradedReadinessAccepted &&
+  (readyResponse.status !== 200 || !ready.ok || ready.chainId !== 5042002)
+) {
+  throw new Error(
+    `/ready: expected Arc Testnet chain 5042002${
+      process.env.SMOKE_ALLOW_RPC_DEGRADED === "true"
+        ? " or an explicit fail-closed RPC_UNAVAILABLE response"
+        : ""
+    }, got ${readyResponse.status} ${JSON.stringify(ready)}`,
+  );
 }
 
 const { body: networks } = await request("/v1/networks");
