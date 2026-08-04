@@ -875,7 +875,7 @@ export function developerConsoleHtml(input: {
         <p class="step">EXISTING TENANT</p>
         <h2>Open your usage</h2>
         <form id="developer-login">
-          <label>Test API key<input id="developer-key" type="password" required pattern="lg_test_[A-Za-z0-9_-]{32,80}" autocomplete="off" spellcheck="false"></label>
+          <label>Test API key<input id="developer-key" type="password" required pattern="lg_test_[-A-Za-z0-9_]{32,80}" autocomplete="off" spellcheck="false"></label>
           <button type="submit" ${input.storageReady ? "" : "disabled"}>Load account</button>
         </form>
       </div>
