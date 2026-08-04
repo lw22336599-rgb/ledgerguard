@@ -10,7 +10,7 @@ project-party transaction is not customer adoption or revenue.
 
 | Channel | Value | Current state | Next evidence gate |
 | --- | --- | --- | --- |
-| npm `@ledgerguard1/sdk` | Public installation and package discovery | **BLOCKED**: registry is `0.1.0`, release candidate is `0.1.1`, CLI is not authenticated | `npm whoami`, publish `0.1.1`, clean-room install and import |
+| npm `@ledgerguard1/sdk` | Public installation and package discovery | **BLOCKED AT WEBAUTHN**: registry is `0.1.0`; `0.1.1` passed pack and clean-room checks; CLI login reached npm's security-key challenge for account `ledgerguard` | Account owner completes the physical security-key/passkey challenge; then run `npm whoami`, publish `0.1.1`, and repeat the clean-room install/import check |
 | Official MCP Registry | Agent/client discovery through a trusted metadata registry | **VALIDATION CANDIDATE, NOT SUBMITTED**: remote-server metadata exists in `server.json`; Registry is preview and publication requires GitHub authentication and acceptance of Registry terms | Validate `server.json` with the official publisher, owner accepts Registry terms, publish and verify search result |
 | CDP x402 Bazaar | Semantic discovery of paid API resources | **HOLD**: there is no separate application form; indexing follows a successful CDP-facilitated settlement with accepted Bazaar v2 metadata | Controlled Base Sepolia settle, accepted extension response, then verify catalog/search result |
 | Circle Developer Grants | Funding, technical review, co-marketing | **WATCH**: application window is currently closed | Preserve accurate pack; add applicant name and milestone budget only when window reopens; include external usage evidence if available |
@@ -36,6 +36,22 @@ project-party transaction is not customer adoption or revenue.
    pilot; record only attributable external evidence.
 6. Submit grants only when the window is open and every required applicant,
    ownership, budget, milestone, and traction field is truthful.
+
+## Distribution evidence on 2026-08-04
+
+- X profile is now branded as LedgerGuard, links to the production preview, and
+  states the non-custodial public-preview boundary.
+- Factual launch/status post published and pinned:
+  https://x.com/HuiLibaa/status/2084634775709716919
+- One targeted developer-pilot invitation was posted in a relevant Circle
+  developer-relations discussion:
+  https://x.com/HuiLibaa/status/2084636152984932611
+- A public correction was added below an older post that incorrectly described
+  Base Mainnet charging as live. The verified state remains mainnet charging
+  disabled and `/canary` fail-closed:
+  https://x.com/HuiLibaa/status/2084636515540648348
+- These actions are distribution evidence only. They are not external adoption,
+  an official endorsement, a customer, a payment commitment, or revenue.
 
 ## Stop rules
 
